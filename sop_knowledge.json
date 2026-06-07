@@ -1,0 +1,155 @@
+[
+  {
+    "id": "SOP-001",
+    "category": "FIFO / Rotation",
+    "keywords": ["fifo", "first in", "first out", "xuất kho", "nhặt hàng", "hạn dùng", "rotation", "lô hàng"],
+    "title_vi": "Quy tắc xuất kho FIFO tiêu chuẩn",
+    "title_en": "Standard FIFO Outbound Procedure",
+    "rule_vi": "🕒 QUY TẮC FIFO (FIRST IN, FIRST OUT):\n\n• Quy trình xuất kho bắt buộc tuân thủ nguyên tắc lô hàng nhập trước xuất trước (FIFO).\n• Hệ thống OMEGA WMS tự động chỉ định tọa độ kệ chứa Lô hàng (LOT ID) cũ nhất.\n• Nghiêm cấm nhân viên tự ý nhặt hàng từ lô mới hơn khi chưa được sự phê duyệt từ QA/QC.\n• Kiểm tra nhãn dán ngày nhập kho trước khi bốc xếp hàng lên pallet.",
+    "rule_en": "🕒 FIFO RULE (FIRST IN, FIRST OUT):\n\n• Outbound dispatch must strictly follow the first-in, first-out rule.\n• OMEGA WMS automatically targets coordinates of the oldest LOT ID.\n• Staff must not retrieve newer stock without QA/QC approval.\n• Double check the inbound date labels before loading cargo onto pallets."
+  },
+  {
+    "id": "SOP-002",
+    "category": "Hàng hư hỏng / QC Fail",
+    "keywords": ["rách", "hỏng", "móp", "bể", "vỡ", "damaged", "defect", "rách hộp", "chênh lệch", "lỗi", "móp méo"],
+    "title_vi": "Quy trình xử lý hàng hỏng/rách hộp",
+    "title_en": "Damaged / Defective Goods SOP",
+    "rule_vi": "📦 QUY TRÌNH HÀNG RÁCH HỘP / HỎNG HÓC:\n\n① Chụp ảnh hiện trạng gói hàng hư hỏng ngay tại vị trí tiếp nhận.\n② Lập biên bản đồng kiểm có chữ ký của thủ kho và tài xế giao hàng.\n③ Dán nhãn đỏ \"HOLD / QC FAIL\" lên kiện hàng để tránh nhầm lẫn.\n④ Di chuyển kiện hàng về khu vực cách ly kiểm định (Zone cách ly) chờ xử lý.\n⑤ Cập nhật lý do và chênh lệch trên hệ thống OMEGA WMS để điều chỉnh số liệu.",
+    "rule_en": "📦 DAMAGED GOODS SOP:\n\n① Photograph packaging damage immediately at receiving dock.\n② Draft a joint inspection report signed by receiver and driver.\n③ Affix a red \"HOLD / QC FAIL\" label to the items to avoid misplacement.\n④ Relocate items to the dedicated Quarantine Zone.\n⑤ Log discrepancies and reasons on OMEGA WMS to adjust balance."
+  },
+  {
+    "id": "SOP-003",
+    "category": "Nhập kho / OCR Gate",
+    "keywords": ["nhập kho", "receipt", "gate", "ocr", "hóa đơn", "inbound", "cảng", "xe tải", "chỉ dẫn"],
+    "title_vi": "Quy trình nhập kho & OCR manifest",
+    "title_en": "Standard Inbound & OCR Manifesting SOP",
+    "rule_vi": "🚚 QUY TRÌNH NHẬP KHO TIÊU CHUẨN:\n\n① Quét hóa đơn đầu vào bằng AI OCR để tự động điền manifest.\n② Đăng ký xe tải cập cảng bốc dỡ hàng theo lịch ưu tiên từ AI.\n③ Thực hiện kiểm định QC chất lượng ngẫu nhiên.\n④ Xếp hàng vào kệ (Putaway) theo chỉ dẫn vị trí tối ưu từ AI và quét mã vạch xác nhận.",
+    "rule_en": "🚚 STANDARD INBOUND SOP:\n\n① Scan incoming invoices using AI OCR to auto-generate manifests.\n② Register and assign truck docks based on AI scheduling priority.\n③ Perform random QC checks.\n④ Putaway items into optimal shelf coordinates suggested by AI and scan barcodes to confirm."
+  },
+  {
+    "id": "SOP-004",
+    "category": "An toàn / PCCC",
+    "keywords": ["an toàn", "cháy nổ", "cứu hỏa", "safety", "fire", "tai nạn", "lối thoát", "forklift", "bảo hộ", "ppe"],
+    "title_vi": "An toàn lao động & Phòng cháy chữa cháy",
+    "title_en": "Safety & Fire Hazard SOP",
+    "rule_vi": "🔥 QUY TẮC AN TOÀN & PHÒNG CHÁY CHỮA CHÁY (PCCC):\n\n• Lối thoát hiểm và khu vực tủ điện, bình chữa cháy phải luôn thông thoáng, không bị chặn.\n• Nghiêm cấm hút thuốc và sử dụng nguồn lửa tự do trong toàn bộ khuôn viên kho.\n• Nhân viên vận hành thiết bị nâng (Forklift) bắt buộc có chứng chỉ và mặc đồ bảo hộ (PPE) tiêu chuẩn.\n• Báo cáo ngay mọi sự cố rò rỉ chất lỏng hoặc chập điện cho bộ phận HSE.",
+    "rule_en": "🔥 SAFETY & FIRE HAZARD SOP:\n\n• Fire exits, electrical panels, and fire extinguishers must remain unobstructed at all times.\n• Smoking and open flames are strictly prohibited throughout the warehouse.\n• Forklift operators must hold valid certification and wear standard PPE.\n• Report any liquid leaks or electrical issues to HSE immediately."
+  },
+  {
+    "id": "SOP-005",
+    "category": "Bảo quản kho lạnh",
+    "keywords": ["lạnh", "nhiệt độ", "bảo quản", "cold chain", "temperature", "âm độ", "đông lạnh"],
+    "title_vi": "Quy trình bảo quản chuỗi cung ứng lạnh",
+    "title_en": "Cold Chain Storage SOP",
+    "rule_vi": "❄️ QUY TRÌNH BẢO QUẢN KHO LẠNH:\n\n• Nhiệt độ kho lạnh luôn duy trì từ 2°C đến 8°C. Kiểm tra nhật ký nhiệt kế 2 lần/ngày (sáng/chiều).\n• Hàng nhạy cảm nhiệt độ phải được luân chuyển vào kho lạnh trong vòng tối đa 15 phút kể từ khi dỡ hàng.\n• Đảm bảo cửa kho lạnh luôn đóng kín, không mở quá 3 phút liên tục.",
+    "rule_en": "❄️ COLD CHAIN STORAGE SOP:\n\n• Maintain cold room temperature strictly between 2°C and 8°C. Log temperature sensors twice daily.\n• Temperature-sensitive cargo must be moved to cold storage within 15 minutes of unloading.\n• Ensure cold room doors are sealed, never open for more than 3 minutes continuously."
+  },
+  {
+    "id": "SOP-006",
+    "category": "Đóng gói / Fragile",
+    "keywords": ["dễ vỡ", "de vo", "bọc xốp", "boc xop", "đóng gói", "dong goi", "bubble wrap", "xốp bong bóng", "thủy tinh", "chống sốc", "chong soc", "bể", "vỡ"],
+    "title_vi": "Quy trình đóng gói hàng dễ vỡ",
+    "title_en": "Fragile Goods Packaging Procedure",
+    "rule_vi": "📦 QUY TRÌNH ĐÓNG GÓI HÀNG DỄ VỠ CHUẨN:\n\n① Bọc chống sốc: Dùng xốp bong bóng khí bọc kín sản phẩm ít nhất 3 lớp, đặc biệt dày ở các góc cạnh.\n② Xếp vào thùng carton: Đặt sản phẩm vào thùng carton cứng. Chèn kín các khoảng trống bằng hạt xốp hoặc giấy vụn để tránh xê dịch.\n③ Niêm phong thùng: Dán băng keo hình chữ thập ở cả đáy và nắp thùng để gia cố chắc chắn.\n④ Dán nhãn cảnh báo: Bắt buộc dán nhãn 'HÀNG DỄ VỠ' màu đỏ ở vị trí dễ thấy nhất bên ngoài thùng.\n\n💡 Mẹo: Lắc thử thùng sau khi đóng, nếu không nghe tiếng lọc xọc bên trong là đạt chuẩn.",
+    "rule_en": "📦 FRAGILE GOODS PACKAGING SOP:\n\n① Bubble wrap: Wrap items in bubble wrap (minimum 3 layers), reinforcing edges/corners.\n② Fill empty spaces: Put items in a sturdy carton. Use foam peanuts or paper to fill any voids to prevent movement.\n③ Tape box: Apply a cross-pattern tape (+) on both top and bottom joints to secure the package.\n④ Warning label: Affix a red 'FRAGILE' label prominently on the box outer surface.\n\n💡 Tip: Shake test the box. If you hear no movement inside, it is correctly packaged."
+  },
+  {
+    "id": "SOP-007",
+    "category": "Vận hành / Barcode",
+    "keywords": ["máy in", "may in", "mã vạch", "ma vach", "in tem", "in nhãn", "in label", "bartender", "decal", "ribbon", "mực in", "barcode", "calibrate"],
+    "title_vi": "Hướng dẫn vận hành máy in mã vạch",
+    "title_en": "Barcode Printer Operation Guide",
+    "rule_vi": "🖨️ HƯỚNG DẪN VẬN HÀNH MÁY IN MÃ VẠCH:\n\n① Kiểm tra decal & mực: Mở nắp máy in kiểm tra cuộn decal và cuộn mực ribbon còn đủ không. Lắp đúng chiều hướng dẫn.\n② Kết nối & Bật nguồn: Kết nối dây cáp USB với máy tính và cắm dây nguồn. Bật công tắc phía sau máy.\n③ In tem: Mở phần mềm Bartender trên máy tính, chọn mẫu tem của kho và nhập mã sản phẩm.\n④ In thử: In test 1 tem trước để kiểm tra chất lượng và căn lề, sau đó mới bấm in hàng loạt.\n\n💡 Mẹo: Nếu máy báo đèn đỏ/lỗi giấy, hãy nhấn Calibrate hoặc giữ nút Feed vài giây để máy tự đo lại giấy.",
+    "rule_en": "🖨️ BARCODE PRINTER OPERATION GUIDE:\n\n① Load media: Verify remaining decal paper and ribbon. Install replacement rolls following the guide inside the printer cover.\n② Power on: Connect USB to PC and plug in the power cord. Switch on the power button at the back.\n③ Bartender print: Open Bartender software, select the standard template, and fill in the SKU details.\n④ Test print: Print 1 label first to inspect print clarity and alignment. Proceed with bulk print if correct.\n\n💡 Tip: If a red status light or alignment error occurs, hold the Feed button or trigger Calibrate."
+  },
+  {
+    "id": "SOP-008",
+    "category": "Kiểm kê / Audit",
+    "keywords": ["kiểm kê", "kiem ke", "kiểm hàng", "kiem hang", "đếm hàng", "dem hang", "tồn kho", "ton kho", "chênh lệch", "đối soát", "biên bản"],
+    "title_vi": "Quy trình kiểm kê hàng hóa tồn kho",
+    "title_en": "Inventory Stocktake SOP",
+    "rule_vi": "📊 QUY TRÌNH KIỂM KÊ HÀNG HÓA:\n\n① Tiếp nhận danh sách: Quản lý cấp phiếu kiểm kê hoặc phân công tọa độ kệ cần kiểm tra.\n② Kiểm đếm thực tế: Đếm vật lý trực tiếp 2 lần tại từng tọa độ kệ. Tuyệt đối không ước lượng.\n③ Ghi chép số liệu: Điền số đếm thực tế vào phiếu kiểm kê hoặc cập nhật trên máy PDA.\n④ Báo cáo chênh lệch: So sánh số thực tế với hệ thống. Lập biên bản nếu có chênh lệch và gửi cho quản lý.\n\n⚠️ Lưu ý: Tuyệt đối không tự ý điều chỉnh số liệu trên hệ thống WMS khi chưa được phê duyệt.",
+    "rule_en": "📊 INVENTORY COUNTING PROCEDURES:\n\n① Receive task: Get the stocktake sheet or shelf coordinate assignments from the supervisor.\n② Physical count: Conduct a double physical count at the assigned coordinates. Never estimate quantities.\n③ Record counts: Write physical quantities on the sheet or input directly into the PDA device.\n④ Discrepancy report: Compare counted stock against WMS records. Draft a report for any mismatches and submit to manager.\n\n⚠️ Warning: Do not modify system inventory figures without formal authorization."
+  },
+  {
+    "id": "SOP-009",
+    "category": "Bàn giao / Shift",
+    "keywords": ["bàn giao", "ban giao", "giao ca", "nhận ca", "nhan ca", "sổ bàn giao", "so ban giao", "đổi ca", "doi ca", "ca làm", "ca lam"],
+    "title_vi": "Quy trình bàn giao ca làm việc",
+    "title_en": "Shift Handover SOP",
+    "rule_vi": "📝 QUY TRÌNH BÀN GIAO CA LÀM VIỆC:\n\n① Tổng hợp công việc: Trước khi hết ca, ghi chép lại tình trạng đơn hàng (đang nhặt, đóng gói, dở dang).\n② Liệt kê sự cố: Ghi nhận sự cố thiết bị (xe nâng hỏng, máy in lỗi) hoặc hàng lỗi phát sinh trong ca.\n③ Bàn giao hàng chờ: Ghi chép các mặt hàng chưa xếp kệ, hàng hoàn trả chưa phân loại.\n④ Ký sổ giao ca: Gặp mặt trực tiếp người ca sau, ký tên vào sổ bàn giao ca xác nhận số liệu bàn giao.",
+    "rule_en": "📝 SHIFT HANDOVER PROCEDURES:\n\n① Summarize tasks: Before shift end, record progress of current outbound orders (picking, packing, pending).\n② Log issues: Document equipment status (forklift faults, printer failures) or damaged goods found during shift.\n③ Handover pending items: Detail unsorted returns or putaway tasks pending action.\n④ Sign handover log: Meet the incoming shift staff, walk through the log together, and sign for confirmation."
+  },
+  {
+    "id": "SOP-010",
+    "category": "Xe nâng / Forklift",
+    "keywords": ["xe nâng", "xe nang", "lái xe", "lai xe", "càng nâng", "cang nang", "tốc độ", "toc do", "chứng chỉ", "chung chi", "tải trọng", "tai trong", "10 km/h"],
+    "title_vi": "Quy định vận hành xe nâng an toàn",
+    "title_en": "Safe Forklift Operation SOP",
+    "rule_vi": "🚜 QUY ĐỊNH VẬN HÀNH XE NÂNG:\n\n① Chứng chỉ hợp lệ: Chỉ nhân viên có chứng chỉ xe nâng được phép vận hành.\n② Giới hạn tốc độ: Chạy tối đa 10 km/h trong kho, 5 km/h tại ngã rẽ hoặc khu vực đông người. Luôn bóp còi báo hiệu.\n③ Quy tắc nâng hạ: Nghiêng khung nâng về phía sau khi di chuyển. Giữ càng nâng thấp (cách đất 15-20cm).\n④ Cấm chở người: Tuyệt đối không chở người trên xe nâng hoặc đứng dưới càng nâng đang tải hàng.\n\n💡 Mẹo: Kiểm tra phanh, còi, và dầu thủy lực trước khi khởi động ca làm việc.",
+    "rule_en": "🚜 FORKLIFT SAFETY REGULATIONS:\n\n① Valid license: Only certified operators are permitted to drive the forklift.\n② Speed limit: Max speed 10 km/h inside aisles, 5 km/h at corners and intersections. Honk at blind spots.\n③ Driving stance: Tilt mast back when moving cargo. Keep forks low (15-20cm off the ground).\n④ No riders: Never carry passengers on the forklift or stand under loaded forks.\n\n💡 Tip: Conduct a pre-shift safety check (brakes, horn, hydraulic fluid)."
+  },
+  {
+    "id": "SOP-011",
+    "category": "Đối soát / Reconciliation",
+    "keywords": ["đối soát", "doi soat", "đối chiếu", "doi chieu", "sai lệch", "sai lech", "cuối ngày", "cuoi ngay", "phiếu xuất", "phieu xuat"],
+    "title_vi": "Quy trình đối soát đơn hàng cuối ngày",
+    "title_en": "End-of-day Order Reconciliation SOP",
+    "rule_vi": "🔍 QUY TRÌNH ĐỐI SOÁT ĐƠN HÀNG:\n\n① Thu thập dữ liệu: Cuối ngày, xuất danh sách toàn bộ các đơn hàng đã đóng gói và giao đi từ hệ thống.\n② Đối chiếu chứng từ: So sánh số liệu hệ thống với phiếu xuất kho giấy đã ký xác nhận bàn giao.\n③ Ghi nhận chênh lệch: Lập danh sách các đơn hàng có sai số về số lượng, mã SKU hoặc sai địa chỉ giao.\n④ Báo cáo & Rà soát: Gửi báo cáo đối soát cho quản lý. Đối với chênh lệch lớn, cần check camera để tìm nguyên nhân.",
+    "rule_en": "🔍 OUTBOUND ORDER RECONCILIATION:\n\n① Export report: Extract the daily outbound dispatch list from the WMS database.\n② Match invoices: Compare digital shipment records against physically signed delivery notes.\n③ Discrepancy log: Document mismatches in quantity, SKU code, or customer destination.\n④ Resolve & Report: Submit the reconciliation summary to management. Investigate major errors using security footage."
+  },
+  {
+    "id": "SOP-012",
+    "category": "Thiết bị / PDA",
+    "keywords": ["pda", "máy pda", "may pda", "thiết bị cầm tay", "quét mã", "quet ma", "wms", "kết nối"],
+    "title_vi": "Hướng dẫn sử dụng thiết bị quét mã vạch PDA",
+    "title_en": "PDA Barcode Scanner User Guide",
+    "rule_vi": "📱 HƯỚNG DẪN SỬ DỤNG MÁY PDA:\n\n① Khởi động & Đăng nhập: Bật nguồn máy PDA, kết nối Wi-Fi kho và đăng nhập tài khoản hệ thống WMS.\n② Quét vị trí & SKU: Sử dụng đầu đọc laser quét mã vạch sản phẩm (SKU) và mã vị trí kệ khi nhập/xuất để bind dữ liệu.\n③ Tiếp nhận lệnh: Làm theo chỉ dẫn hiển thị trên màn hình PDA (tọa độ kệ cần lấy hàng, số lượng nhặt).\n④ Bảo quản thiết bị: Cuối ca, tắt ứng dụng, cắm sạc thiết bị vào dock sạc quy định và báo cáo nếu màn hình nứt, nút hỏng.",
+    "rule_en": "📱 PDA SCANNER HANDLING GUIDE:\n\n① Login: Switch on the PDA, verify connection to warehouse Wi-Fi, and log into the WMS app.\n② Scanning: Use the laser engine to scan SKU barcodes and location labels during putaway or pick operations.\n③ Execute tasks: Follow step-by-step pick/putaway targets shown on the PDA screen.\n④ Maintenance: Put the PDA back on the charging dock at shift end. Report cracked screens or buttons."
+  },
+  {
+    "id": "SOP-013",
+    "category": "Đổi trả / Returns",
+    "keywords": ["trả về", "tra ve", "đổi trả", "doi tra", "hoàn hàng", "hoan hang", "nhập lại", "nhap lai", "phân loại", "phan loai"],
+    "title_vi": "Quy trình xử lý hàng hoàn trả",
+    "title_en": "Returns & Exchanges Handling SOP",
+    "rule_vi": "🔄 XỬ LÝ HÀNG TRẢ VỀ (RETURNED GOODS):\n\n① Kiểm tra hàng hoàn: Tiếp nhận bưu phẩm hoàn trả từ đơn vị vận chuyển. Đối chiếu mã đơn hàng trên nhãn vận đơn.\n② Đánh giá chất lượng: Mở kiện hàng kiểm tra. Phân loại thành: Hàng tốt (bán tiếp được), Hàng lỗi/hỏng (để khu biệt trữ).\n③ Nhập lại hệ thống: Dùng máy PDA quét nhập kho lại. Hàng tốt xếp lại lên kệ; hàng lỗi dán nhãn cách ly.\n④ Lưu hồ sơ: Ghi nhận lý do hoàn hàng (khách đổi size, hàng móp méo) vào phần mềm đối soát.",
+    "rule_en": "🔄 RETURNED GOODS PROCESSING:\n\n① Inbound scan: Receive returned packages from carriers. Verify order ID on shipping labels.\n② Quality inspection: Unbox and check items. Sort into: Restockable (good condition) and Damaged (quarantined).\n③ Restock / Segregate: Use PDA to scan items back into inventory. Move good items to shelf, move damaged items to quarantine zone.\n④ Log reasons: Record return reason (customer exchange, shipping damage) on the WMS system."
+  },
+  {
+    "id": "SOP-CHITCHAT-001",
+    "category": "Trò chuyện",
+    "keywords": ["chào", "chao", "xin chào", "xin chao", "hello", "hi", "hey", "alo", "ê chào", "e chao", "chào bạn", "chao ban", "bạn ơi", "ban oi", "cậu ơi", "cau oi", "may oi", "mày ơi", "có ai không", "co ai khong", "chào buổi sáng", "chao buoi sang", "chào buổi chiều", "chao buoi chieu", "khỏe không", "khoe khong", "đang làm gì", "dang lam gi", "há lo", "ha lo", "hé lo", "he lo", "helo", "halo", "yo ní", "yo ni", "lô ní", "lo ni", "hú ní", "hu ni", "chào ní", "chao ni", "yo", "yo ní"],
+    "title_vi": "Chào hỏi và trò chuyện",
+    "title_en": "Greetings & Chit-Chat",
+    "rule_vi": "👋 Chào cậu nha! Tớ là Tùng, trợ lý cẩm nang kho hàng đây. Cậu cần hỏi gì về quy trình kho bãi, hướng dẫn đóng gói hay vận hành thiết bị thì cứ nhắn cho tớ nhé.",
+    "rule_en": "👋 Hello! I am the warehouse SOP assistant. Feel free to ask me any questions about warehouse procedures, packaging instructions, or equipment operation."
+  },
+  {
+    "id": "SOP-CHITCHAT-002",
+    "category": "Trò chuyện",
+    "keywords": ["cảm ơn", "cam on", "thank", "thanks", "tks", "camon", "cám ơn", "cảm ơn nhiều", "hiểu rồi", "hieu roi", "rõ rồi", "ro roi", "oke thanks"],
+    "title_vi": "Cảm ơn",
+    "title_en": "Thank You",
+    "rule_vi": "😊 Không có gì đâu nè! Hỗ trợ cậu là niềm vui của tớ. Có thắc mắc gì thêm cứ nhắn tớ nhé. Chúc cậu làm việc vui vẻ!",
+    "rule_en": "😊 You're welcome! It's my pleasure to help. Feel free to ask if you have more questions. Have a great shift!"
+  },
+  {
+    "id": "SOP-CHITCHAT-003",
+    "category": "Trò chuyện",
+    "keywords": ["tạm biệt", "tam biet", "bye", "goodbye", "bai", "bái bai", "đi đây", "di day", "nghỉ thôi", "nghi thoi", "hẹn gặp lại", "hen gap lai"],
+    "title_vi": "Tạm biệt",
+    "title_en": "Goodbye",
+    "rule_vi": "👋 Tạm biệt cậu nhé! Chúc cậu ca làm suôn sẻ và an toàn. Cần gì cứ quay lại hỏi tớ nha. Hẹn gặp lại!",
+    "rule_en": "👋 Goodbye! Wishing you a safe and smooth shift. Come back anytime you need help. See you again!"
+  },
+  {
+    "id": "SOP-CHITCHAT-004",
+    "category": "Trò chuyện",
+    "keywords": ["còn gì khác không", "con gi khac khong", "còn gì nữa không", "con gi nua khong", "biết làm gì", "biet lam gi", "hỗ trợ gì", "ho tro gi", "giúp gì", "giup gi", "gợi ý", "goi y", "nên hỏi gì", "nen hoi gi", "đề xuất", "de xuat", "gợi ý câu hỏi", "goi y cau hoi"],
+    "title_vi": "Các chủ đề hỗ trợ",
+    "title_en": "Supported Topics",
+    "rule_vi": "🤖 Tớ có thể hỗ trợ cậu về các chủ đề sau:\n\n1. **Quy trình kho:** Nhập hàng, xuất hàng, kiểm kê, bàn giao ca, đối soát cuối ngày, kho lạnh.\n2. **Đóng gói & Vận hành:** Đóng gói hàng dễ vỡ, vận hành máy in mã vạch, xe nâng.\n3. **An toàn & Sự cố:** Quy tắc an toàn lao động, xử lý sự cố cháy nổ, xử lý hàng rách hộp/hàng hỏng.\n\nCậu muốn tìm hiểu sâu về quy trình nào thì cứ nhắn tớ nhé!",
+    "rule_en": "🤖 I can assist you with the following topics:\n\n1. **Warehouse Procedures:** Inbound, outbound, auditing, shift handover, reconciliation, cold storage.\n2. **Packaging & Operations:** Fragile packaging, barcode printing, forklift safety.\n3. **Safety & Issues:** General safety rules, fire emergency, handling damaged goods.\n\nJust tell me what you want to know!"
+  }
+]

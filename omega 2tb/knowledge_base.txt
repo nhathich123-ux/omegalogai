@@ -1,0 +1,101 @@
+Ý tưởng chính
+1. AI Dự báo tồn kho dựa trên đơn hàng xuất (Demand Forecasting)
+Ý tưởng cốt lõi
+Trong quản lý kho truyền thống, người ta thường đặt ra một "ngưỡng an toàn" cố định (ví dụ: hễ mặt hàng A còn dưới 20 cái thì báo nhập). Cách làm này bộc lộ điểm yếu chết người khi gặp biến động thị trường: vào ngày thường thì 20 cái tồn kho là đủ bán cả tuần, nhưng vào ngày siêu sale hoặc mùa cao điểm, 20 cái có thể hết sạch trong vòng 5 phút, dẫn đến cháy hàng. Ngược lại, qua mùa cao điểm, nếu vẫn nhập theo định mức đó thì hàng sẽ bị tồn, giam vốn.
+AI Demand Forecasting ra đời để chuyển từ "quản lý bị động" sang "quản lý dự báo chủ động". AI không nhìn vào một con số cố định, mà nhìn vào tốc độ tiêu thụ (Velocity) kết hợp với dữ liệu lịch sử cùng kỳ và yếu tố mùa vụ để tự động tính toán ra một "ngưỡng an toàn động", thay đổi liên tục theo dòng chảy của thị trường.
+Cách hoạt động chi tiết (Kỹ thuật)
+Bước 1 - Thu thập và Làm sạch dữ liệu chuỗi thời gian (Time-Series Data): Hệ thống sẽ gom toàn bộ lịch sử xuất kho của từng mã hàng theo dòng thời gian (ngày, tuần, tháng). Dữ liệu này được làm sạch để loại bỏ các biến động "nhiễu" (ví dụ: một ngày đột xuất có khách sỉ đến gom một lượng hàng lớn ngoài kế hoạch).
+Bước 2 - Phân tích đa tầng dữ liệu (Feature Engineering cho AI): Thay vì chỉ đưa số lượng đơn của vài ngày gần nhất vào mô hình, kỹ sư sẽ "bơm" thêm các biến số môi trường quan trọng cho AI học:
+Dữ liệu cùng kỳ (Lag Features): Lượng đơn của tuần trước, tháng trước, và đặc biệt là tháng này của năm ngoái.
+Dữ liệu mùa vụ (Seasonality): Biến số đánh dấu thời gian (Ví dụ: Tháng 12 là mùa đông, tháng 6 là mùa hè).
+Dữ liệu sự kiện đặc biệt (Event/Holiday Features): Gắn nhãn các ngày Siêu Sale (11/11, 12/12), ngày lễ Tết (Tết Nguyên Đán, Trung Thu, Noel), hoặc các ngày chạy chiến dịch khuyến mãi lớn của kho.
+Bước 3 - Huấn luyện mô hình dự báo: Hệ thống sử dụng các thuật toán chuyên dụng cho chuỗi thời gian như Prophet (do Meta phát triển), XGBoost Regressor, hoặc các mô hình Deep Learning như LSTM để tự động tìm ra quy luật: "Cứ đến trước ngày 11/11 khoảng 3 ngày là tốc độ tiêu thụ nhóm hàng X sẽ tăng vọt gấp 4 lần ngày thường, và sau Tết lượng đơn sẽ giảm 70%".
+Bước 4 - Đưa ra cảnh báo và Đề xuất động (Output):
+AI liên tục chạy ngầm và tính toán: Số lượng tồn hiện tại / Tốc độ tiêu thụ dự báo cho vài ngày tới.
+Hệ thống sẽ hiển thị cảnh báo thông minh:
+Cảnh báo cạn kho: > "Mặt hàng B hiện còn 150 sản phẩm. Theo dự báo dựa trên dữ liệu mùa vụ (sắp đến kỳ nghỉ lễ) và tốc độ bán 3 ngày qua, mặt hàng này sẽ cháy hàng trong 2 ngày tới. Đề xuất: Nhập thêm ít nhất 400 sản phẩm để đủ cung ứng cho tuần lễ tiếp theo."
+2. Định vị vị trí lưu kho bằng mã vạch (Barcode-driven Slotting & Bin Management)
+1. Tư duy logic và Cách hệ thống vận hành
+Mô hình của mày dựa trên việc liên kết 2 thực thể bằng hành động quét mã (Binding): Mã vạch kệ hàng (Location SKU) và Mã vạch biến thể sản phẩm (Product SKU).
+Luồng 1: Nhập hàng vào kệ (Binding Location)
+Bước 1: Nhân viên cầm điện thoại/máy quét đi đến kệ. Họ quét mã vạch dán trên kệ (Ví dụ mã kệ là: KE-A-TANG-1). Lúc này hệ thống ghi nhận: Hành động tiếp theo sẽ diễn ra tại Kệ A - Tầng 1.
+Bước 2: Nhân viên bốc thùng hàng xuống và quét mã vạch trên mác áo. Ví dụ quét trúng con Áo khoác - Size M - Màu Đỏ (Mã hàng: AK-DO-M).
+Bước 3: AI/Hệ thống tự động tạo một liên kết trong database: AK-DO-M đang nằm tại KE-A-TANG-1. Mỗi lần nhân viên bấm quét thêm 1 cái, hệ thống tự động cộng số lượng tồn kho của biến thể đó tại vị trí kệ đó lên $1$.
+Luồng 2: Kiểm kho và Xuất kho (Query & Picking)
+Khi cần kiểm tra xem Kệ A - Tầng 1 đang có những gì, thủ kho chỉ cần quét mã kệ KE-A-TANG-1. Web sẽ hiện ra ngay một bảng tổng hợp:
+Áo khoác - Đỏ - Size S: 10 cái
+Áo khoác - Đỏ - Size M: 5 cái
+Áo khoác - Xanh - Size L: 2 cái
+Khi có đơn hàng cần xuất 1 cái Áo khoác - Hồng - Size L, hệ thống sẽ tra ngược database và chỉ đường cho nhân viên: "Hãy đến ngay KE-A-TANG-1 để lấy hàng".
+AI sẽ nhảy vào xử lý ở các điểm sau:
+AI tự động sinh cấu trúc mã vạch tối ưu: Thay vì mày phải tự nghĩ tên kệ, AI sẽ dựa trên diện tích kho để tự tối ưu sơ đồ đặt kệ và sinh ra các mã vạch kệ sao cho nhân viên dễ đọc, dễ tìm nhất.
+AI phát hiện lỗi quét nhầm (Anomaly Detection): Ví dụ kệ KE-A-TANG-1 trước giờ chỉ chuyên chứa Áo khoác. Hôm nay nhân viên vô tình quét mã kệ này, rồi lại quét mã vạch của một mặt hàng hoàn toàn khác là Giày thể thao. AI sẽ lập tức rung chuông cảnh báo trên màn hình điện thoại: "Phát hiện bất thường: Kệ này đang chứa hàng thời trang áo, bạn có chắc chắn muốn xếp Giày vào đây không?" để tránh nhân viên để lộn xộn khó tìm.
+Mở rộng thêm
+1. AI Nhận diện đơn hàng nhập và tối ưu lịch nhập kho (Inbound Logistics AI)
+Ý tưởng cốt lõi
+Trong quản lý kho thực tế, việc nhập hàng rất dễ bị quá tải hoặc lộn xộn nếu nhiều nhà cung cấp cùng giao hàng một lúc. Thay vì để nhân viên tự đọc email, file Excel rồi xếp lịch thủ công, AI sẽ tự động "đọc" các chứng từ, hóa đơn nhập hàng dự kiến, sau đó sắp xếp một lịch trình nhập kho thông minh. Tiêu chí ưu tiên cao nhất là hàng cần gấp/hàng có ngày nhập sớm nhất (hoặc hàng có hạn sử dụng ngắn nhất) để tối ưu luồng luân chuyển hàng hóa.
+Cách hoạt động chi tiết (Kỹ thuật)
+Bước 1 - Nhận diện dữ liệu (OCR & Document AI): Khi có file PDF hóa đơn, ảnh chụp phiếu giao hàng (Delivery Note) từ nhà cung cấp gửi đến, hệ thống sử dụng công nghệ OCR (nhận diện ký tự quang học) kết hợp với các mô hình xử lý ngôn ngữ tự nhiên (NLP) để tự động bóc tách các trường thông tin: Mã sản phẩm, Số lượng, Ngày giao hàng dự kiến, Hạn sử dụng (nếu có). Nhân viên không cần gõ tay lại vào hệ thống.
+Bước 2 - Phân tích độ ưu tiên (Heuristic & Rule-based AI):
+AI sẽ đối chiếu dữ liệu vừa bóc tách với tình trạng kho hiện tại. Nó sẽ tính toán điểm ưu tiên dựa trên các quy tắc:
+Sản phẩm nào trong kho đang bị cạn (báo động đỏ từ thuật toán dự báo tồn kho).
+Đơn hàng nào có lịch hẹn giao từ nhà cung cấp sớm nhất.
+Hàng hóa nào có vòng đời ngắn (dễ lỗi thời hoặc hết hạn).
+Bước 3 - Tự động xếp lịch (Smart Scheduling):
+AI xuất ra một bảng lịch trình (giao diện Kanban hoặc Calendar) cho thủ kho: "Ngày mai ưu tiên tiếp nhận xe hàng của nhà cung cấp A vào khung giờ 8h-10h, vì hàng này đang cháy và cần xuất đi ngay".
+2. AI Phân tích giỏ hàng để gợi ý Combo và Định vị vị trí kho (Market Basket Analysis & Slotting)
+Ý tưởng cốt lõi
+Tính năng này giải quyết bài toán kép: Hỗ trợ kinh doanh (gợi ý combo sale) và Tối ưu vận hành kho (sắp xếp kệ hàng cạnh nhau). AI sẽ đào sâu vào lịch sử hóa đơn bán ra để tìm ra những quy luật ẩn mà con người không tự thống kê được (ví dụ: khách mua kìm bấm cáp rất hay mua thêm đầu bấm RJ45, khách mua nồi chiên không dầu hay mua kèm giấy nến).
+Cách hoạt động chi tiết (Kỹ thuật)
+Bước 1 - Khai phá dữ liệu (Data Mining):
+Hệ thống sử dụng các thuật toán học máy kinh điển trong thương mại là Apriori hoặc FP-Growth để quét qua hàng nghìn, hàng triệu hóa đơn cũ.
+Bước 2 - Tính toán chỉ số liên kết:
+AI tính toán dựa trên 3 chỉ số chính:
+Support (Độ hỗ trợ): Tần suất cặp sản phẩm A và B xuất hiện cùng nhau trên tổng số hóa đơn.
+Confidence (Độ tin cậy): Khi khách đã mua A thì tỷ lệ họ mua thêm B là bao nhiêu %.
+Lift (Độ cải thiện): Thể hiện mối quan hệ này là ngẫu nhiên hay thực sự có sự liên quan logic.
+Bước 3 - Đưa ra đề xuất (Output):
+Giao diện quản lý: AI gợi ý: "Mã hàng 01 và Mã hàng 05 có tỷ lệ mua cùng nhau là 85%. Đề xuất tạo Combo X giảm giá 5% để kích cầu".
+Giao diện điều phối kho: AI gửi lệnh đến module quản lý vị trí: "Hãy chuyển vị trí lưu trữ của Mã hàng 05 về cạnh Mã hàng 01 trên cùng một dãy kệ" $\rightarrow$ Khi nhân viên đi nhặt hàng cho đơn combo, họ chỉ cần đứng tại một vị trí là lấy được cả hai món, giảm 50% thời gian đi bộ.
+3. Chatbot cẩm nang cho nhân viên kho (Internal Knowledge Base LLM)
+Ý tưởng cốt lõi
+Kho hàng thường có rất nhiều quy trình phức tạp: quy trình bồi thường hàng hỏng, quy trình đóng gói hàng dễ vỡ, quy trình vận hành máy in mã vạch, quy tắc an toàn lao động... Nhân viên mới (hoặc nhân viên thời vụ vào mùa cao điểm) thường mất nhiều thời gian để đào tạo hoặc liên tục phải đi hỏi quản lý. Chatbot này đóng vai trò như một "Trợ lý vạn năng", hiểu được ngôn ngữ tự nhiên và trả lời ngay lập tức mọi câu hỏi về quy trình kho dựa trên tài liệu nội bộ.
+Cách hoạt động chi tiết (Kỹ thuật)
+Bước 1 - Xây dựng cơ sở dữ liệu tri thức (Vector Database):
+Bạn tải tất cả các file PDF cẩm nang, quy định, file hướng dẫn vận hành kho lên hệ thống. AI sẽ "bẻ nhỏ" các văn bản này thành các đoạn thông tin và số hóa chúng thành các chuỗi vector (gọi là Embeddings) rồi lưu vào một cơ sở dữ liệu vector (như Pinecone, ChromaDB hoặc Milvus).
+Bước 2 - Sử dụng công nghệ RAG (Retrieval-Augmented Generation):
+Khi nhân viên gõ câu hỏi bằng ngôn ngữ nói tự nhiên (ví dụ: "Hàng bị rách hộp khi nhập thì xử lý thế nào m?"):
+AI sẽ không tự "bịa" câu trả lời mà nó dùng câu hỏi đó để quét trong Vector Database nhằm tìm ra đúng đoạn quy định về "Hàng lỗi/rách hộp".
+Nó bốc đoạn quy định chuẩn đó ra, đưa vào một mô hình ngôn ngữ lớn (LLM như Gemini API) để mô hình dịch lại thành một câu trả lời ngắn gọn, dễ hiểu, thân thiện nhất.
+Bước 3 - Trả kết quả trực quan:
+Chatbot trả về câu trả lời: "Theo quy trình mục 3.2, bạn chụp ảnh lại vết rách, lập biên bản đồng kiểm với tài xế và nhấn nút 'Báo cáo hàng lỗi' trên web nhé!". Nhân viên làm theo được ngay mà không cần làm phiền quản lý.
+4. AI Chấm điểm và lựa chọn Nhà cung cấp (Supplier Scoring & Selection)
+Ý tưởng cốt lõi
+Khi hệ thống cảnh báo một mặt hàng sắp cạn kho (từ tính năng dự báo tồn kho), thông thường thủ kho hoặc bộ phận mua hàng (Purchasing) phải tự liên hệ với các nhà cung cấp, so sánh giá, hỏi thời gian giao hàng rồi mới đưa ra quyết định.
+Tính năng này cho phép AI đóng vai trò là một chuyên gia đấu thầu. AI sẽ tự động phân tích lịch sử giao dịch của tất cả các nhà cung cấp từng hợp tác để chấm điểm họ theo nhiều tiêu chí (Giá cả, độ uy tín thời gian, tỷ lệ hàng lỗi). Khi kho cần nhập hàng, AI sẽ tự động đề xuất nhà cung cấp tối ưu nhất tại thời điểm đó để tối ưu hóa chi phí và đảm bảo an toàn cho kho.
+Cách hoạt động chi tiết (Kỹ thuật)
+Bước 1 - Thu thập và chuẩn hóa dữ liệu (Data Collection): AI liên tục ghi nhận dữ liệu từ các đơn nhập kho (Inbound Orders) trong quá khứ của từng nhà cung cấp theo 3 chỉ số chính:
+Chất lượng (Quality): Tỷ lệ hàng bị lỗi, rách hộp, hoặc hỏng hóc phải hoàn trả (Dữ liệu lấy từ tính năng quét ảnh hàng hoàn/hàng lỗi).
+Thời gian (Lead Time & Punctuality): Chênh lệch giữa Ngày hẹn giao trên hệ thống và Ngày thực tế xe hàng đến kho.
+Chi phí (Cost): Giá nhập của sản phẩm và các chi phí vận chuyển đi kèm.
+Bước 2 - Thuật toán chấm điểm trọng số (Multi-Criteria Decision Making - MCDM): Hệ thống sử dụng các thuật toán ra quyết định đa tiêu chí như AHP (Analytic Hierarchy Process) hoặc TOPSIS. Chủ kho có thể tự cấu hình "Trọng số" (Độ ưu tiên) theo nhu cầu của kho mình:
+Ví dụ 1 (Kho đang cần hàng gấp): Cài đặt trọng số Thời gian giao hàng (50%) > Chất lượng (30%) > Giá cả (20%).
+Ví dụ 2 (Kho muốn tối ưu vốn): Cài đặt trọng số Giá cả (60%) > Chất lượng (20%) > Thời gian (20%).
+AI sẽ chạy mô hình học máy để tính toán và đưa ra một số điểm tổng thể (Score từ 1 - 100) cho từng nhà cung cấp đối với mã hàng đó.
+Bước 3 - Đề xuất và Tự động hóa (Actionable Output): Khi một mặt hàng chạm ngưỡng tối thiểu cần nhập, hệ thống sẽ hiển thị một bảng đề xuất thông minh:
+Gợi ý nhập hàng từ AI: > "Mặt hàng X đang sắp hết. Đề xuất nhập 500 đơn vị từ Nhà cung cấp A (Điểm uy tín: 95/100). Lý do: Họ có giá tốt nhất trong tháng này và tỷ lệ giao đúng hạn là 98%, đảm bảo hàng về trước khi kho bị cạn trong 3 ngày tới."
+Nếu chủ kho duyệt, AI có thể tự động tạo phôi đơn mua hàng (Purchase Order - PO) và gửi email thẳng đến nhà cung cấp được chọn.
+5. Cảnh báo bất thường và thất thoát (Anomaly Detection)
+Ý tưởng cốt lõi
+Sai lệch số liệu giữa hệ thống và thực tế (hao hụt, mất mát, gian lận) là bài toán cực kỳ đau đầu của các chủ kho. Con người rất khó phát hiện ra các hành vi gian lận tinh vi vì dữ liệu nhập - xuất kho diễn ra hàng ngày với số lượng rất lớn.
+AI đóng vai trò như một "Giám sát viên ẩn mình" 24/7. Thay vì đợi đến kỳ kiểm kho cuối tháng mới phát hiện mất hàng, AI liên tục quét các giao dịch và hành vi trên hệ thống để tìm ra những điểm "lạ thường" (Anomalies). Khi phát hiện bất kỳ dấu hiệu nào không tuân theo quy luật vận hành chuẩn, AI sẽ lập tức "gắn cờ" (Flag) cảnh báo để quản lý can thiệp kịp thời.
+Cách hoạt động chi tiết (Kỹ thuật)
+Bước 1 - Học hành vi chuẩn (Baseline Training): AI sử dụng dữ liệu lịch sử vận hành của kho trong vài tháng để học thế nào là một ngày làm việc "bình thường". Nó ghi nhớ: Khung giờ làm việc của nhân viên, số lượng hàng xuất trung bình của từng ca, tỷ lệ hao hụt tự nhiên cho phép (ví dụ hàng dễ vỡ hao hụt 0.5%).
+Thuật toán áp dụng: Học máy không giám sát (Unsupervised Learning) như Isolation Forest, One-Class SVM, hoặc Autoencoders (Deep Learning). Các thuật toán này cực mạnh trong việc tìm ra các điểm dữ liệu nằm ngoài vùng bình thường (Outliers).
+Bước 2 - Giám sát thời gian thực và Gắn cờ bất thường: AI quét liên tục mọi hành động phát sinh trên website quản lý kho. Nó sẽ kích hoạt cảnh báo đỏ khi gặp các tình huống sau:
+Bất thường về thời gian: Một nhân viên thực hiện lệnh điều chuyển hàng hóa nội bộ hoặc xuất kho vào lúc 2 giờ sáng (khung giờ kho đóng cửa).
+Bất thường về số lượng: Một mã hàng vốn có tỷ lệ lỗi rất thấp, nhưng hôm nay nhân viên bỗng nhiên bấm báo hỏng/hao hụt với số lượng lớn bất thường (dấu hiệu của việc ăn lận hoặc gian lận tuồn hàng ra ngoài).
+Bất thường về quyền hạn: Tài khoản của nhân viên nhặt hàng bỗng dưng cố gắng truy cập vào chỉnh sửa giá nhập của nhà cung cấp.
+Bước 3 - Xuất báo cáo điều tra (Output): Hệ thống gửi thông báo bảo mật ngay lập tức lên màn hình của Quản lý:
+Cảnh báo bất thường hệ thống (Hạng mục: Thất thoát): "Phát hiện hành vi báo hao hụt 50 sản phẩm mã Y tại Kệ B3 vào lúc 11h30 ca trưa bởi nhân viên Nguyễn Văn A. Số lượng này vượt quá 500% so với mức hao hụt trung bình của tuần. Đề xuất quản lý kiểm tra lại Camera khu vực Kệ B3 và đối chiếu biên bản."
+AI TUAN ANH, LIEM va Thanh Minh

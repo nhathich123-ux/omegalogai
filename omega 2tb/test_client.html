@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gemma 2B Backend</title>
+    <style>
+        body { font-family: sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; }
+        #chat { height: 400px; overflow-y: auto; background: #181825; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #313244; }
+        .message { margin-bottom: 15px; line-height: 1.5; }
+        .user { color: #89b4fa; font-weight: bold; }
+        .bot { color: #a6e3a1; }
+        input[type="text"] { width: calc(100% - 100px); padding: 10px; border-radius: 4px; border: 1px solid #45475a; background: #313244; color: white; }
+        button { width: 80px; padding: 10px; background: #89b4fa; border: none; border-radius: 4px; color: #11111b; font-weight: bold; cursor: pointer; }
+        button:hover { background: #b4befe; }
+    </style>
+</head>
+<body>
+
+    <h2>Test API Local Gemma 2B (Port 5173)</h2>
+    <div id="chat"></div>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="userInput" placeholder="Nhập câu hỏi về quản lý kho..." onkeydown="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Gửi</button>
+    </div>
+
+    <script>
+        const chatDiv = document.getElementById("chat");
+        const inputField = document.getElementById("userInput");
+        let messages = [];
+
+        async function sendMessage() {
+            const text = inputField.value.trim();
+            if (!text) return;
+
+            // Hiển thị user
+            chatDiv.innerHTML += `<div class="message"><span class="user">Bạn:</span> ${text}</div>`;
+            inputField.value = "";
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            messages.push({ role: "user", content: text });
+
+            // Hiển thị bot placeholder
+            const botId = "bot_" + Date.now();
+            chatDiv.innerHTML += `<div class="message"><span class="bot">Gemma 2B:</span> <span id="${botId}"></span></div>`;
+            const botSpan = document.getElementById(botId);
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            try {
+                const response = await fetch("http://localhost:5173/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: messages })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullResponse = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split("\n");
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                if (data.content) {
+                                    fullResponse += data.content;
+                                    // Chuyển newline thành <br>
+                                    botSpan.innerHTML = fullResponse.replace(/\n/g, "<br>");
+                                    chatDiv.scrollTop = chatDiv.scrollHeight;
+                                }
+                            } catch (e) { }
+                        }
+                    }
+                }
+                messages.push({ role: "assistant", content: fullResponse });
+            } catch (err) {
+                botSpan.innerHTML = `<span style="color: #f38ba8;">Lỗi kết nối đến Backend 5173! Hãy chắc chắn bạn đã chạy run_backend.bat</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

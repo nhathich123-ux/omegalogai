@@ -1,0 +1,107 @@
+================================================================================
+           CẨM NANG HƯỚNG DẪN SỬ DỤNG HỆ THỐNG ĐIỀU KHIỂN KHO OMEGA WMS
+                      (Bao gồm Weather-triggered Alerts MVP)
+================================================================================
+
+Tài liệu này hướng dẫn chi tiết cách vận hành, kiểm thử các tính năng thông minh của hệ thống quản lý kho OMEGA WMS chạy trên môi trường máy cá nhân.
+
+--------------------------------------------------------------------------------
+1. HỆ THỐNG PHẢN ỨNG THỜI TIẾT THỜI GIAN THỰC (WEATHER-TRIGGERED ALERTS MVP)
+--------------------------------------------------------------------------------
+* Chức năng: Hệ thống chạy một luồng quét ngầm (Background Thread) mỗi 30 phút tự động kiểm tra thời tiết thực tế tại tọa độ được cấu hình (ví dụ Đồng Nai). Khi phát hiện thời tiết xấu (ví dụ Mưa giông), nó tự đối chiếu quy tắc tĩnh để đưa ra đề xuất xuất các mã hàng (như Áo mưa SKU-AOMUA, Ô dù SKU-ODU) ra quầy bán và đẩy cảnh báo tức thời qua Telegram Bot hoặc ghi log hệ thống.
+
+* Cách sử dụng và Vị trí bấm trên giao diện:
+  - Vị trí: Truy cập trang chủ Dashboard của hệ thống (bằng cách nhấn nút "Dashboard" ở thanh bên trái hoặc khi vừa mở web).
+  - Tìm thẻ: "Hệ thống Phản ứng Thời tiết Thời gian thực (Alerts MVP)" nằm ở ngay phía trên luồng Log Terminal dưới cùng Dashboard.
+  - Các tab điều khiển (Góc trên cùng bên phải của thẻ):
+    a. Tab [GIẢ LẬP TEST] (Mặc định mở):
+       - Chọn Trạng thái thời tiết: Chọn trong dropdown "Mưa lớn giông bão" hoặc "Trời quang đãng".
+       - Giả lập nhiệt độ: Kéo thanh trượt nhiệt độ (nếu > 35°C sẽ khớp luật nắng nóng cực đoan).
+       - Bấm nút: "KÍCH HOẠT GIẢ LẬP CẢNH BÁO THỜI TIẾT" màu cam sáng.
+         => KẾT QUẢ: 
+            + Hộp thư thoại "LUỒNG HOẠT ĐỘNG VẬN HÀNH THỜI GIAN THỰC" (Terminal đen dưới cùng) sẽ ngay lập tức xuất hiện dòng thông báo đỏ rực: "[Cảnh báo thời tiết]: Dự báo khu vực sắp có mưa lớn..." hoặc "[Cảnh báo thời tiết]: Nhiệt độ đo được vượt quá 35°C...".
+            + Nếu có cấu hình Telegram, điện thoại của bạn sẽ rung lên nhận tin nhắn trong 2 giây.
+    b. Tab [CẤU HÌNH]:
+       - Vĩ độ (Lat) & Kinh độ (Lon): Nhập tọa độ địa điểm kho cần theo dõi (mặc định khu vực Đồng Nai: Lat 10.9, Lon 106.9).
+       - OpenWeatherMap API Key: Nhập Key của bạn (hoặc để trống để hệ thống tự động chạy chế độ giả lập thông minh).
+       - Telegram Bot Token & Chat ID: Nhập token bot của bạn (tạo từ @BotFather) và Chat ID cá nhân/nhóm để nhận tin nhắn đẩy thực tế.
+       - Bấm nút: "LƯU TẤT CẢ THIẾT LẬP CẤU HÌNH" để lưu vào file `weather_config.json`.
+    c. Tab [LỊCH SỬ LOG]:
+       - Xem danh sách các lần quét kiểm tra thời tiết chạy ngầm của hệ thống, trạng thái gửi tin nhắn Telegram thành công hay thất bại.
+    d. Nút [KIỂM TRA THỜI TIẾT NGAY] (Màu cam viền ở cột trái):
+       - Nhấn vào bất kỳ lúc nào để bắt hệ thống kéo dữ liệu thời tiết mới nhất về lập tức mà không cần đợi vòng lặp 30 phút.
+
+--------------------------------------------------------------------------------
+2. TRỢ LÝ TRÒ CHUYỆN THÔNG MINH (OMEGA AI ASSISTANT CHATBOT)
+--------------------------------------------------------------------------------
+* Chức năng: Chatbot hỗ trợ nhân viên tra cứu quy trình nghiệp vụ kho (SOP) bằng tiếng Việt tự nhiên (hiểu cả viết tắt, không dấu, sai chính tả nhẹ nhờ bộ NLP chuẩn hóa tiếng Việt). Đồng thời chatbot đã được liên kết với Cơ sở dữ liệu WMS thực tế để trả lời chính xác số lượng tồn kho, trạng thái đơn hàng thời gian thực.
+
+* Cách sử dụng và Vị trí bấm trên giao diện:
+  - Vị trí: Click vào Quả cầu Hologram Ω AI màu cam xoay tròn phát sáng ở góc dưới cùng bên phải màn hình. Khung chat sẽ mở ra.
+  - Các hành động:
+    a. Tra cứu dữ liệu trực tiếp:
+       - Bạn gõ hỏi: "kho còn bao nhiêu áo mưa" hoặc "sku-aomua còn bao nhiêu cái" hoặc "kiểm tra đơn po-2026-0139".
+       - Chatbot sẽ tự động lục tìm dữ liệu thực tế đang có trên Web và trả về kết quả chính xác tuyệt đối: "Hiện tại sản phẩm Áo mưa tiện lợi OMEGA (SKU-AOMUA) có 120 cái tại vị trí kệ Zone D..." hoặc trạng thái đơn hàng.
+    b. Tra cứu quy trình kho sâu (Deep RAG):
+       - Bạn gõ hỏi: "giải thích sâu về quy trình nhập hàng" hoặc "hướng dẫn thực hành đóng gói hàng dễ vỡ" hoặc "các bước sử dụng xe nâng".
+       - Chatbot sẽ lục trong thư viện data_nhan để trả về hướng dẫn chi tiết từng bước, cẩm nang thực hành, hoặc phân tích lý thuyết cặn kẽ.
+    c. Trò chuyện tự nhiên & Viết tắt:
+       - Bạn gõ: "chao ni", "he lo", "cam on lam", "atld la gi" hoặc "xuat kho ntn" chatbot đều hiểu và trả lời giống con người.
+    d. Nút gợi ý nhanh:
+       - Bấm vào các bong bóng gợi ý: [FIFO], [Rách hộp], [Xe nâng], [Mã vạch] ở trên thanh nhập liệu để hỏi nhanh.
+
+--------------------------------------------------------------------------------
+3. KIỂM ĐỊNH CHẤT LƯỢNG (QC) & NHẬP KHO (INBOUND FLOW & OCR)
+--------------------------------------------------------------------------------
+* Chức năng: Quét hóa đơn đầu vào bằng AI OCR để tự động hóa danh sách nhập hàng, chấm điểm ưu tiên xe tải và thực hiện Putaway (xếp kệ).
+
+* Cách sử dụng và Vị trí bấm trên giao diện:
+  - Nhấp vào tab "Operations" (Vận hành) ở thanh bên trái.
+  - Cuộn xuống phần "Inbound Shipments (Receipts)". Bạn sẽ thấy danh sách các phiếu nhập hàng:
+    a. Sử dụng AI OCR để nạp Manifest xe tải:
+       - Tìm phần "AI OCR Manifest Parser" ở cột bên phải.
+       - Chọn một hóa đơn mẫu trong dropdown (ví dụ: `invoice_steelworks_992.pdf`).
+       - Nhấn nút "Execute OCR manifest check" (Chạy phân tích OCR).
+         => Hệ thống sẽ tự động trích xuất sản phẩm, số lượng, nhà cung cấp, và tự động xếp xe tải đó lên đầu hàng đợi ưu tiên (Priority Truck Queue) nếu xe chở hàng đang bị thiếu hụt nghiêm trọng trong kho.
+    b. Kiểm định QC:
+       - Với các phiếu có trạng thái "QC Inspection Pending" màu xanh lam.
+       - Nhấp vào nút "Inspect QC" -> Tích chọn Đạt/Lỗi cho từng sản phẩm và nhập ghi chú kiểm thử -> Nhấn "Submit QC results".
+    c. Xếp kệ Putaway:
+       - Khi QC hoàn tất, trạng thái phiếu chuyển thành chờ xếp kệ.
+       - Nhấn nút "Putaway & Validate" -> Chọn vị trí kệ gợi ý tối ưu từ AI (ví dụ: Zone A cho Khung gầm) -> Nhấn "Confirm Putaway". Hàng hóa sẽ được cộng dồn vào tồn kho thực tế ngay lập tức.
+
+--------------------------------------------------------------------------------
+4. XUẤT KHO THÔNG MINH (OUTBOUND FLOW & STRATEGIES)
+--------------------------------------------------------------------------------
+* Chức năng: Cho phép quản lý và nhân viên thực hiện quy trình xuất kho theo 3 bước chuẩn (Pick -> Pack -> Ship) kết hợp các chiến lược quản lý lô hàng tự động (FIFO/LIFO).
+
+* Cách sử dụng và Vị trí bấm trên giao diện:
+  - Nhấp vào tab "Operations" ở thanh bên trái.
+  - Tìm phần "Outbound Shipments (Deliveries)":
+    a. Thay đổi chiến lược gom hàng:
+       - Tại mỗi phiếu xuất, bấm vào nút chọn chiến lược (mặc định là "FIFO" - Lô cũ xuất trước). Bạn có thể đổi sang "LIFO".
+    b. Quy trình 3 bước vận hành:
+       - Bước 1 (Gom hàng): Nhấn "Pick Goods". Trạng thái chuyển sang chờ đóng gói.
+       - Bước 2 (Đóng gói): Nhấn "Pack Cargo" -> Một cửa sổ pop-up hiện lên gợi ý kích thước hộp tối ưu -> Chọn kích thước thùng -> Bấm "Validate Packaging & Print label" để in tem.
+       - Bước 3 (Vận chuyển): Nhấn "Ship Out" để bàn giao cho hãng vận chuyển (ví dụ DHL/GHN). Tồn kho sản phẩm và số lượng các lô hàng (Lots) sẽ tự động trừ đi trên hệ thống.
+
+--------------------------------------------------------------------------------
+5. BÁO CÁO CUNG ỨNG VÀ ĐẤU THẦU NHÀ CUNG CẤP (TOPSIS/AHP DECISION MAKING)
+--------------------------------------------------------------------------------
+* Chức năng: Dự báo số ngày cháy hàng dựa theo tốc độ tiêu thụ thực tế và tự động chấm điểm lựa chọn nhà cung cấp tối ưu bằng thuật toán đa tiêu chí TOPSIS.
+
+* Cách sử dụng và Vị trí bấm trên giao diện:
+  - Nhấp vào tab "Reports" (Báo cáo) ở thanh bên trái.
+  - Tại đây bạn có 3 công cụ chính:
+    a. Thẻ "Demand & Stockout Forecaster":
+       - Chọn mã SKU trong dropdown -> Bấm "Run Forecast" (Chạy dự báo).
+         => Hệ thống sẽ vẽ biểu đồ cột dự báo nhu cầu tiêu thụ 7 ngày tới, tính số ngày còn lại đến lúc cạn kho, đối chiếu với Lead time giao hàng để hiển thị cảnh báo đỏ rực nếu hàng có nguy cơ bị đứt gãy cung ứng.
+    b. Thẻ "Supplier Evaluation (TOPSIS Multi-Criteria)":
+       - Dùng khi hàng sắp cạn và cần mua thêm.
+       - Chọn SKU và kéo các thanh trượt trọng số ưu tiên: Chất lượng kiểm định, Thời gian giao hàng (Lead time), Giá cả mua vào.
+       - Bấm nút "Run Evaluation Decision".
+         => Thuật toán TOPSIS trên Python sẽ tính toán, xếp hạng các nhà cung cấp theo điểm số giảm dần (từ 0-100) để bạn dễ dàng lựa chọn.
+    c. Thẻ "Automatic PO Dispatcher":
+       - Sau khi chọn nhà cung cấp tốt nhất ở bước trên, kéo xuống bấm nút "Dispatch Purchase Order".
+         => Hệ thống tự động điền email, lập hợp đồng mua hàng tự động gửi trực tiếp sang cho nhà cung cấp và tạo một đơn PO nháp mới trong hệ thống.
+================================================================================

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Chatbot Cẩm Nang Nhân Viên Kho - Trợ lý AI giải đáp quy trình kho hàng chạy 100% offline">
+    <title>Cẩm Nang Kho Hàng - Trợ Lý AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Đang khởi tạo trợ lý AI...</div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+        <div class="dashboard-container">
+            <!-- CỘT TRÁI: KHÔNG GIAN TRÒ CHUYỆN (CHAT WORKSPACE) -->
+            <div class="chat-workspace">
+                <header id="chat-header">
+                    <div class="header-avatar" id="bot-avatar">T</div>
+                    <div class="header-info">
+                        <h1 class="header-name" id="bot-name">Tùng</h1>
+                        <div class="header-status">Trực tuyến - Trợ lý vạn năng</div>
+                    </div>
+                    <button class="kb-toggle-btn" id="kb-toggle-btn" title="Quản lý cẩm nang số">
+                        📚 Cẩm Nang
+                    </button>
+                    <div class="header-badge" id="bot-mode-badge">AI Local - RAG</div>
+                </header>
+
+                <div id="chat-messages"></div>
+                <div id="suggestions-area"></div>
+
+                <div id="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="message-input"
+                            placeholder="Gõ câu hỏi về quy trình kho..."
+                            rows="1"
+                            autocomplete="off"
+                            spellcheck="false"></textarea>
+                        <button id="send-btn" title="Gửi tin nhắn" disabled>
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: QUẢN LÝ CẨM NĂNG SỐ -->
+            <aside class="kb-workspace" id="kb-workspace">
+                <div class="kb-header">
+                    <h2>📚 Cẩm Nang Số</h2>
+                    <button id="close-kb-btn" class="close-kb-btn" title="Đóng">&times;</button>
+                </div>
+
+                <div class="kb-contents">
+                    <div class="upload-section">
+                        <h3>Số Hóa Cẩm Nang Quy Trình</h3>
+                        <div id="drag-drop-zone" class="drag-zone">
+                            <div class="drag-icon">📤</div>
+                            <p>Kéo & thả file quy định kho (.txt, .pdf)</p>
+                            <span>hoặc click để chọn file từ máy</span>
+                            <input type="file" id="file-uploader" accept=".txt,.pdf" style="display: none;">
+                        </div>
+                        <!-- Status steps for indexing -->
+                        <div id="upload-status" class="upload-status-panel hidden">
+                            <div class="status-steps">
+                                <div class="step-item" id="step-read">
+                                    <span class="step-bullet">1</span> Đọc nội dung file...
+                                </div>
+                                <div class="step-item" id="step-chunk">
+                                    <span class="step-bullet">2</span> Băm nhỏ quy trình (Chunking)...
+                                </div>
+                                <div class="step-item" id="step-embed">
+                                    <span class="step-bullet">3</span> Mã hóa tọa độ (Vector Space)...
+                                </div>
+                                <div class="step-item" id="step-save">
+                                    <span class="step-bullet">4</span> Lưu trữ SQLite DB...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="docs-section">
+                        <h3>Tài Liệu Hướng Dẫn Hiện Có</h3>
+                        <div id="docs-list" class="docs-list">
+                            <!-- JS renders dynamic list here -->
+                            <div class="loading-docs">Đang tải danh sách tài liệu...</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+
+
+    <script src="app.js"></script>
+</body>
+</html>

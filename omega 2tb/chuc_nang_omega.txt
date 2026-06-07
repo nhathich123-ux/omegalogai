@@ -1,0 +1,18 @@
+Chức năng cơ bản:
+- Quản lý danh mục: Thêm/Sửa/Xóa/Xem sản phẩm.
+- Quản lý đối tác: Danh sách nhà cung cấp (Suppliers) và khách hàng.
+- Xử lý phiếu kho cơ bản: Tạo phiếu Nhập kho (Receipts) và phiếu Xuất kho (Delivery) thủ công hoặc theo đơn hàng.
+- Cập nhật tồn kho tự động: Hệ thống tự cộng/trừ số lượng tồn trong database.
+- Quản lý vị trí (Location): Định nghĩa danh sách các kho, các dãy kệ.
+Chức năng AI:
+- Chatbot cẩm nang cho nhân viên kho (Internal Knowledge Base LLM): Sử dụng AI (RAG) để tự động tra cứu tài liệu nội bộ và phản hồi ngay lập tức cách xử lý quy trình kho bằng ngôn ngữ tự nhiên cho nhân viên.
+- AI Dự báo tồn kho dựa trên đơn hàng xuất (Demand Forecasting): Thu thập và Làm sạch dữ liệu chuỗi thời gian phân tích đa tầng dữ liệu để huấn luyện mô hình dự báo đưa ra cảnh báo và Đề xuất động  (Ví dụ: Mặt hàng A còn dưới 20 cái thì báo nhập, mặt hàng B hiện còn 150 sản phẩm. Theo dự báo dựa trên dữ liệu mùa vụ (sắp đến kỳ nghỉ lễ) và tốc độ bán 3 ngày qua, mặt hàng này sẽ cháy hàng trong 2 ngày tới. Đề xuất: Nhập thêm ít nhất 400 sản phẩm để đủ cung ứng cho tuần lễ tiếp theo.)
+- Định vị vị trí lưu kho bằng mã vạch (Barcode-driven Slotting & Bin Management): (Liên kết 2 thực thể bằng hành động quét mã (Binding)),
+- Nhập hàng vào kệ (Binding Location): để liên kết chính xác vị trí kệ kho với sản phẩm và tự động tăng số lượng tồn kho khi quét mã vạch nhập hàng.
+- kiểm kho và Xuất kho: truy xuất nhanh danh sách hàng hóa trên kệ và chỉ đường cho nhân viên đến đúng vị trí lấy hàng khi có đơn xuất kho.
+- AI tự động sinh cấu trúc mã vạch tối ưu phát hiện lỗi quét nhầm (Anomaly Detection): AI để tự động tối ưu sơ đồ đặt mã kệ và gửi cảnh báo tức thời khi phát hiện nhân viên quét nhầm vị trí hàng hóa.
+- AI Nhận diện đơn hàng nhập và tối ưu lịch nhập kho (Inbound Logistics AI): AI để tự động bóc tách thông tin hóa đơn và tự động xếp lịch trình tiếp nhận xe hàng theo độ ưu tiên để tránh quá tải kho.
+- AI Phân tích giỏ hàng để gợi ý Combo và Định vị vị trí kho (Market Basket Analysis & Slotting): Phân tích lịch sử hóa đơn để gợi ý các combo bán hàng và đề xuất xếp các sản phẩm hay bán kèm cạnh nhau trên kệ kho nhằm giảm thời gian lấy hàng.
+- AI Chấm điểm và lựa chọn Nhà cung cấp (Supplier Scoring & Selection): Dùng AI để tự động chấm điểm lịch sử giao dịch của các nhà cung cấp và gợi ý đơn vị tối ưu nhất về giá cả lẫn thời gian khi kho sắp cạn hàng.
+- Cảnh báo bất thường và thất thoát (Anomaly Detection): dùng AI để liên tục giám sát các giao dịch kho 24/7 và gắn cờ cảnh báo tức thời các hành vi gian lận hoặc hao hụt bất thường để quản lý kịp thời xử lý.
+-

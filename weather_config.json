@@ -1,0 +1,75 @@
+{
+  "lat": 10.9,
+  "lon": 106.9,
+  "api_key": "",
+  "telegram_token": "",
+  "telegram_chat_id": "",
+  "simulation": {
+    "active": false,
+    "condition": "Clear",
+    "temp": 28.0
+  },
+  "rules": [
+    {
+      "condition": "Rain",
+      "skus": [
+        "SKU-AOMUA",
+        "SKU-ODU"
+      ],
+      "min_temp": null,
+      "max_temp": null,
+      "message_vi": "Cảnh báo: Dự báo khu vực sắp có mưa lớn. Yêu cầu ưu tiên xuất ngay 50 áo mưa tiện lợi và 20 chiếc ô dù ra quầy số 1."
+    },
+    {
+      "condition": null,
+      "skus": [
+        "SKU-AOCHONGNANG"
+      ],
+      "min_temp": 35.0,
+      "max_temp": null,
+      "message_vi": "Cảnh báo: Nhiệt độ đo được vượt quá 35°C. Yêu cầu tăng cường cấp ngay 30 áo khoác chống nắng UV ra quầy trưng bày chính."
+    }
+  ],
+  "logs": [
+    {
+      "id": "WLOG-2287",
+      "time": "2026-06-07 17:40:09",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-2721",
+      "time": "2026-06-07 17:10:07",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-2371",
+      "time": "2026-06-07 16:57:53",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-6648",
+      "time": "2026-06-07 16:27:51",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    }
+  ]
+}
