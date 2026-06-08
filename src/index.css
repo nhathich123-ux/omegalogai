@@ -2902,3 +2902,61 @@ html[lang="vi"] .text-glow-amber {
   border-color: rgba(232, 130, 90, 0.2);
   background: #fff;
 }
+
+/* ─── CHATBOT TOAST NOTIFICATION ─── */
+.sop-chatbot-toast {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  right: 16px;
+  background: rgba(232, 130, 90, 0.15);
+  border: 1px solid rgba(232, 130, 90, 0.45);
+  color: #ff9e7d;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+  animation: sop-toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards, sop-pulse-toast 2s ease-in-out infinite;
+}
+
+[data-theme="light"] .sop-chatbot-toast {
+  background: rgba(232, 130, 90, 0.1);
+  border-color: rgba(232, 130, 90, 0.35);
+  color: #c8532a;
+}
+
+.sop-chatbot-toast-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+@keyframes sop-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sop-pulse-toast {
+  0%, 100% {
+    border-color: rgba(232, 130, 90, 0.45);
+  }
+  50% {
+    border-color: rgba(232, 130, 90, 0.75);
+    box-shadow: 0 4px 16px rgba(232, 130, 90, 0.15);
+  }
+}

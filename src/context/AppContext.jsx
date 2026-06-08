@@ -55,6 +55,96 @@ const defaultAccounts = [
   }
 ];
 
+const defaultLocationsTree = {
+  id: 'root',
+  name: 'Tất cả Kho hàng',
+  children: [
+    {
+      id: 'WH-A',
+      name: 'Warehouse A (HCM)',
+      children: [
+        {
+          id: 'WH-A/Zone A',
+          name: 'Khu A (Thiết bị nặng)',
+          children: [
+            {
+              id: 'WH-A/Zone A/Aisle 1',
+              name: 'Dãy 1',
+              children: [
+                { id: 'WH-A/Zone A/Aisle 1/Shelf 1', name: 'Kệ 1', children: [{ id: 'WH-A/Zone A/Aisle 1/Shelf 1/Level 1', name: 'Tầng 1 (Heavy Floor)' }, { id: 'WH-A/Zone A/Aisle 1/Shelf 1/Level 2', name: 'Tầng 2' }] }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'WH-A/Zone B',
+          name: 'Khu B (Điện tử)',
+          children: [
+            {
+              id: 'WH-A/Zone B/Aisle 1',
+              name: 'Dãy 1',
+              children: [
+                { id: 'WH-A/Zone B/Aisle 1/Shelf 2', name: 'Kệ 2', children: [{ id: 'WH-A/Zone B/Aisle 1/Shelf 2/Level 3', name: 'Tầng 3' }] }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'WH-A/Zone D',
+          name: 'Khu D (Chất lỏng)',
+          children: [
+            {
+              id: 'WH-A/Zone D/Aisle 1',
+              name: 'Dãy 1',
+              children: [
+                { id: 'WH-A/Zone D/Aisle 1/Shelf 1', name: 'Kệ 1', children: [{ id: 'WH-A/Zone D/Aisle 1/Shelf 1/Level 1', name: 'Tầng 1' }] }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'WH-B',
+      name: 'Warehouse B (Hà Nội)',
+      children: [
+        {
+          id: 'WH-B/Zone B',
+          name: 'Khu B (Phụ kiện điện tử)',
+          children: [
+            {
+              id: 'WH-B/Zone B/Aisle 2',
+              name: 'Dãy 2',
+              children: [
+                { id: 'WH-B/Zone B/Aisle 2/Shelf 3', name: 'Kệ 3', children: [{ id: 'WH-B/Zone B/Aisle 2/Shelf 3/Level 2', name: 'Tầng 2' }] }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'WH-C',
+      name: 'Warehouse C (Đà Nẵng)',
+      children: [
+        {
+          id: 'WH-C/Zone C',
+          name: 'Khu C (Năng lượng)',
+          children: [
+            {
+              id: 'WH-C/Zone C/Aisle 1',
+              name: 'Dãy 1',
+              children: [
+                { id: 'WH-C/Zone C/Aisle 1/Shelf 2', name: 'Kệ 2', children: [{ id: 'WH-C/Zone C/Aisle 1/Shelf 2/Level 1', name: 'Tầng 1' }] }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
 export function AppProvider({ children }) {
   const [theme, setTheme] = useState(() => localStorage.getItem('omega-theme') || 'dark');
   const [lang, setLang] = useState(() => {
@@ -88,95 +178,7 @@ export function AppProvider({ children }) {
   ]);
 
   // 3. Hierarchical Location Tree Path (Odoo-like)
-  const [locationsTree, setLocationsTree] = useState({
-    id: 'root',
-    name: 'Tất cả Kho hàng',
-    children: [
-      {
-        id: 'WH-A',
-        name: 'Warehouse A (HCM)',
-        children: [
-          {
-            id: 'WH-A/Zone A',
-            name: 'Khu A (Thiết bị nặng)',
-            children: [
-              {
-                id: 'WH-A/Zone A/Aisle 1',
-                name: 'Dãy 1',
-                children: [
-                  { id: 'WH-A/Zone A/Aisle 1/Shelf 1', name: 'Kệ 1', children: [{ id: 'WH-A/Zone A/Aisle 1/Shelf 1/Level 1', name: 'Tầng 1 (Heavy Floor)' }, { id: 'WH-A/Zone A/Aisle 1/Shelf 1/Level 2', name: 'Tầng 2' }] }
-                ]
-              }
-            ]
-          },
-          {
-            id: 'WH-A/Zone B',
-            name: 'Khu B (Điện tử)',
-            children: [
-              {
-                id: 'WH-A/Zone B/Aisle 1',
-                name: 'Dãy 1',
-                children: [
-                  { id: 'WH-A/Zone B/Aisle 1/Shelf 2', name: 'Kệ 2', children: [{ id: 'WH-A/Zone B/Aisle 1/Shelf 2/Level 3', name: 'Tầng 3' }] }
-                ]
-              }
-            ]
-          },
-          {
-            id: 'WH-A/Zone D',
-            name: 'Khu D (Chất lỏng)',
-            children: [
-              {
-                id: 'WH-A/Zone D/Aisle 1',
-                name: 'Dãy 1',
-                children: [
-                  { id: 'WH-A/Zone D/Aisle 1/Shelf 1', name: 'Kệ 1', children: [{ id: 'WH-A/Zone D/Aisle 1/Shelf 1/Level 1', name: 'Tầng 1' }] }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'WH-B',
-        name: 'Warehouse B (Hà Nội)',
-        children: [
-          {
-            id: 'WH-B/Zone B',
-            name: 'Khu B (Phụ kiện điện tử)',
-            children: [
-              {
-                id: 'WH-B/Zone B/Aisle 2',
-                name: 'Dãy 2',
-                children: [
-                  { id: 'WH-B/Zone B/Aisle 2/Shelf 3', name: 'Kệ 3', children: [{ id: 'WH-B/Zone B/Aisle 2/Shelf 3/Level 2', name: 'Tầng 2' }] }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'WH-C',
-        name: 'Warehouse C (Đà Nẵng)',
-        children: [
-          {
-            id: 'WH-C/Zone C',
-            name: 'Khu C (Năng lượng)',
-            children: [
-              {
-                id: 'WH-C/Zone C/Aisle 1',
-                name: 'Dãy 1',
-                children: [
-                  { id: 'WH-C/Zone C/Aisle 1/Shelf 2', name: 'Kệ 2', children: [{ id: 'WH-C/Zone C/Aisle 1/Shelf 2/Level 1', name: 'Tầng 1' }] }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  });
+  const [locationsTree, setLocationsTree] = useState(() => getLocalStorageItem('omega-locations-tree', defaultLocationsTree));
 
   // 4. Lots / Serial Numbers Tracker database
   const [lots, setLots] = useState(() => getLocalStorageItem('omega-lots', []));
@@ -1083,9 +1085,31 @@ export function AppProvider({ children }) {
     localStorage.setItem('omega-faceid-accounts', JSON.stringify(faceIdAccounts));
   }, [faceIdAccounts]);
 
+  // Persist Locations Tree to LocalStorage
+  useEffect(() => {
+    localStorage.setItem('omega-locations-tree', JSON.stringify(locationsTree));
+  }, [locationsTree]);
+
+  const mergeLists = (localList, serverList, idKey = 'id') => {
+    const serverIds = new Set((serverList || []).map(item => item[idKey]));
+    const newLocal = (localList || []).filter(item => !serverIds.has(item[idKey]));
+    return [...(serverList || []), ...newLocal];
+  };
+
   const lastSyncedRef = useRef({
     registeredAccounts: getLocalStorageItem('omega-registered-accounts', defaultAccounts),
-    faceIdAccounts: getLocalStorageItem('omega-faceid-accounts', [])
+    faceIdAccounts: getLocalStorageItem('omega-faceid-accounts', []),
+    products: getLocalStorageItem('omega-products', []),
+    lots: getLocalStorageItem('omega-lots', []),
+    receipts: getLocalStorageItem('omega-receipts', []),
+    deliveries: getLocalStorageItem('omega-deliveries', []),
+    internalTransfers: getLocalStorageItem('omega-transfers', []),
+    adjustments: getLocalStorageItem('omega-adjustments', []),
+    purchaseOrders: getLocalStorageItem('omega-purchase-orders', []),
+    notifications: getLocalStorageItem('omega-notifications', []),
+    reorderHistory: getLocalStorageItem('omega-reorder-history', []),
+    partners: getLocalStorageItem('omega-partners', []),
+    locationsTree: getLocalStorageItem('omega-locations-tree', defaultLocationsTree)
   });
   const isFirstRenderRef = useRef(true);
 
@@ -1099,39 +1123,115 @@ export function AppProvider({ children }) {
       .then(data => {
         clearTimeout(timeoutId);
         if (data) {
-          // Merge logic to prevent losing previously created accounts in localstorage
-          const localAccs = getLocalStorageItem('omega-registered-accounts', []);
-          const localFaceIds = getLocalStorageItem('omega-faceid-accounts', []);
-
-          // Find accounts in localstorage that are not in the database
-          const serverAccEmails = new Set((data.registeredAccounts || []).map(acc => acc.email));
-          const newLocalAccs = localAccs.filter(acc => !serverAccEmails.has(acc.email));
-
-          const serverFaceEmails = new Set((data.faceIdAccounts || []).map(f => f.email));
-          const newLocalFaces = localFaceIds.filter(f => !serverFaceEmails.has(f.email));
-
-          let finalAccs = data.registeredAccounts || [];
-          let finalFaces = data.faceIdAccounts || [];
           let needsUpdate = false;
 
-          if (newLocalAccs.length > 0) {
-            finalAccs = [...finalAccs, ...newLocalAccs];
-            needsUpdate = true;
-          }
-          if (newLocalFaces.length > 0) {
-            finalFaces = [...finalFaces, ...newLocalFaces];
-            needsUpdate = true;
-          }
-
+          // 1. Registered Accounts
+          const localAccs = getLocalStorageItem('omega-registered-accounts', defaultAccounts);
+          const finalAccs = mergeLists(localAccs, data.registeredAccounts, 'email');
+          if (JSON.stringify(finalAccs) !== JSON.stringify(data.registeredAccounts || [])) needsUpdate = true;
           setRegisteredAccounts(finalAccs);
-          setFaceIdAccounts(finalFaces);
-
           localStorage.setItem('omega-registered-accounts', JSON.stringify(finalAccs));
-          localStorage.setItem('omega-faceid-accounts', JSON.stringify(finalFaces));
+
+          // 2. FaceID Accounts
+          const localFaceIds = getLocalStorageItem('omega-faceid-accounts', []);
+          const finalFaceIds = mergeLists(localFaceIds, data.faceIdAccounts, 'email');
+          if (JSON.stringify(finalFaceIds) !== JSON.stringify(data.faceIdAccounts || [])) needsUpdate = true;
+          setFaceIdAccounts(finalFaceIds);
+          localStorage.setItem('omega-faceid-accounts', JSON.stringify(finalFaceIds));
+
+          // 3. Products
+          const localProducts = getLocalStorageItem('omega-products', []);
+          const finalProducts = mergeLists(localProducts, data.products, 'sku');
+          if (JSON.stringify(finalProducts) !== JSON.stringify(data.products || [])) needsUpdate = true;
+          setProducts(finalProducts);
+          localStorage.setItem('omega-products', JSON.stringify(finalProducts));
+
+          // 4. Lots
+          const localLots = getLocalStorageItem('omega-lots', []);
+          const finalLots = mergeLists(localLots, data.lots, 'id');
+          if (JSON.stringify(finalLots) !== JSON.stringify(data.lots || [])) needsUpdate = true;
+          setLots(finalLots);
+          localStorage.setItem('omega-lots', JSON.stringify(finalLots));
+
+          // 5. Receipts
+          const localReceipts = getLocalStorageItem('omega-receipts', []);
+          const finalReceipts = mergeLists(localReceipts, data.receipts, 'id');
+          if (JSON.stringify(finalReceipts) !== JSON.stringify(data.receipts || [])) needsUpdate = true;
+          setReceipts(finalReceipts);
+          localStorage.setItem('omega-receipts', JSON.stringify(finalReceipts));
+
+          // 6. Deliveries
+          const localDeliveries = getLocalStorageItem('omega-deliveries', []);
+          const finalDeliveries = mergeLists(localDeliveries, data.deliveries, 'id');
+          if (JSON.stringify(finalDeliveries) !== JSON.stringify(data.deliveries || [])) needsUpdate = true;
+          setDeliveries(finalDeliveries);
+          localStorage.setItem('omega-deliveries', JSON.stringify(finalDeliveries));
+
+          // 7. Internal Transfers
+          const localTransfers = getLocalStorageItem('omega-transfers', []);
+          const finalTransfers = mergeLists(localTransfers, data.internalTransfers, 'id');
+          if (JSON.stringify(finalTransfers) !== JSON.stringify(data.internalTransfers || [])) needsUpdate = true;
+          setInternalTransfers(finalTransfers);
+          localStorage.setItem('omega-transfers', JSON.stringify(finalTransfers));
+
+          // 8. Adjustments
+          const localAdjustments = getLocalStorageItem('omega-adjustments', []);
+          const finalAdjustments = mergeLists(localAdjustments, data.adjustments, 'id');
+          if (JSON.stringify(finalAdjustments) !== JSON.stringify(data.adjustments || [])) needsUpdate = true;
+          setAdjustments(finalAdjustments);
+          localStorage.setItem('omega-adjustments', JSON.stringify(finalAdjustments));
+
+          // 9. Purchase Orders
+          const localPO = getLocalStorageItem('omega-purchase-orders', []);
+          const finalPO = mergeLists(localPO, data.purchaseOrders, 'id');
+          if (JSON.stringify(finalPO) !== JSON.stringify(data.purchaseOrders || [])) needsUpdate = true;
+          setPurchaseOrders(finalPO);
+          localStorage.setItem('omega-purchase-orders', JSON.stringify(finalPO));
+
+          // 10. Notifications
+          const localNotifs = getLocalStorageItem('omega-notifications', []);
+          const finalNotifs = mergeLists(localNotifs, data.notifications, 'id');
+          if (JSON.stringify(finalNotifs) !== JSON.stringify(data.notifications || [])) needsUpdate = true;
+          setNotifications(finalNotifs);
+          localStorage.setItem('omega-notifications', JSON.stringify(finalNotifs));
+
+          // 11. Reorder History
+          const localReorder = getLocalStorageItem('omega-reorder-history', []);
+          const finalReorder = mergeLists(localReorder, data.reorderHistory, 'id');
+          if (JSON.stringify(finalReorder) !== JSON.stringify(data.reorderHistory || [])) needsUpdate = true;
+          setReorderHistory(finalReorder);
+          localStorage.setItem('omega-reorder-history', JSON.stringify(finalReorder));
+
+          // 12. Partners
+          const localPartners = getLocalStorageItem('omega-partners', []);
+          const finalPartners = mergeLists(localPartners, data.partners, 'id');
+          if (JSON.stringify(finalPartners) !== JSON.stringify(data.partners || [])) needsUpdate = true;
+          setPartners(finalPartners);
+          localStorage.setItem('omega-partners', JSON.stringify(finalPartners));
+
+          // 13. Locations Tree
+          let finalTree = data.locationsTree;
+          if (!finalTree || !finalTree.id) {
+            finalTree = getLocalStorageItem('omega-locations-tree', defaultLocationsTree);
+            needsUpdate = true;
+          }
+          setLocationsTree(finalTree);
+          localStorage.setItem('omega-locations-tree', JSON.stringify(finalTree));
 
           lastSyncedRef.current = {
             registeredAccounts: finalAccs,
-            faceIdAccounts: finalFaces
+            faceIdAccounts: finalFaceIds,
+            products: finalProducts,
+            lots: finalLots,
+            receipts: finalReceipts,
+            deliveries: finalDeliveries,
+            internalTransfers: finalTransfers,
+            adjustments: finalAdjustments,
+            purchaseOrders: finalPO,
+            notifications: finalNotifs,
+            reorderHistory: finalReorder,
+            partners: finalPartners,
+            locationsTree: finalTree
           };
 
           // If we merged local accounts, update the server immediately
@@ -1141,7 +1241,7 @@ export function AppProvider({ children }) {
             fetch('/api/db', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ registeredAccounts: finalAccs, faceIdAccounts: finalFaces }),
+              body: JSON.stringify(lastSyncedRef.current),
               signal: updateController.signal
             })
             .then(() => clearTimeout(updateTimeoutId))
@@ -1166,25 +1266,39 @@ export function AppProvider({ children }) {
         .then(data => {
           clearTimeout(timeoutId);
           if (!data) return;
-          const currentAccStr = localStorage.getItem('omega-registered-accounts') || '[]';
-          const currentFaceStr = localStorage.getItem('omega-faceid-accounts') || '[]';
-          
-          const incomingAccStr = JSON.stringify(data.registeredAccounts || []);
-          const incomingFaceStr = JSON.stringify(data.faceIdAccounts || []);
 
-          if (incomingAccStr !== currentAccStr || incomingFaceStr !== currentFaceStr) {
-            if (incomingAccStr !== currentAccStr) {
-              setRegisteredAccounts(data.registeredAccounts);
-              localStorage.setItem('omega-registered-accounts', incomingAccStr);
+          const syncKey = (key, setter, localKey) => {
+            const currentStr = localStorage.getItem(localKey) || (key === 'locationsTree' ? '{}' : '[]');
+            const incomingStr = JSON.stringify(data[key] || (key === 'locationsTree' ? null : []));
+            if (incomingStr !== currentStr) {
+              setter(data[key]);
+              localStorage.setItem(localKey, incomingStr);
+              lastSyncedRef.current[key] = data[key];
             }
-            if (incomingFaceStr !== currentFaceStr) {
-              setFaceIdAccounts(data.faceIdAccounts);
-              localStorage.setItem('omega-faceid-accounts', incomingFaceStr);
+          };
+
+          syncKey('registeredAccounts', setRegisteredAccounts, 'omega-registered-accounts');
+          syncKey('faceIdAccounts', setFaceIdAccounts, 'omega-faceid-accounts');
+          syncKey('products', setProducts, 'omega-products');
+          syncKey('lots', setLots, 'omega-lots');
+          syncKey('receipts', setReceipts, 'omega-receipts');
+          syncKey('deliveries', setDeliveries, 'omega-deliveries');
+          syncKey('internalTransfers', setInternalTransfers, 'omega-transfers');
+          syncKey('adjustments', setAdjustments, 'omega-adjustments');
+          syncKey('purchaseOrders', setPurchaseOrders, 'omega-purchase-orders');
+          syncKey('notifications', setNotifications, 'omega-notifications');
+          syncKey('reorderHistory', setReorderHistory, 'omega-reorder-history');
+          syncKey('partners', setPartners, 'omega-partners');
+
+          // Sync locationsTree
+          if (data.locationsTree && data.locationsTree.id) {
+            const currentTreeStr = localStorage.getItem('omega-locations-tree') || '{}';
+            const incomingTreeStr = JSON.stringify(data.locationsTree);
+            if (incomingTreeStr !== currentTreeStr) {
+              setLocationsTree(data.locationsTree);
+              localStorage.setItem('omega-locations-tree', incomingTreeStr);
+              lastSyncedRef.current.locationsTree = data.locationsTree;
             }
-            lastSyncedRef.current = {
-              registeredAccounts: data.registeredAccounts || [],
-              faceIdAccounts: data.faceIdAccounts || []
-            };
           }
         })
         .catch(err => {
@@ -1201,17 +1315,32 @@ export function AppProvider({ children }) {
       return;
     }
 
-    const currentAccStr = JSON.stringify(registeredAccounts);
-    const currentFaceStr = JSON.stringify(faceIdAccounts);
-    
-    const lastAccStr = JSON.stringify(lastSyncedRef.current.registeredAccounts);
-    const lastFaceStr = JSON.stringify(lastSyncedRef.current.faceIdAccounts);
-    
-    if (currentAccStr !== lastAccStr || currentFaceStr !== lastFaceStr) {
-      lastSyncedRef.current = {
-        registeredAccounts,
-        faceIdAccounts
-      };
+    const payload = {
+      registeredAccounts,
+      faceIdAccounts,
+      products,
+      lots,
+      receipts,
+      deliveries,
+      internalTransfers,
+      adjustments,
+      purchaseOrders,
+      notifications,
+      reorderHistory,
+      partners,
+      locationsTree
+    };
+
+    let hasChanged = false;
+    for (const key of Object.keys(payload)) {
+      if (JSON.stringify(payload[key]) !== JSON.stringify(lastSyncedRef.current[key])) {
+        hasChanged = true;
+        break;
+      }
+    }
+
+    if (hasChanged) {
+      lastSyncedRef.current = { ...payload };
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1500);
@@ -1219,7 +1348,7 @@ export function AppProvider({ children }) {
       fetch('/api/db', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ registeredAccounts, faceIdAccounts }),
+        body: JSON.stringify(payload),
         signal: controller.signal
       })
       .then(() => clearTimeout(timeoutId))
@@ -1227,7 +1356,10 @@ export function AppProvider({ children }) {
         clearTimeout(timeoutId);
       });
     }
-  }, [registeredAccounts, faceIdAccounts]);
+  }, [
+    registeredAccounts, faceIdAccounts, products, lots, receipts, deliveries,
+    internalTransfers, adjustments, purchaseOrders, notifications, reorderHistory, partners, locationsTree
+  ]);
 
   useEffect(() => {
     localStorage.setItem('omega-partners', JSON.stringify(partners));

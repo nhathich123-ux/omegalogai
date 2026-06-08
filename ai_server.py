@@ -21,6 +21,331 @@ except Exception as e:
     print("=== WARNING: COULD NOT LOAD RICH SEED DATA ===", e)
 
 
+USER_PROFILES = {}
+
+def load_user_profiles():
+    global USER_PROFILES
+    try:
+        if os.path.exists('db.json'):
+            with open('db.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                USER_PROFILES = data.get("userProfiles", {})
+    except Exception as e:
+        print("Error loading user profiles:", e)
+
+def save_user_profiles_to_db():
+    global USER_PROFILES
+    try:
+        db_path = 'db.json'
+        current = {}
+        if os.path.exists(db_path):
+            with open(db_path, 'r', encoding='utf-8') as f:
+                try:
+                    current = json.load(f)
+                except Exception:
+                    pass
+        current["userProfiles"] = USER_PROFILES
+        with open(db_path, 'w', encoding='utf-8') as f:
+            json.dump(current, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print("Error saving user profiles:", e)
+
+# Load profiles initially
+load_user_profiles()
+
+def update_user_profile(user_email, user_name, message):
+    global USER_PROFILES
+    if not user_email:
+        user_email = "anonymous@omega.io"
+        
+    user_email = user_email.lower().strip()
+    
+    if user_email not in USER_PROFILES:
+        USER_PROFILES[user_email] = {
+            "name": user_name or "ní",
+            "bot_ref": "tớ",
+            "user_ref": "cậu",
+            "greeting_style": "friendly"
+        }
+        
+    profile = USER_PROFILES[user_email]
+    
+    if user_name and user_name != "Admin Omega" and profile.get("name") in ["ní", "Admin Omega", "Admin"]:
+        profile["name"] = user_name
+        
+    message_clean = clean_text(message)
+    message_no_diac = remove_diacritics(message_clean)
+    message_telex = clean_telex_typos(message_no_diac)
+    words = message_no_diac.split()
+    words_telex = message_telex.split()
+    msg_words = set(words + words_telex)
+    
+    intro_found = False
+    
+    for phrase in ["tên là", "tên tui là", "tên tớ là", "tên mình là", "tên em là", "gọi là", "gọi tớ là", "gọi tui là", "gọi mình là", "gọi em là", "ten la", "ten tui la", "ten to la", "ten minh la", "ten em la", "goi la", "goi to la", "goi tui la", "goi minh la", "goi em la"]:
+        phrase_clean = remove_diacritics(phrase)
+        if phrase_clean in message_no_diac:
+            idx = message_no_diac.find(phrase_clean) + len(phrase_clean)
+            words_orig = message.split()
+            no_diac_words = message_no_diac.split()
+            try:
+                phrase_words = phrase_clean.split()
+                start_idx = -1
+                for i in range(len(no_diac_words) - len(phrase_words) + 1):
+                    if no_diac_words[i:i+len(phrase_words)] == phrase_words:
+                        start_idx = i
+                        break
+                if start_idx != -1:
+                    target_idx = start_idx + len(phrase_words)
+                    if target_idx < len(words_orig):
+                        name_part = words_orig[target_idx]
+                        name_part = re.sub(r'[^\w\s]', '', name_part).strip()
+                        if len(name_part) >= 2 and name_part.lower() not in ["ai", "gi", "gì", "nào", "nao", "nhé", "nha", "nhe", "nhao"]:
+                            profile["name"] = name_part.title()
+                            intro_found = True
+                            break
+            except Exception:
+                pass
+                
+    if not intro_found:
+        for pronoun in ["tớ là", "tớ tên là", "tui là", "tui tên là", "mình là", "mình tên là", "em là", "em tên là", "anh là", "anh tên là", "to la", "to ten la", "tui la", "tui ten la", "minh la", "minh ten la", "em la", "em ten la", "anh la", "anh ten la"]:
+            pronoun_clean = remove_diacritics(pronoun)
+            if pronoun_clean in message_no_diac:
+                phrase_words = pronoun_clean.split()
+                no_diac_words = message_no_diac.split()
+                words_orig = message.split()
+                try:
+                    start_idx = -1
+                    for i in range(len(no_diac_words) - len(phrase_words) + 1):
+                        if no_diac_words[i:i+len(phrase_words)] == phrase_words:
+                            start_idx = i
+                            break
+                    if start_idx != -1:
+                        target_idx = start_idx + len(phrase_words)
+                        if target_idx < len(words_orig):
+                            name_part = words_orig[target_idx]
+                            name_part = re.sub(r'[^\w\s]', '', name_part).strip()
+                            if len(name_part) >= 2 and name_part.lower() not in ["ai", "gi", "gì", "nào", "nao", "nhé", "nha", "nhe"]:
+                                profile["name"] = name_part.title()
+                                intro_found = True
+                                break
+                except Exception:
+                    pass
+                    
+    # Detect pronouns to update references and greeting styles
+    if "ni" in msg_words or "ní" in message_clean or "yo ni" in message_no_diac or "chao ni" in message_no_diac:
+        profile["bot_ref"] = "tui"
+        profile["user_ref"] = "ní"
+        profile["greeting_style"] = "ni"
+    elif any(w in msg_words for w in ["may", "tao", "mai", "mày", "mài"]):
+        profile["bot_ref"] = "tao"
+        profile["user_ref"] = "mày"
+        profile["greeting_style"] = "bro"
+    elif any(w in msg_words for w in ["sep", "boss", "chutich", "sếp"]):
+        profile["bot_ref"] = "em"
+        profile["user_ref"] = "sếp"
+        profile["greeting_style"] = "respectful"
+    elif "dong chi" in message_no_diac or "đồng chí" in message_clean:
+        profile["bot_ref"] = "tôi"
+        profile["user_ref"] = "đồng chí"
+        profile["greeting_style"] = "military"
+    elif any(w in msg_words for w in ["cau", "to", "cậu", "tớ"]):
+        profile["bot_ref"] = "tớ"
+        profile["user_ref"] = "cậu"
+        profile["greeting_style"] = "friendly"
+    elif any(w in msg_words for w in ["ban", "tui", "minh", "bạn", "mình"]):
+        profile["bot_ref"] = "tui"
+        profile["user_ref"] = "bạn"
+        profile["greeting_style"] = "casual"
+    elif "em" in msg_words and ("anh" in msg_words or "chi" in msg_words):
+        profile["bot_ref"] = "em"
+        if "anh" in msg_words:
+            profile["user_ref"] = "anh"
+        else:
+            profile["user_ref"] = "chị"
+        profile["greeting_style"] = "respectful"
+    elif ("anh" in msg_words or "chi" in msg_words) and "em" in msg_words:
+        profile["user_ref"] = "em"
+        if "anh" in msg_words:
+            profile["bot_ref"] = "anh"
+        else:
+            profile["bot_ref"] = "chị"
+        profile["greeting_style"] = "respectful"
+        
+    save_user_profiles_to_db()
+    return profile, intro_found
+
+def generate_intro_acknowledgment(profile):
+    name = profile.get("name", "ní")
+    user_ref = profile.get("user_ref", "cậu")
+    bot_ref = profile.get("bot_ref", "tớ")
+    style = profile.get("greeting_style", "friendly")
+    
+    if style == "ni":
+        acknowledgments = [
+            f"Chào {name} nha! Ghê chưa, {bot_ref} ghi nhận tên của {user_ref} là {name} rồi nghen. Có gì cần {bot_ref} hỗ trợ ca trực kho bãi hôm nay không nè?",
+            f"Yo {name}! Hế lo {name} nha! 👋 {bot_ref} đã lưu tên của {user_ref} vào bộ nhớ rồi. Có câu hỏi gì về WMS hay SOP cứ nhắn {bot_ref} nha!",
+            f"Chào {name} thân yêu! Rất vui được đồng hành cùng {name} trong ca trực này. Cần {bot_ref} phụ giúp gì thì cứ nhắn nghen!"
+        ]
+    elif style == "bro":
+        acknowledgments = [
+            f"Ok chào {name} nha! Tao nhớ tên mày là {name} rồi. Có việc gì cần tao thông não giùm không?",
+            f"Yo {name}! Tao biết tên mày rồi nha. Ca làm hôm nay thế nào, có gì khó khăn cứ hú tao nhé!",
+            f"Chào {name}! Tao lưu tên mày rồi. Giờ cần tao tra cứu SOP hay WMS gì không, lẹ đi tao chỉ cho!"
+        ]
+    elif style == "respectful":
+        acknowledgments = [
+            f"Dạ chào {user_ref} {name} ạ! em đã ghi nhận và lưu thông tin của {user_ref} vào hệ thống. em có thể giúp gì cho sếp trong ca vận hành hôm nay ạ?",
+            f"Dạ chào {user_ref} {name}! Chúc {user_ref} một ngày làm việc đầy năng lượng. em rất vinh hạnh được hỗ trợ sếp {name} ca trực hôm nay ạ.",
+            f"Chào {user_ref} {name}! em đã lưu tên của sếp rồi ạ. Có quy trình nào cần kiểm định sếp cứ bảo em nhé."
+        ]
+    elif style == "military":
+        acknowledgments = [
+            f"Chào đồng chí {name}! Báo cáo đồng chí {name}, tôi đã cập nhật danh tính của đồng chí vào danh sách trực ban. Xin hãy giao nhiệm vụ!",
+            f"Báo cáo đồng chí {name}! Tôi đã ghi nhớ tên của đồng chí. Trực ban SOP kho hàng đã sẵn sàng hỗ trợ đồng chí ca trực hôm nay.",
+            f"Chào đồng chí {name}! Tôi đã lưu thông tin đồng chí. Nhiệm vụ hôm nay thế nào, tôi đã sẵn sàng chấp hành lệnh."
+        ]
+    else:
+        acknowledgments = [
+            f"Chào {name} nha! Rất vui được gặp lại {name}. Hôm nay ca làm việc thế nào, có gì cần {bot_ref} phụ giúp không?",
+            f"Hế lo {name}! Ngày làm việc mới thật hiệu quả nghen. {bot_ref} đã nhớ tên của {user_ref} là {name} rồi nè.",
+            f"Chào {name}! Cần {bot_ref} chỉ cách nhặt hàng FIFO, xử lý hàng rách hộp hay in tem mã vạch thì cứ nhắn {bot_ref} nhé."
+        ]
+    return random.choice(acknowledgments)
+
+def is_querying_name(message):
+    message_no_diac = remove_diacritics(clean_text(message))
+    
+    patterns = [
+        r"\bten (tui|toi|tao|em|to|minh|cua tui|cua toi|cua tao|cua em|cua to|cua minh|cua ni|ni) la (gi|chi)\b",
+        r"\bnhac lai ten\b",
+        r"\bnho ten (tui|toi|tao|em|to|minh|cua tui|cua toi|cua tao|cua em|cua to|cua minh|cua ni|ni)\b",
+        r"\bten (tui|toi|tao|em|to|minh|cua tui|cua toi|cua tao|cua em|cua to|cua minh|cua ni|ni) la gi\b",
+        r"\bnho ten (tui|toi|tao|em|to|minh)\b",
+        r"\bbiet ten (tui|toi|tao|em|to|minh) khong\b",
+        r"\bbiet ten (tui|toi|tao|em|to|minh) ko\b",
+        r"\bten (tui|toi|tao|em|to|minh) la\b.*\bgi\b",
+        r"\bnhac lai ten tui\b",
+        r"\bnhac lai ten tao\b",
+        r"\bnhac lai ten to\b",
+        r"\bnhac lai ten em\b",
+        r"\bnhac lai ten minh\b",
+        r"\bnho ten\b"
+    ]
+    
+    for pattern in patterns:
+        if re.search(pattern, message_no_diac):
+            return True
+            
+    words = message_no_diac.split()
+    has_ten = "ten" in words
+    has_gi = "gi" in words or "nao" in words or "chi" in words
+    has_pronoun = any(w in words for w in ["tui", "toi", "tao", "em", "to", "minh", "ni"])
+    
+    if has_ten and has_gi and has_pronoun:
+        return True
+        
+    return False
+
+def generate_name_response(profile):
+    name = profile.get("name", "ní")
+    user_ref = profile.get("user_ref", "cậu")
+    bot_ref = profile.get("bot_ref", "tớ")
+    style = profile.get("greeting_style", "friendly")
+    
+    if style == "ni":
+        responses = [
+            f"Tên của {user_ref} là {name} nè, {bot_ref} làm sao quên được! 😉 Có gì cần {bot_ref} giúp nữa không?",
+            f"Ní đùa {bot_ref} hoài, tên của {user_ref} là {name} chứ gì nữa! {bot_ref} ghi nhớ kỹ lắm đó nha.",
+            f"Là {name} thân yêu của {bot_ref} chứ ai vào đây nữa nè!"
+        ]
+    elif style == "bro":
+        responses = [
+            f"Tên mày là {name} chứ gì nữa, tao quên thế nào được! Có cần tao nhắc lại lần nữa không?",
+            f"Mày là {name} chứ ai! Đừng có thử trí nhớ của tao nha mày.",
+            f"Tên mày là {name} nè. Hỏi câu gì khó hơn đi!"
+        ]
+    elif style == "respectful":
+        responses = [
+            f"Dạ, tên của {user_ref} là sếp {name} ạ. em luôn ghi nhớ thông tin của sếp để hỗ trợ tốt nhất.",
+            f"Dạ sếp {name} ạ! em làm sao dám quên tên của sếp được ạ.",
+            f"Thưa sếp, tên của sếp trên hệ thống kho OMEGA là {name} ạ."
+        ]
+    elif style == "military":
+        responses = [
+            f"Báo cáo đồng chí! Tên của đồng chí là {name}. Tôi đã đối soát và ghi nhớ chính xác.",
+            f"Đồng chí là {name}. Báo cáo đồng chí, thông tin quân số đã được cập nhật chính xác.",
+            f"Đồng chí {name}! Tôi đã lưu trữ hồ sơ của đồng chí trên hệ thống."
+        ]
+    else:
+        responses = [
+            f"Tên của {user_ref} là {name} nè, {bot_ref} nhớ rõ mà! Có việc gì cần {bot_ref} phụ giúp không?",
+            f"Là {name} chứ ai nè! {bot_ref} lưu tên của {user_ref} rồi, không quên được đâu.",
+            f"Tên {user_ref} là {name} đúng không nè? {bot_ref} nhớ như in luôn á."
+        ]
+    return random.choice(responses)
+
+def generate_greeting(profile):
+    style = profile.get("greeting_style", "friendly")
+    user_ref = profile.get("user_ref", "cậu")
+    bot_ref = profile.get("bot_ref", "tớ")
+    
+    if style == "ni":
+        greetings = [
+            f"Chào {user_ref} nha! Yo {user_ref}, hế lo {user_ref}! 👋 Có gì cần {bot_ref} hỗ trợ ca trực kho bãi hôm nay không nè?",
+            f"Yo {user_ref}! Hôm nay có đơn hàng hay quy trình gì cần {bot_ref} check giùm không sếp ơi? Hê lô {user_ref} nha!",
+            f"Hế lo {user_ref} thân yêu! Rất vui được đồng hành cùng {user_ref} ca này nghen. {bot_ref} trực chiến ở đây hỗ trợ {user_ref} nè!"
+        ]
+    elif style == "bro":
+        greetings = [
+            f"Chào {user_ref} nha! {bot_ref} nghe nè {user_ref}, có việc gì cần {bot_ref} thông não giùm không?",
+            f"Hế lo {user_ref}! Ca trực hôm nay sao rồi? Có đơn nào bị nghẽn hay cần tìm SKU cứ hú {bot_ref} nha!",
+            f"Yo {user_ref}! Ca này vất vả không mày? Cần {bot_ref} tra cứu SOP hay WMS gì không, lẹ đi {bot_ref} chỉ cho!"
+        ]
+    elif style == "respectful":
+        greetings = [
+            f"Chào {user_ref} ạ! {bot_ref} có thể giúp gì cho {user_ref} trong ca vận hành hôm nay ạ?",
+            f"Dạ hế lo {user_ref}! Chúc {user_ref} một ngày làm việc đầy năng lượng. {bot_ref} luôn sẵn sàng hỗ trợ {user_ref} tra cứu SOP và WMS ạ.",
+            f"Chào {user_ref}! {bot_ref} rất vinh hạnh được hỗ trợ sếp ca này. Có quy trình nào cần kiểm định sếp cứ bảo {bot_ref} nhé."
+        ]
+    elif style == "military":
+        greetings = [
+            f"Chào {user_ref}! Báo cáo {user_ref}, tôi đã sẵn sàng trực ban hỗ trợ cẩm nang SOP kho bãi.",
+            f"Chào {user_ref}! Ca trực hôm nay nhiệm vụ thế nào? Có quy trình nào cần đối soát cứ lệnh cho tôi.",
+            f"Báo cáo {user_ref}! Hệ thống WMS và cẩm nang an toàn đã sẵn sàng. Xin hãy giao nhiệm vụ!"
+        ]
+    else:
+        greetings = [
+            f"Chào {user_ref} nha! Rất vui được gặp lại {user_ref}. Hôm nay ca làm việc thế nào, có gì cần {bot_ref} phụ giúp không?",
+            f"Hế lo {user_ref}! Ngày làm việc mới thật hiệu quả nghen. Cần tra cứu vị trí kệ hay SOP cứ hỏi {bot_ref} nha.",
+            f"Chào {user_ref}! Cần {bot_ref} chỉ cách nhặt hàng FIFO, xử lý hàng rách hộp hay in tem mã vạch thì cứ nhắn {bot_ref} nhé."
+        ]
+        
+    return random.choice(greetings)
+
+def apply_pronouns(text, profile):
+    if not profile:
+        return text
+        
+    bot_ref = profile.get("bot_ref", "tớ")
+    user_ref = profile.get("user_ref", "cậu")
+    
+    def repl_bot(m):
+        word = m.group(0)
+        return bot_ref.capitalize() if word[0].isupper() else bot_ref
+
+    def repl_user(m):
+        word = m.group(0)
+        return user_ref.capitalize() if word[0].isupper() else user_ref
+
+    text = re.sub(r'\b[tT]ớ\b', repl_bot, text)
+    text = re.sub(r'\b[tT]ui\b', repl_bot, text)
+    text = re.sub(r'\b[cC]ậu\b', repl_user, text)
+    text = re.sub(r'\b[nN]í\b', repl_user, text)
+    text = re.sub(r'\b[bB]ạn\b', repl_user, text)
+    
+    return text
+
 PORT = 8000
 
 # Simulated supplier data template
@@ -125,10 +450,52 @@ ABBREVIATION_MAP = {
     'trc': 'trước', 'ns': 'nói',
     'cx': 'cũng', 'cg': 'cũng',
     'oke': 'ok', 'okie': 'ok',
-    'ní': 'bạn', 'ni': 'bạn',
-    'atld': 'an toàn lao động',
+    'ní': 'bạn', 'ni': 'bạn', 'cau': 'bạn', 'cậu': 'bạn',
     'sp': 'sản phẩm',
     'ncc': 'nhà cung cấp',
+    # Logistics Terms and Slang
+    'atld': 'an toàn lao động',
+    'bhld': 'bảo hộ lao động',
+    'pccc': 'phòng cháy chữa cháy',
+    'wms': 'hệ thống quản lý kho',
+    'po': 'đơn mua hàng',
+    'pda': 'máy quét pda',
+    'fifo': 'nhập trước xuất trước',
+    'fefo': 'hết hạn trước xuất trước',
+    'hsd': 'hạn sử dụng',
+    'qc': 'kiểm định chất lượng',
+    'qa': 'kiểm soát chất lượng',
+    'outbound': 'xuất kho',
+    'inbound': 'nhập kho',
+    'sop': 'quy trình chuẩn',
+    'stock': 'tồn kho',
+    'lot': 'lô hàng',
+    'sku': 'mã sản phẩm',
+    'pallet': 'kệ chứa hàng',
+    'dock': 'bến xếp dỡ',
+    'forklift': 'xe nâng',
+    'hônggg': 'không',
+    'wa': 'quá', 'waa': 'quá', 'waaa': 'quá', 'quaa': 'quá',
+    'mêt': 'mệt', 'met': 'mệt', 'oai': 'oải',
+    'nhapkho': 'nhập kho',
+    'xuatkho': 'xuất kho',
+    'antoan': 'an toàn',
+    'xenang': 'xe nâng',
+    'khohang': 'kho hàng',
+    'hanghoa': 'hàng hóa',
+    'donggoi': 'đóng gói',
+    'kiemke': 'kiểm kê',
+    'doisoat': 'đối soát',
+    'nhapnhanh': 'nhập nhanh',
+    'xuatnhanh': 'xuất nhanh',
+    'kholanh': 'kho lạnh',
+    'khomat': 'kho mát',
+    'khodong': 'kho đông',
+    'phieuxuat': 'phiếu xuất',
+    'phieunhap': 'phiếu nhập',
+    'tk': 'tồn kho',
+    'nk': 'nhập kho',
+    'xk': 'xuất kho',
 }
 
 def remove_diacritics(text):
@@ -141,6 +508,37 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+def clean_telex_typos(text):
+    text = text.lower()
+    text = re.sub(r'aa', 'a', text)
+    text = re.sub(r'ee', 'e', text)
+    text = re.sub(r'oo', 'o', text)
+    text = re.sub(r'uw', 'u', text)
+    text = re.sub(r'ow', 'o', text)
+    text = re.sub(r'dd', 'd', text)
+    text = re.sub(r'\b([a-z]+)[sfrxj]\b', r'\1', text)
+    text = re.sub(r'([a-z])\1+', r'\1', text)
+    return text
+
+def fuzzy_word_match(word1, word2):
+    if not word1 or not word2:
+        return False
+    w1_clean = clean_telex_typos(word1)
+    w2_clean = clean_telex_typos(word2)
+    if w1_clean == w2_clean:
+        return True
+    if abs(len(w1_clean) - len(w2_clean)) > 2:
+        return False
+    import difflib
+    ratio = difflib.SequenceMatcher(None, w1_clean, w2_clean).ratio()
+    return ratio >= 0.75
+
+def phrase_similarity(s1, s2):
+    s1_clean = clean_telex_typos(remove_diacritics(clean_text(s1)))
+    s2_clean = clean_telex_typos(remove_diacritics(clean_text(s2)))
+    import difflib
+    return difflib.SequenceMatcher(None, s1_clean, s2_clean).ratio()
+
 def normalize_vietnamese_query(query):
     query_cleaned = clean_text(query)
     words = query_cleaned.split()
@@ -148,8 +546,16 @@ def normalize_vietnamese_query(query):
     for word in words:
         if word in ABBREVIATION_MAP:
             expanded_words.append(ABBREVIATION_MAP[word])
-        else:
-            expanded_words.append(word)
+            continue
+        word_clean = re.sub(r'([a-z])\1+', r'\1', word)
+        if word_clean in ABBREVIATION_MAP:
+            expanded_words.append(ABBREVIATION_MAP[word_clean])
+            continue
+        word_telex = clean_telex_typos(word)
+        if word_telex in ABBREVIATION_MAP:
+            expanded_words.append(ABBREVIATION_MAP[word_telex])
+            continue
+        expanded_words.append(word)
     return " ".join(expanded_words)
 
 def query_knowledge_base(query, lang='vi'):
@@ -168,6 +574,9 @@ def query_knowledge_base(query, lang='vi'):
     query_no_diac = remove_diacritics(query_norm)
     query_orig_no_diac = remove_diacritics(clean_text(query))
     
+    query_words = query_no_diac.split()
+    query_orig_words = query_orig_no_diac.split()
+    
     best_rule = None
     best_score = 0
     
@@ -175,28 +584,46 @@ def query_knowledge_base(query, lang='vi'):
         score = 0
         keywords = rule.get('keywords', [])
         
-        # 1. So khớp các từ khóa
+        # 1. So khớp các từ khóa (Keywords)
         for kw in keywords:
             kw_norm = normalize_vietnamese_query(kw)
             kw_no_diac = remove_diacritics(kw_norm)
             
-            # Khớp trực tiếp hoặc chứa chuỗi con
-            if kw_no_diac in query_no_diac or kw_no_diac in query_orig_no_diac:
-                score += 5
+            # Substring match (fuzzy-cleaned)
+            kw_clean = clean_telex_typos(kw_no_diac)
+            query_clean = clean_telex_typos(query_no_diac)
+            query_orig_clean = clean_telex_typos(query_orig_no_diac)
             
-            # Khớp cấp độ từ
+            if kw_clean in query_clean or kw_clean in query_orig_clean:
+                score += 6
+            
+            # Khớp cấp độ từ (Fuzzy word overlap)
             kw_words = kw_no_diac.split()
-            query_words = query_no_diac.split()
-            overlap = set(kw_words) & set(query_words)
-            score += len(overlap) * 2
+            overlap_count = 0
+            for kw_w in kw_words:
+                for q_w in query_words + query_orig_words:
+                    if fuzzy_word_match(kw_w, q_w):
+                        overlap_count += 1
+                        break
+            score += overlap_count * 3
 
-        # 2. So khớp tiêu đề
-        title_vi = rule.get('title_vi', '')
+        # 2. So khớp tiêu đề (Title)
+        title_vi = rule.get('title_vi' if lang == 'vi' else 'title_en', '')
         title_no_diac = remove_diacritics(clean_text(title_vi))
         title_words = title_no_diac.split()
-        query_words = query_no_diac.split()
-        title_overlap = set(title_words) & set(query_words)
-        score += len(title_overlap) * 3
+        
+        title_overlap = 0
+        for t_w in title_words:
+            for q_w in query_words + query_orig_words:
+                if fuzzy_word_match(t_w, q_w):
+                    title_overlap += 1
+                    break
+        score += title_overlap * 4
+        
+        # 3. Độ tương đồng cả câu (Whole phrase similarity)
+        title_sim = phrase_similarity(query, title_vi)
+        if title_sim >= 0.7:
+            score += int(title_sim * 15)
         
         if score > best_score:
             best_score = score
@@ -365,13 +792,16 @@ def query_wms_state(query, wms_state, lang='vi'):
 
     return None
 
-def query_seed_data(query, lang='vi'):
+def query_seed_data(query, lang='vi', profile=None):
     if not SEED_DATA:
         return None, 0, ""
 
     query_norm = normalize_vietnamese_query(query)
     query_no_diac = remove_diacritics(query_norm)
     query_orig_no_diac = remove_diacritics(clean_text(query))
+    
+    query_words = query_no_diac.split()
+    query_orig_words = query_orig_no_diac.split()
     
     best_topic = None
     best_score = 0
@@ -387,26 +817,52 @@ def query_seed_data(query, lang='vi'):
         score = 0
         topic_id = topic.get('id', '')
         
+        # 1. Keywords fuzzy check
         for kw in topic.get('keywords', []):
             kw_norm = normalize_vietnamese_query(kw)
             kw_no_diac = remove_diacritics(kw_norm)
-            if kw_no_diac in query_no_diac or kw_no_diac in query_orig_no_diac:
-                score += 5
-            kw_words = kw_no_diac.split()
-            query_words = query_no_diac.split()
-            overlap = set(kw_words) & set(query_words)
-            score += len(overlap) * 2
+            kw_clean = clean_telex_typos(kw_no_diac)
+            query_clean = clean_telex_typos(query_no_diac)
+            query_orig_clean = clean_telex_typos(query_orig_no_diac)
             
+            if kw_clean in query_clean or kw_clean in query_orig_clean:
+                score += 6
+            
+            kw_words = kw_no_diac.split()
+            overlap_count = 0
+            for kw_w in kw_words:
+                for q_w in query_words + query_orig_words:
+                    if fuzzy_word_match(kw_w, q_w):
+                        overlap_count += 1
+                        break
+            score += overlap_count * 3
+            
+        # 2. Training samples fuzzy check
         for sample in topic.get('training_samples', []):
             sample_norm = normalize_vietnamese_query(sample)
             sample_no_diac = remove_diacritics(sample_norm)
-            if sample_no_diac in query_no_diac or query_no_diac in sample_no_diac:
-                score += 4
+            sample_clean = clean_telex_typos(sample_no_diac)
+            query_clean = clean_telex_typos(query_no_diac)
             
+            if sample_clean in query_clean or query_clean in sample_clean:
+                score += 5
+                
+            sample_sim = phrase_similarity(query, sample)
+            if sample_sim >= 0.75:
+                score += int(sample_sim * 18)
+            
+        # 3. Title check
         title = topic.get('title', '')
         title_no_diac = remove_diacritics(clean_text(title))
-        if title_no_diac in query_no_diac:
-            score += 6
+        title_clean = clean_telex_typos(title_no_diac)
+        query_clean = clean_telex_typos(query_no_diac)
+        
+        if title_clean in query_clean:
+            score += 7
+            
+        title_sim = phrase_similarity(query, title)
+        if title_sim >= 0.7:
+            score += int(title_sim * 15)
             
         if score > best_score:
             best_score = score
@@ -416,17 +872,22 @@ def query_seed_data(query, lang='vi'):
         topic_id = best_topic['id']
         title = best_topic.get('title', '')
         
+        if topic_id == 'greeting' and profile and lang == 'vi':
+            response = generate_greeting(profile)
+            source = f"OMEGA RAG [Chào hỏi cá nhân hóa - Match: {best_score}%]"
+            return response, best_score, source
+            
         if is_deep_request and topic_id in SEED_DATA.DEEP_EXPLANATIONS:
             explanation = SEED_DATA.DEEP_EXPLANATIONS[topic_id]
             response = f"🎯 [GIẢI THÍCH SÂU - CHỦ ĐỀ: {title.upper()}]\n\n{explanation}"
             source = f"OMEGA RAG [Đào sâu Kiến thức - Match: {best_score}%]"
-            return response, best_score, source
+            return apply_pronouns(response, profile), best_score, source
             
         if is_guide_request and topic_id in SEED_DATA.EXECUTION_GUIDES:
             guide = SEED_DATA.EXECUTION_GUIDES[topic_id]
             response = f"🛠️ [HƯỚNG DẪN THỰC HÀNH - CHỦ ĐỀ: {title.upper()}]\n\n{guide}"
             source = f"OMEGA RAG [Cẩm nang Vận hành - Match: {best_score}%]"
-            return response, best_score, source
+            return apply_pronouns(response, profile), best_score, source
             
         if (is_steps_request or requested_step) and topic_id in SEED_DATA.STEP_EXPLANATIONS:
             steps_dict = SEED_DATA.STEP_EXPLANATIONS[topic_id]
@@ -436,7 +897,7 @@ def query_seed_data(query, lang='vi'):
                 steps_text = "\n\n".join([f"🔸 {v}" for k, v in sorted(steps_dict.items())])
                 response = f"📋 [CÁC BƯỚC QUY TRÌNH - CHỦ ĐỀ: {title.upper()}]\n\n{steps_text}"
             source = f"OMEGA RAG [Chi tiết Từng bước - Match: {best_score}%]"
-            return response, best_score, source
+            return apply_pronouns(response, profile), best_score, source
             
         responses = best_topic.get('responses', [])
         if responses:
@@ -453,7 +914,7 @@ def query_seed_data(query, lang='vi'):
                 response += f"\n\n💡 *Gợi ý: Cậu có thể hỏi thêm tớ về '{', '.join(more_info)}' của quy trình này nhé!*"
                 
             source = f"OMEGA RAG [{best_topic.get('category', 'SOP').upper()} - Match: {best_score}%]"
-            return response, best_score, source
+            return apply_pronouns(response, profile), best_score, source
             
     return None, 0, ""
 
@@ -475,7 +936,7 @@ DEFAULT_WEATHER_CONFIG = {
     "logs": []
 }
 
-WEATHER_CONFIG_PATH = 'weather_config.json'
+WEATHER_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weather_config.json')
 WEATHER_CONFIG = {}
 
 def load_weather_config():
@@ -627,6 +1088,124 @@ def check_weather_and_trigger_rules(simulated_weather=None):
     save_weather_config()
     
     return log_entry
+
+
+def extract_fields_from_message(message):
+    data = {}
+    
+    # Extract SKU: Look for SKU-123 or OMG-9921 or alphanumeric uppercase words of length >= 3
+    sku_match = re.search(r'\b(SKU-[A-Za-z0-9_-]+|OMG-[0-9]+|[A-Z0-9]{3,}-[A-Z0-9]+)\b', message)
+    if not sku_match:
+        sku_match = re.search(r'(?:sku|mã|ma)\s*[:\-]?\s*([A-Za-z0-9_-]+)', message, re.IGNORECASE)
+    
+    if sku_match:
+        data['sku'] = sku_match.group(1).upper()
+
+    # Extract Quantity/Stock: E.g., "số lượng 50", "sl 50", "50 cái", "50 sản phẩm"
+    qty_match = re.search(r'(?:số lượng|so luong|sl|qty|quantity|số lượng là|so luong la)\s*[:\-]?\s*(\d+)', message, re.IGNORECASE)
+    if not qty_match:
+        qty_match = re.search(r'\b(\d+)\b', message)
+    if qty_match:
+        val = int(qty_match.group(1))
+        data['qty'] = val
+        data['stock'] = val
+
+    # Price and Cost
+    price_match = re.search(r'(?:giá|gia|giá bán|price)\s*[:\-]?\s*(\d+)', message, re.IGNORECASE)
+    if price_match:
+        data['price'] = int(price_match.group(1))
+        
+    cost_match = re.search(r'(?:giá vốn|gia von|cost|giá mua)\s*[:\-]?\s*(\d+)', message, re.IGNORECASE)
+    if cost_match:
+        data['cost'] = int(cost_match.group(1))
+
+    # Category for ADD_PRODUCT
+    cat_match = re.search(r'(?:loại|danh mục|danh muc|category|nhóm|nhom)\s*[:\-]?\s*([A-Za-z0-9_\s]+)', message, re.IGNORECASE)
+    if cat_match:
+        cat_str = cat_match.group(1).strip().lower()
+        if 'dien tu' in cat_str or 'điện tử' in cat_str or 'elect' in cat_str:
+            data['category'] = 'ELECTRONICS'
+        elif 'nặng' in cat_str or 'nang' in cat_str or 'cơ khí' in cat_str or 'heavy' in cat_str or 'may moc' in cat_str or 'máy móc' in cat_str:
+            data['category'] = 'HEAVY MACHINERY'
+        elif 'năng lượng' in cat_str or 'nang luong' in cat_str or 'pin' in cat_str or 'energy' in cat_str:
+            data['category'] = 'ENERGY UNITS'
+        elif 'lỏng' in cat_str or 'long' in cat_str or 'nước' in cat_str or 'fluid' in cat_str or 'chất lỏng' in cat_str:
+            data['category'] = 'FLUIDS'
+    
+    # Location
+    loc_match = re.search(r'\b([A-Z]-\d{2}-\d{2})\b', message)
+    if loc_match:
+        data['location'] = loc_match.group(1)
+
+    # Name: matches "tên [tên sản phẩm] (tại|số lượng|giá|loại|$)"
+    name_match = re.search(r'(?:tên|ten|tên là|ten la)\s*[:\-]?\s*([^,.\n]+?)(?=\s*(?:số lượng|so luong|sl|giá|gia|loại|loai|danh mục|danh muc|sku|vị trí|vi tri|$))', message, re.IGNORECASE)
+    if name_match:
+        name_val = name_match.group(1).strip()
+        if name_val.lower() not in ["gì", "gi", "sản phẩm", "san pham"]:
+            data['name'] = name_val
+            data['nameEn'] = name_val
+
+    # Partner/Vendor: after "cho đối tác", "từ nhà cung cấp"
+    partner_match = re.search(r'(?:đối tác|doi tac|nhà cung cấp|nha cung cap|vendor|partner|khách hàng|khach hang|cho|từ|tu)\s*[:\-]?\s*([A-Za-z0-9_-]+)', message, re.IGNORECASE)
+    if partner_match:
+        p_name = partner_match.group(1).strip()
+        if p_name.lower() not in ["đối", "tác", "nhập", "xuất", "nhap", "xuat", "kho", "sản", "phẩm", "san", "pham", "sku", "số", "lượng", "so", "luong", "giá", "gia"]:
+            data['partner'] = p_name
+            data['vendor'] = p_name
+
+    # Internal transfers (fromWh, toWh)
+    from_match = re.search(r'(?:từ kho|tu kho|từ|tu)\s+([A-Za-z0-9_\s]+?)(?=\s*(?:sang kho|sang|đến kho|den kho|đến|den|sku|số lượng|so luong|sl|$))', message, re.IGNORECASE)
+    if from_match:
+        data['fromWh'] = from_match.group(1).strip()
+    
+    to_match = re.search(r'(?:sang kho|sang|đến kho|den kho|đến|den)\s+([A-Za-z0-9_\s]+?)(?=\s*(?:từ kho|tu kho|từ|tu|sku|số lượng|so luong|sl|$))', message, re.IGNORECASE)
+    if to_match:
+        data['toWh'] = to_match.group(1).strip()
+
+    return data
+
+
+def get_current_weather_info():
+    load_weather_config()
+    is_sim = WEATHER_CONFIG.get("simulation", {}).get("active", False)
+    if is_sim:
+        sim_data = WEATHER_CONFIG.get("simulation", {})
+        condition = sim_data.get("condition", "Clear")
+        temp = sim_data.get("temp", 28.0)
+    else:
+        api_key = WEATHER_CONFIG.get("api_key", "").strip()
+        lat = WEATHER_CONFIG.get("lat", 10.9)
+        lon = WEATHER_CONFIG.get("lon", 106.9)
+        if not api_key:
+            condition = "Clear"
+            temp = 28.0
+        else:
+            url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
+            try:
+                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    data = json.loads(response.read().decode('utf-8'))
+                    temp = data.get("main", {}).get("temp", 28.0)
+                    weather_list = data.get("weather", [])
+                    if weather_list:
+                        condition = weather_list[0].get("main", "Clear")
+            except Exception:
+                condition = "Clear"
+                temp = 28.0
+                
+    cond_vi = {
+        "clear": "Trời đang trong xanh nắng đẹp",
+        "clouds": "Trời nhiều mây mát mẻ",
+        "rain": "Trời đang có mưa rơi",
+        "drizzle": "Mưa phùn bay lất phất",
+        "thunderstorm": "Đang có giông bão sấm chớp nguy hiểm",
+        "mist": "Sương mù che phủ nhẹ",
+        "fog": "Sương mù dày đặc",
+        "snow": "Tuyết đang rơi nhẹ"
+    }
+    cond_str = cond_vi.get(condition.lower(), f"trời đang ở trạng thái {condition}")
+    return cond_str, temp
+
 
 class WeatherWorkerThread(threading.Thread):
     def __init__(self):
@@ -780,10 +1359,10 @@ class AIServerHandler(http.server.BaseHTTPRequestHandler):
                         "faceIdAccounts": []
                     }
                 
-                updated = {
-                    "registeredAccounts": req_body.get("registeredAccounts", current.get("registeredAccounts")),
-                    "faceIdAccounts": req_body.get("faceIdAccounts", current.get("faceIdAccounts", []))
-                }
+                updated = current.copy()
+                for key in ["registeredAccounts", "faceIdAccounts", "products", "lots", "receipts", "deliveries", "internalTransfers", "adjustments", "purchaseOrders", "notifications", "reorderHistory", "partners", "locationsTree", "userProfiles"]:
+                    if key in req_body:
+                        updated[key] = req_body[key]
                 
                 with open(db_path, 'w', encoding='utf-8') as f:
                     json.dump(updated, f, indent=2, ensure_ascii=False)
@@ -911,6 +1490,7 @@ class AIServerHandler(http.server.BaseHTTPRequestHandler):
             return
 
         # Chatbot Query Execution
+        # Chatbot Query Execution
         elif self.path == '/api/ai/chatbot':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -919,15 +1499,368 @@ class AIServerHandler(http.server.BaseHTTPRequestHandler):
             message = req_body.get("message", "")
             lang = req_body.get("lang", "vi")
             wms_state = req_body.get("wms_state", None)
+            spam_count = req_body.get("spam_count", 0)
+            pending_action = req_body.get("pending_action", None)
             
+            # Extract user context
+            user_info = req_body.get("user", {})
+            user_email = user_info.get("email", "anonymous@omega.io")
+            user_name = user_info.get("name", "ní")
+            
+            # Update user profile based on user's message
+            profile, intro_found = update_user_profile(user_email, user_name, message)
+            
+            # Spam control check
+            if spam_count >= 4:
+                bot_ref = profile.get("bot_ref", "tớ")
+                user_ref = profile.get("user_ref", "cậu")
+                if spam_count == 4:
+                    response = f"Ní ơi, đừng spam {bot_ref} nha! Một câu hỏi mà gửi tới 4 lần là {bot_ref} nhức đầu lắm đó! 🙄"
+                elif spam_count == 5:
+                    response = f"Ủa {user_ref} bị kẹt phím hay bị lag mạng hả? Hỏi gì hỏi hoài một câu vậy, {bot_ref} không trả lời nữa đâu nha! 😠"
+                elif spam_count == 6:
+                    response = f"Này! Lì lợm vừa vừa thôi nha {user_ref}. Coi chừng {bot_ref} khóa tài khoản PDA của {user_ref} bây giờ á! Đừng có giỡn mặt nha! 😡"
+                elif spam_count == 7:
+                    response = f"Bực mình rồi nha! Không lo đi kiểm kho đi, suốt ngày ngồi spam robot. {user_ref} có tin {bot_ref} báo cáo lên sếp tổng cho ăn biên bản không?! 😤"
+                else:
+                    response = f"Cạn lời! {bot_ref.capitalize()} từ chối tiếp chuyện với {user_ref} luôn. Đi quét mã vạch đi, đừng quấy rối nữa! Đồ lì lợm! ❌"
+                
+                self.wfile.write(json.dumps({"response": response, "source": "OMEGA-RAG Model (Spam Control)"}).encode('utf-8'))
+                return
+
+            # If name was just introduced, return friendly acknowledgment
+            if intro_found:
+                response = generate_intro_acknowledgment(profile)
+                self.wfile.write(json.dumps({"response": response, "source": "OMEGA Personalization Engine"}).encode('utf-8'))
+                return
+                
+            # If user is asking for their name
+            if is_querying_name(message):
+                response = generate_name_response(profile)
+                self.wfile.write(json.dumps({"response": response, "source": "OMEGA Personalization Engine"}).encode('utf-8'))
+                return
+
+            # Action Execution State Machine
+            if pending_action:
+                action_type = pending_action.get("type")
+                data = pending_action.get("data", {})
+                step = pending_action.get("step", "")
+                
+                # Check for confirm/reject answer
+                is_yes = any(w in message.lower() for w in ["có", "co", "muốn", "muon", "ok", "yes", "duyệt", "thực hiện", "chạy đi", "yup", "uh", "uhm", "đồng ý", "dong y", "agree"])
+                is_no = any(w in message.lower() for w in ["không", "khong", "đéo", "deo", "no", "nah", "cancel", "hủy", "huy", "dẹp đi", "dep di", "không muốn", "khong muon", "đếch", "bỏ", "bo"])
+                
+                if step == 'confirming':
+                    if is_yes:
+                        # Success: execute action
+                        action_names = {
+                            "ADD_PRODUCT": "Thêm sản phẩm mới",
+                            "CREATE_RECEIPT": "Tạo phiếu nhập kho",
+                            "CREATE_DELIVERY": "Tạo phiếu xuất kho",
+                            "CREATE_TRANSFER": "Điều chuyển kho nội bộ",
+                            "CREATE_PO": "Tạo đơn mua hàng (PO)"
+                        }
+                        response = f"🚀 Tuyệt vời! Tớ tiến hành thực thi hành động **{action_names[action_type]}** thành công trên hệ thống rồi nhé!"
+                        response = apply_pronouns(response, profile)
+                        
+                        self.wfile.write(json.dumps({
+                            "response": response,
+                            "source": "OMEGA-RAG (Action Executor)",
+                            "execute_action": {
+                                "type": action_type,
+                                "data": data
+                            },
+                            "pending_action": None
+                        }).encode('utf-8'))
+                        return
+                    elif is_no:
+                        # Reject: show manual instructions
+                        manual_guides = {
+                            "ADD_PRODUCT": (
+                                "Cậu đã hủy bỏ tự động thực thi. Dưới đây là hướng dẫn thao tác thủ công:\n\n"
+                                "1️⃣ Vào trang **Kho hàng** (Inventory) từ thanh menu chính bên trái.\n"
+                                "2️⃣ Click nút **+ Thêm sản phẩm** ở góc trên bên phải màn hình.\n"
+                                "3️⃣ Nhập các thông tin như SKU, Tên sản phẩm, Danh mục, Vị trí kệ, Số lượng tồn kho ban đầu.\n"
+                                "4️⃣ Bấm **Lưu** để hoàn tất đăng ký sản phẩm."
+                            ),
+                            "CREATE_RECEIPT": (
+                                "Cậu đã hủy bỏ tự động thực thi. Dưới đây là hướng dẫn thao tác thủ công:\n\n"
+                                "1️⃣ Vào trang **Vận hành** (Operations) từ menu, click tab **Nhập kho** (Receipts).\n"
+                                "2️⃣ Bấm nút **+ Tạo phiếu nhập**.\n"
+                                "3️⃣ Chọn Đối tác (Nhà cung cấp), nhập mã SKU và Số lượng muốn nhập kho.\n"
+                                "4️⃣ Bấm **Xác nhận** để tạo phiếu nhập ở trạng thái Chờ kiểm định chất lượng (QC)."
+                            ),
+                            "CREATE_DELIVERY": (
+                                "Cậu đã hủy bỏ tự động thực thi. Dưới đây là hướng dẫn thao tác xuất kho thủ công:\n\n"
+                                "1️⃣ Vào trang **Vận hành** (Operations) từ menu, click tab **Xuất kho** (Deliveries).\n"
+                                "2️⃣ Bấm nút **+ Tạo yêu cầu xuất**.\n"
+                                "3️⃣ Chọn Khách hàng (Đối tác nhận), nhập mã SKU và Số lượng cần xuất kho.\n"
+                                "4️⃣ Bấm **Tạo phiếu** để lưu phiếu xuất ở trạng thái chuẩn bị lấy hàng (Pick/Pack)."
+                            ),
+                            "CREATE_TRANSFER": (
+                                "Cậu đã hủy bỏ tự động thực thi. Dưới đây là hướng dẫn chuyển kho thủ công:\n\n"
+                                "1️⃣ Vào trang **Vận hành** (Operations) hoặc click **Nhà kho** (Warehouses).\n"
+                                "2️⃣ Tìm và click nút **Điều chuyển nội bộ** (Internal Transfer).\n"
+                                "3️⃣ Nhập mã SKU, Số lượng hàng, chọn Kho xuất (From) và Kho nhận (To).\n"
+                                "4️⃣ Bấm **Xác nhận** để hệ thống tự động cập nhật số dư tồn kho giữa hai kho."
+                            ),
+                            "CREATE_PO": (
+                                "Cậu đã hủy bỏ tự động thực thi. Dưới đây là hướng dẫn tạo đơn mua hàng (PO) thủ công:\n\n"
+                                "1️⃣ Vào trang **Mua hàng** (Purchase) từ menu chính.\n"
+                                "2️⃣ Bấm nút **+ Tạo yêu cầu báo giá (RFQ)**.\n"
+                                "3️⃣ Chọn Nhà cung cấp phù hợp, thêm mã SKU sản phẩm và số lượng mua.\n"
+                                "4️⃣ Bấm **Lưu bản nháp** hoặc **Xác nhận đơn hàng** để gửi PO sang bên nhà cung cấp."
+                            )
+                        }
+                        response = manual_guides.get(action_type, "Đã hủy bỏ hành động.")
+                        response = apply_pronouns(response, profile)
+                        
+                        self.wfile.write(json.dumps({
+                            "response": response,
+                            "source": "OMEGA-RAG (Action Executor)",
+                            "execute_action": None,
+                            "pending_action": None
+                        }).encode('utf-8'))
+                        return
+                    else:
+                        response = f"Tớ đang đợi xác nhận thực thi của cậu. Cậu có muốn tớ tự động làm trên hệ thống không? (Trả lời 'Có' hoặc 'Không')"
+                        response = apply_pronouns(response, profile)
+                        self.wfile.write(json.dumps({
+                            "response": response,
+                            "source": "OMEGA-RAG (Action Executor)",
+                            "pending_action": pending_action
+                        }).encode('utf-8'))
+                        return
+                
+                # If step is not confirming, we must be collecting missing fields
+                # Update data with any fields we can extract from the new message
+                new_data = extract_fields_from_message(message)
+                data.update(new_data)
+                
+                # Check what was the first missing field and if we can map the entire message as its value
+                missing_fields = pending_action.get("missing_fields", [])
+                if missing_fields:
+                    first_field = missing_fields[0]
+                    if first_field not in data:
+                        if first_field in ['qty', 'stock']:
+                            num_match = re.search(r'\b(\d+)\b', message)
+                            if num_match:
+                                data[first_field] = int(num_match.group(1))
+                        elif first_field == 'sku':
+                            sku_val = message.strip().upper()
+                            if len(sku_val) > 2:
+                                data['sku'] = sku_val
+                        else:
+                            val = message.strip()
+                            if len(val) >= 2 and not is_yes and not is_no:
+                                data[first_field] = val
+                
+                # Re-calculate missing fields
+                missing_fields = []
+                if action_type == "ADD_PRODUCT":
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'name' not in data: missing_fields.append('name')
+                elif action_type == "CREATE_RECEIPT":
+                    if 'partner' not in data: missing_fields.append('partner')
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                elif action_type == "CREATE_DELIVERY":
+                    if 'partner' not in data: missing_fields.append('partner')
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                elif action_type == "CREATE_TRANSFER":
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                    if 'fromWh' not in data: missing_fields.append('fromWh')
+                    if 'toWh' not in data: missing_fields.append('toWh')
+                elif action_type == "CREATE_PO":
+                    if 'vendor' not in data: missing_fields.append('vendor')
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                
+                if not missing_fields:
+                    # Formulate confirmation
+                    summary = ""
+                    if action_type == "ADD_PRODUCT":
+                        summary = f"Thêm sản phẩm mới:\n• SKU: {data['sku']}\n• Tên: {data['name']}\n• Danh mục: {data.get('category', 'ELECTRONICS')}\n• Tồn kho ban đầu: {data.get('stock', 0)} cái tại vị trí {data.get('location', 'A-01-01')}"
+                    elif action_type == "CREATE_RECEIPT":
+                        summary = f"Tạo phiếu NHẬP KHO (Receipt):\n• Nhà cung cấp/Đối tác: {data['partner']}\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái"
+                    elif action_type == "CREATE_DELIVERY":
+                        summary = f"Tạo phiếu XUẤT KHO (Delivery):\n• Khách hàng/Đối tác nhận: {data['partner']}\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái"
+                    elif action_type == "CREATE_TRANSFER":
+                        summary = f"Tạo lệnh ĐIỀU CHUYỂN nội bộ:\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái\n• Từ kho: {data['fromWh']} ➔ Đến kho: {data['toWh']}"
+                    elif action_type == "CREATE_PO":
+                        summary = f"Tạo ĐƠN MUA HÀNG (Purchase Order):\n• Nhà cung cấp: {data['vendor']}\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái"
+
+                    response = f"📝 **Xác nhận yêu cầu:**\nTớ đã chuẩn bị thông tin:\n\n{summary}\n\nCậu có muốn tớ tự động thực hiện hành động này trên hệ thống không? (Trả lời 'Có' hoặc 'Không')"
+                    response = apply_pronouns(response, profile)
+                    
+                    self.wfile.write(json.dumps({
+                        "response": response,
+                        "source": "OMEGA-RAG Model",
+                        "pending_action": {
+                            "type": action_type,
+                            "data": data,
+                            "step": "confirming",
+                            "missing_fields": []
+                        }
+                    }).encode('utf-8'))
+                    return
+                else:
+                    # Ask for the next missing field
+                    next_field = missing_fields[0]
+                    field_prompts = {
+                        "sku": "Vui lòng cung cấp mã **SKU** sản phẩm để thực hiện.",
+                        "name": "Cho tớ xin **Tên sản phẩm** cần thêm nhé.",
+                        "partner": "Vui lòng nhập tên **Đối tác/Khách hàng** cho lô hàng.",
+                        "vendor": "Vui lòng nhập tên **Nhà cung cấp**.",
+                        "qty": "Vui lòng cung cấp **Số lượng** là bao nhiêu cái.",
+                        "fromWh": "Vui lòng nhập tên **Kho nguồn (From)**.",
+                        "toWh": "Vui lòng nhập tên **Kho đích (To)**."
+                    }
+                    response = field_prompts.get(next_field, f"Vui lòng điền thông tin '{next_field}'.")
+                    response = apply_pronouns(response, profile)
+                    
+                    self.wfile.write(json.dumps({
+                        "response": response,
+                        "source": "OMEGA-RAG Model",
+                        "pending_action": {
+                            "type": action_type,
+                            "data": data,
+                            "step": "collecting",
+                            "missing_fields": missing_fields
+                        }
+                    }).encode('utf-8'))
+                    return
+
+            # Check for new action intents
+            msg_no_diac = remove_diacritics(clean_text(message))
+            
+            action_type = None
+            if any(w in msg_no_diac for w in ["them san pham", "tao san pham", "them sp", "tao sp", "add product"]):
+                action_type = "ADD_PRODUCT"
+            elif any(w in msg_no_diac for w in ["nhap kho", "nhap hang", "tao phieu nhap", "create receipt", "inbound"]):
+                action_type = "CREATE_RECEIPT"
+            elif any(w in msg_no_diac for w in ["xuat kho", "xuat hang", "tao phieu xuat", "create delivery", "outbound"]):
+                action_type = "CREATE_DELIVERY"
+            elif any(w in msg_no_diac for w in ["chuyen kho", "chuyen hang", "dieu chuyen", "transfer"]):
+                action_type = "CREATE_TRANSFER"
+            elif any(w in msg_no_diac for w in ["tao po", "mua hang", "don mua hang", "create po", "purchase order"]):
+                action_type = "CREATE_PO"
+                
+            if action_type:
+                data = extract_fields_from_message(message)
+                
+                # Check missing fields
+                missing_fields = []
+                if action_type == "ADD_PRODUCT":
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'name' not in data: missing_fields.append('name')
+                elif action_type == "CREATE_RECEIPT":
+                    if 'partner' not in data: missing_fields.append('partner')
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                elif action_type == "CREATE_DELIVERY":
+                    if 'partner' not in data: missing_fields.append('partner')
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                elif action_type == "CREATE_TRANSFER":
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                    if 'fromWh' not in data: missing_fields.append('fromWh')
+                    if 'toWh' not in data: missing_fields.append('toWh')
+                elif action_type == "CREATE_PO":
+                    if 'vendor' not in data: missing_fields.append('vendor')
+                    if 'sku' not in data: missing_fields.append('sku')
+                    if 'qty' not in data: missing_fields.append('qty')
+                    
+                if not missing_fields:
+                    # Formulate confirmation immediately
+                    summary = ""
+                    if action_type == "ADD_PRODUCT":
+                        summary = f"Thêm sản phẩm mới:\n• SKU: {data['sku']}\n• Tên: {data['name']}\n• Danh mục: {data.get('category', 'ELECTRONICS')}\n• Tồn kho ban đầu: {data.get('stock', 0)} cái tại vị trí {data.get('location', 'A-01-01')}"
+                    elif action_type == "CREATE_RECEIPT":
+                        summary = f"Tạo phiếu NHẬP KHO (Receipt):\n• Nhà cung cấp/Đối tác: {data['partner']}\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái"
+                    elif action_type == "CREATE_DELIVERY":
+                        summary = f"Tạo phiếu XUẤT KHO (Delivery):\n• Khách hàng/Đối tác nhận: {data['partner']}\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái"
+                    elif action_type == "CREATE_TRANSFER":
+                        summary = f"Tạo lệnh ĐIỀU CHUYỂN nội bộ:\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái\n• Từ kho: {data['fromWh']} ➔ Đến kho: {data['toWh']}"
+                    elif action_type == "CREATE_PO":
+                        summary = f"Tạo ĐƠN MUA HÀNG (Purchase Order):\n• Nhà cung cấp: {data['vendor']}\n• Sản phẩm SKU: {data['sku']}\n• Số lượng: {data['qty']} cái"
+
+                    response = f"📝 **Xác nhận yêu cầu:**\nTớ đã chuẩn bị thông tin:\n\n{summary}\n\nCậu có muốn tớ tự động thực hiện hành động này trên hệ thống không? (Trả lời 'Có' hoặc 'Không')"
+                    response = apply_pronouns(response, profile)
+                    
+                    self.wfile.write(json.dumps({
+                        "response": response,
+                        "source": "OMEGA-RAG Model",
+                        "pending_action": {
+                            "type": action_type,
+                            "data": data,
+                            "step": "confirming",
+                            "missing_fields": []
+                        }
+                    }).encode('utf-8'))
+                    return
+                else:
+                    # Ask for the first missing field
+                    next_field = missing_fields[0]
+                    field_prompts = {
+                        "sku": "Vui lòng cung cấp mã **SKU** sản phẩm để thực hiện.",
+                        "name": "Cho tớ xin **Tên sản phẩm** cần thêm nhé.",
+                        "partner": "Vui lòng nhập tên **Đối tác/Khách hàng** cho lô hàng.",
+                        "vendor": "Vui lòng nhập tên **Nhà cung cấp**.",
+                        "qty": "Vui lòng cung cấp **Số lượng** là bao nhiêu cái.",
+                        "fromWh": "Vui lòng nhập tên **Kho nguồn (From)**.",
+                        "toWh": "Vui lòng nhập tên **Kho đích (To)**."
+                    }
+                    response = field_prompts.get(next_field, f"Vui lòng điền thông tin '{next_field}'.")
+                    response = apply_pronouns(response, profile)
+                    
+                    self.wfile.write(json.dumps({
+                        "response": response,
+                        "source": "OMEGA-RAG Model",
+                        "pending_action": {
+                            "type": action_type,
+                            "data": data,
+                            "step": "collecting",
+                            "missing_fields": missing_fields
+                        }
+                    }).encode('utf-8'))
+                    return
+
+            # Weather check
+            if any(w in msg_no_diac for w in ["thoi tiet", "mua khong", "troi dep khong", "nhiet do"]):
+                cond_str, temp = get_current_weather_info()
+                weather_replies = [
+                    f"Thời tiết hiện tại đang khoảng {temp}°C, {cond_str} nhé {profile.get('user_ref', 'ní')}! Rất thích hợp để làm việc trong kho mát mẻ hoặc đi hẹn hò luôn á!",
+                    f"Tình trạng thời tiết ghi nhận được là {temp}°C và {cond_str} nè {profile.get('user_ref', 'ní')}. Nhớ mặc đồ bảo hộ đầy đủ và giữ gìn sức khỏe lúc làm việc nha!",
+                    f"Trạm khí tượng OMEGA báo cáo thời tiết là {temp}°C ({cond_str}). Chúc {profile.get('user_ref', 'ní')} có một ngày làm việc tràn đầy năng lượng nghen!"
+                ]
+                response = random.choice(weather_replies)
+                self.wfile.write(json.dumps({"response": response, "source": "Trạm Khí tượng OMEGA WMS"}).encode('utf-8'))
+                return
+                
+            # Friend chitchat check
+            if any(w in msg_no_diac for w in ["khoe khong", "dieu gi moi", "nay khoe ko", "khoe re", "khoe chu"]):
+                chitchat_replies = [
+                    f"{profile.get('bot_ref', 'Tớ')} khỏe re hà! Suốt ngày ngồi hỗ trợ hệ thống kho WMS cho {profile.get('user_ref', 'cậu')} là thấy tràn đầy năng lượng rồi. Hôm nay của {profile.get('user_ref', 'cậu')} thế nào?",
+                    f"Cảm ơn nhé, {profile.get('bot_ref', 'tớ')} siêu khỏe luôn! Kho OMEGA đang vận hành cực mượt mà. Ca trực của {profile.get('user_ref', 'cậu')} hôm nay ổn áp hết chứ?",
+                    f"{profile.get('bot_ref', 'Tớ')} lúc nào cũng sẵn sàng 100% pin hỗ trợ các {profile.get('user_ref', 'ní')}! Mà {profile.get('user_ref', 'ní')} nay khỏe không, nếu thấy mệt nhớ nghỉ tay uống nước nha."
+                ]
+                response = random.choice(chitchat_replies)
+                self.wfile.write(json.dumps({"response": response, "source": "OMEGA Companion Engine"}).encode('utf-8'))
+                return
+
             # 1. Try querying live WMS state database
             wms_response = query_wms_state(message, wms_state, lang)
             if wms_response:
+                wms_response = apply_pronouns(wms_response, profile)
                 self.wfile.write(json.dumps({"response": wms_response, "source": "Cơ sở dữ liệu OMEGA Live Database"}).encode('utf-8'))
                 return
                 
             # 2. Try querying seed data from data_nhan (explanations, guides, steps, chitchats)
-            seed_response, seed_score, seed_source = query_seed_data(message, lang)
+            seed_response, seed_score, seed_source = query_seed_data(message, lang, profile)
             if seed_response and seed_score >= 5:
                 self.wfile.write(json.dumps({"response": seed_response, "source": seed_source}).encode('utf-8'))
                 return
@@ -940,6 +1873,7 @@ class AIServerHandler(http.server.BaseHTTPRequestHandler):
                 category = rule.get('category', 'SOP')
                 source = f"OMEGA RAG [{category} - Match: {score}%]"
                 response = f"🎯 [QUY TRÌNH HỢP LỆ - ĐỘ CHÍNH XÁC {score}%]\n\n📄 {title.upper()}\n\n{content}" if lang == 'vi' else f"🎯 [SOP MATCH - CONFIDENCE {score}%]\n\n📄 {title.upper()}\n\n{content}"
+                response = apply_pronouns(response, profile)
                 self.wfile.write(json.dumps({"response": response, "source": source}).encode('utf-8'))
                 return
                 
@@ -951,23 +1885,47 @@ class AIServerHandler(http.server.BaseHTTPRequestHandler):
             # 5. Generative Fallback
             source = "OMEGA Generative LLM"
             if lang == 'vi':
-                response = (
-                    f"🤖 Hệ thống không tìm thấy quy trình SOP trực tiếp khớp chính xác với câu hỏi của ní: \"{message}\".\n\n"
-                    "Tuy nhiên, theo tiêu chuẩn quản lý kho OMEGA WMS, ní có thể tham khảo:\n"
-                    "• Đảm bảo mọi giao dịch quét mã vạch (Putaway/Pick) đúng vị trí kệ.\n"
-                    "• Ghi nhận biên bản bất kỳ sự cố chênh lệch tồn kho nào lớn hơn 2%.\n"
-                    "• Đảm bảo lối đi và thiết bị cứu hỏa luôn thông thoáng.\n\n"
-                    "Ní có thể thêm quy trình này vào cẩm nang SOP trong tab Huấn luyện AI của hệ thống nha!"
-                )
+                fallbacks = [
+                    f"🤖 Ui, tớ chưa tìm thấy quy trình SOP nào khớp chính xác với câu hỏi \"{message}\" của ní hết á.\n\n"
+                    "Cơ mà theo tiêu chuẩn kho OMEGA, ní lưu ý mấy cái này nha:\n"
+                    "• Luôn dùng máy PDA quét mã vạch (SKU và vị trí kệ) khi nhập xuất, đừng nhập tay dễ lệch số liệu.\n"
+                    "• Gặp hàng rách hộp hay lỗi lúc nhận thì lập biên bản đồng kiểm có chữ ký tài xế ngay.\n"
+                    "• Lối thoát hiểm với thiết bị PCCC phải luôn gọn gàng, không được chặn nha.\n\n"
+                    "Ní có thể tự thêm quy trình này vào cẩm nang trong tab **Huấn luyện AI** của hệ thống nhé!",
+                    
+                    f"🤖 Hơ, câu hỏi \"{message}\" này hơi lạ nha, cẩm nang SOP kho của tớ chưa lưu rồi ní ơi.\n\n"
+                    "Nhưng ní yên tâm, nguyên tắc vận hành kho OMEGA mình luôn cần nhớ:\n"
+                    "• Xếp hàng lên kệ cao thì nặng ở dưới, nhẹ ở trên để an toàn.\n"
+                    "• Lái xe nâng trong kho tối đa 10km/h thôi, ôm cua nhớ bóp còi báo hiệu.\n"
+                    "• Xuất hàng thì cứ FIFO (nhập trước xuất trước) mà làm cho chuẩn.\n\n"
+                    "Cần quy trình chi tiết, ní vào tab **Huấn luyện AI** soạn thêm rồi train cho tớ nhé!",
+                    
+                    f"🤖 Hmmm, tớ lục tung cả cẩm nang SOP rồi mà chưa thấy hướng dẫn cho: \"{message}\" nè.\n\n"
+                    "Để ca làm suôn sẻ, tớ mách nhỏ vài nguyên tắc chuẩn WMS nha:\n"
+                    "• Hàng hoàn trả từ khách nhớ mở hộp check 100% tình trạng rồi mới quét nhập lại.\n"
+                    "• Kho lạnh mát rau củ quả nhớ giữ 2-8°C, còn kho đông thịt cá là -18°C đến -25°C.\n"
+                    "• PDA hết pin thì cắm dock sạc, tắt tài khoản khi hết ca để bảo mật.\n\n"
+                    "Ní có thể thêm trực tiếp quy trình này qua tab **Huấn luyện AI** nha ní!"
+                ]
+                response = random.choice(fallbacks)
             else:
-                response = (
-                    f"🤖 No direct SOP matches found for: \"{message}\".\n\n"
-                    "General OMEGA WMS Warehouse standard guidelines:\n"
-                    "• Ensure all barcode scans (Putaway/Pick) align with the WMS instructions.\n"
-                    "• File a report for any inventory discrepancy exceeding 2%.\n"
-                    "• Keep exits, panels, and fire fighting equipment unobstructed.\n\n"
-                    "You can add this SOP to the database via the AI Training tab!"
-                )
+                fallbacks = [
+                    f"🤖 Oops! I couldn't find any exact SOP matches for \"{message}\".\n\n"
+                    "However, according to OMEGA WMS standards, please remember:\n"
+                    "• Always scan barcodes (SKU and Location) on your PDA, do not input manually.\n"
+                    "• Report any inventory discrepancies over 2% to your supervisor immediately.\n"
+                    "• Exits and fire extinguishers must remain unobstructed at all times.\n\n"
+                    "You can add this procedure via the **AI Training** tab!",
+                    
+                    f"🤖 Hmmm, \"{message}\" isn't in my current warehouse handbook yet.\n\n"
+                    "Standard guidelines to keep in mind:\n"
+                    "• Forklift speed limit is 10 km/h inside aisles. Always honk at corners.\n"
+                    "• Apply FIFO/FEFO rules: pull old stock to the front, place new stock in the back.\n"
+                    "• Quarantine damaged packages immediately in the designated zone.\n\n"
+                    "Feel free to create and train this new SOP in the **AI Training** tab!"
+                ]
+                response = random.choice(fallbacks)
+            response = apply_pronouns(response, profile)
             self.wfile.write(json.dumps({"response": response, "source": source}).encode('utf-8'))
             return
 
@@ -1288,5 +2246,5 @@ if __name__ == '__main__':
     weather_thread = WeatherWorkerThread()
     weather_thread.start()
     
-    server = http.server.HTTPServer(('0.0.0.0', PORT), AIServerHandler)
+    server = http.server.HTTPServer(('127.0.0.1', PORT), AIServerHandler)
     server.serve_forever()

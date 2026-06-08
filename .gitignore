@@ -26,3 +26,6 @@ dist-ssr
 # Large files & media
 *.gguf
 *.mp4
+
+# Local Netlify folder
+.netlify

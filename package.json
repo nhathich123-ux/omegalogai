@@ -1,5 +1,5 @@
 {
-  "name": "omega",
+  "name": "omegalogai",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -28,6 +28,7 @@
     "globals": "^17.6.0",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.3.0",
+    "vercel": "^54.9.1",
     "vite": "^8.0.12"
   }
 }
