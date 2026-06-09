@@ -799,7 +799,7 @@ export default function ReportsPage() {
       style: 'currency',
       currency: 'VND',
       maximumFractionDigits: 0
-    }).format(val * 23000);
+    }).format(val);
   };
 
   // Chronological Moves helper
@@ -862,7 +862,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 select-none relative">
+    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 relative">
       
       {/* Dynamic Toast Feedback Overlay */}
       {toastText && (
@@ -873,7 +873,7 @@ export default function ReportsPage() {
       )}
 
       {/* ─── MAIN TABS NAVIGATION ─── */}
-      <div className="flex items-center gap-6 border-b border-[#1b1a20] pb-3 mb-8 font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase select-none">
+      <div className="flex items-center gap-6 border-b border-[#1b1a20] pb-3 mb-8 font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase">
         <button
           onClick={() => setActiveTab('reports')}
           className={`hover:text-[#ff7a45] transition-colors uppercase relative py-1 ${activeTab === 'reports' ? 'text-[#ff7a45]' : ''}`}
@@ -904,7 +904,7 @@ export default function ReportsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Left 3 Columns: Reports catalogs list */}
           <div className="lg:col-span-3">
-            <Card className="bg-[#111114] border border-[#22202a] p-4 space-y-2 select-none h-full">
+            <Card className="bg-[#111114] border border-[#22202a] p-4 space-y-2 h-full">
               <p className="font-mono text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-3">{isVi ? 'Danh mục Báo cáo' : 'Report Index'}</p>
               <button
                 onClick={() => setReportsSubtab('onhand')}
@@ -1059,7 +1059,7 @@ export default function ReportsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div>
                     <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-[#ff7a45]">
-                      {isVi ? 'Nhật ký Hồ sơ Cân bằng Kho hàng' : 'Inventory Adjustments Records'}
+                      {isVi ? 'NHẬT KÝ HỒ SƠ CÂN BẰNG KHO HÀNG' : 'INVENTORY ADJUSTMENTS RECORDS'}
                     </h3>
                     <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
                       {isVi ? 'Lịch sử điều chỉnh sai số dư thực tế' : 'Discrepancy logs from active counts'}
@@ -1112,7 +1112,7 @@ export default function ReportsPage() {
                 <div className="border-b border-[#1b1a20] pb-3.5 mb-5 flex items-center justify-between">
                   <div>
                     <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">
-                      {isVi ? 'Phiếu Kiểm Kê Thực Tế Đang Chạy' : 'Active Physical Audit Counting Sheet'}
+                      {isVi ? 'PHIẾU KIỂM KÊ THỰC TẾ ĐANG CHẠY' : 'ACTIVE PHYSICAL AUDIT COUNTING SHEET'}
                     </h3>
                   </div>
                 </div>
@@ -1206,7 +1206,7 @@ export default function ReportsPage() {
               <div>
                 <div className="border-b border-zinc-900 pb-3.5 mb-4">
                   <h3 className="text-xs font-bold uppercase tracking-widest text-[#ff7a45]">
-                    {isVi ? 'Hướng dẫn Kiểm đếm Thực tế' : 'Physical Audit Instruction'}
+                    {isVi ? 'HƯỚNG DẪN KIỂM ĐẾM THỰC TẾ' : 'PHYSICAL AUDIT INSTRUCTION'}
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -1763,7 +1763,7 @@ export default function ReportsPage() {
                         );
                       })
                     ) : (
-                      <div className="p-4 border border-zinc-900 text-center text-zinc-650 uppercase text-[9px] tracking-wider">
+                      <div className="p-4 border border-zinc-900 text-center text-zinc-500 uppercase text-[9px] tracking-wider">
                         {isVi ? 'KHÔNG CÓ ĐƠN HÀNG XUẤT KHO ƯU TIÊN' : 'NO PRIORITIZED OUTBOUND DELIVERIES'}
                       </div>
                     )}
@@ -2198,7 +2198,7 @@ export default function ReportsPage() {
 
             </div>
 
-            <p className="text-[8.5px] text-zinc-650 font-sans leading-relaxed">
+            <p className="text-[8.5px] text-zinc-500 font-sans leading-relaxed">
               {isVi ? '* Lưu ý: Hệ thống hiện tại đang sử dụng các luồng giả lập kiểm thử biên an toàn (Mock diagnostics). Để gộp mô hình AI thật, nhà phát triển chỉ cần gán các hàm fetch tương tác qua Endpoint trên.' : '* Interface ready. You can substitute mockup logic with real fetch requests pointing to these URLs.'}
             </p>
           </div>

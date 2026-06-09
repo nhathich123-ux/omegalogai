@@ -39,7 +39,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl animate-fade-in text-zinc-100 select-none">
+    <div className="p-6 lg:p-8 max-w-2xl animate-fade-in text-zinc-100">
       <PageHeader title={s.title} subtitle={s.description} />
 
       {message && (
@@ -56,7 +56,7 @@ export default function SettingsPage() {
             <AlertTriangle className="w-4 h-4 text-[#ff7a45]" />
             <div>
               <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                {isVi ? 'Quản trị Cơ sở Dữ liệu' : 'System Database Administration'}
+                {isVi ? 'QUẢN TRỊ CƠ SỞ DỮ LIỆU' : 'SYSTEM DATABASE ADMINISTRATION'}
               </h3>
               <p className="text-[9px] text-zinc-500 tracking-wide mt-0.5">
                 {isVi ? 'Điều chỉnh trạng thái dữ liệu hoạt động hoặc phục hồi hệ thống trống' : 'Clear or pre-populate system records'}
@@ -120,7 +120,7 @@ export default function SettingsPage() {
                 <Smile className="w-4 h-4 text-[#ff7a45]" />
                 <div>
                   <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                    {isVi ? 'Bảo mật Tài khoản & Face ID' : 'Account Security & Face ID'}
+                    {isVi ? 'BẢO MẬT TÀI KHOẢN & FACE ID' : 'ACCOUNT SECURITY & FACE ID'}
                   </h3>
                   <p className="text-[9px] text-zinc-500 tracking-wide mt-0.5">
                     {isVi ? 'Quản lý xác thực sinh trắc học gương mặt cho tài khoản hiện tại' : 'Manage face biometric credentials for current active profile'}

@@ -19,8 +19,39 @@ import {
   ChevronRight,
   ShieldAlert,
   Camera,
-  Upload
+  Upload,
+  Printer,
+  Check,
+  Scan,
+  AlertTriangle,
+  Copy,
+  Search
 } from 'lucide-react';
+
+// Reusable Copy Text Action Button Component
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button 
+      onClick={handleCopy}
+      type="button" 
+      className="inline-flex items-center justify-center p-1 rounded bg-zinc-950/80 border border-zinc-800 hover:border-zinc-700 text-zinc-500 hover:text-[#ff7a45] transition-all cursor-pointer select-none"
+      title="Copy to clipboard"
+    >
+      {copied ? (
+        <span className="text-[8px] text-emerald-400 font-mono font-bold uppercase tracking-wider animate-pulse">Copied!</span>
+      ) : (
+        <Copy className="w-3 h-3" />
+      )}
+    </button>
+  );
+}
 import { useApp } from '../context/AppContext';
 import { Card, StatusPill, SegmentedStockBar, DataTable } from '../components/ui';
 
@@ -35,7 +66,9 @@ export default function InventoryPage() {
     deleteProduct, 
     deleteLocationNode,
     renameLocationNode,
-    lang 
+    lang,
+    notifications,
+    setNotifications
   } = useApp();
 
   const isVi = lang === 'vi';
@@ -56,10 +89,10 @@ export default function InventoryPage() {
       style: 'currency',
       currency: 'VND',
       maximumFractionDigits: 0
-    }).format(val * 23000);
+    }).format(val);
   };
 
-  // Tabs: 'products' | 'locations' | 'lots'
+  // Tabs: 'products' | 'locations' | 'lots' | 'slotting'
   const [activeTab, setActiveTab] = useState('products');
 
   // Search & Filters state
@@ -106,6 +139,15 @@ export default function InventoryPage() {
 
   // Search lots state
   const [lotSearchQuery, setLotSearchQuery] = useState('');
+
+  // Barcode Slotting state variables
+  const [slottingProductSku, setSlottingProductSku] = useState('');
+  const [slottingLocationId, setSlottingLocationId] = useState('');
+  const [slottingScanStatus, setSlottingScanStatus] = useState('idle'); // 'idle' | 'scanning' | 'success' | 'warning'
+  const [slottingProgress, setSlottingProgress] = useState(0);
+  const [slottingLabelProduct, setSlottingLabelProduct] = useState(null);
+  const [isSlottingLabelOpen, setIsSlottingLabelOpen] = useState(false);
+  const [mismatchTarget, setMismatchTarget] = useState(null); // { product, locationId }
 
   // ────────────────────────────────────────────────────────
   // SKU DATA FILTERING
@@ -338,7 +380,12 @@ export default function InventoryPage() {
     { 
       key: 'sku', 
       label: 'SKU ID', 
-      render: (r) => <span className="font-mono text-xs font-bold text-zinc-500">#{r.sku}</span> 
+      render: (r) => (
+        <div className="flex items-center gap-1">
+          <span className="font-mono text-xs font-bold text-zinc-500">#{r.sku}</span>
+          <CopyButton text={r.sku} />
+        </div>
+      ) 
     },
     { 
       key: 'name', 
@@ -349,7 +396,7 @@ export default function InventoryPage() {
             {r.image ? (
               <img src={r.image} alt={r.name} className="w-full h-full object-cover animate-fade-in" />
             ) : (
-              <span className="font-mono text-[7px] text-zinc-650 font-bold uppercase">SKU</span>
+              <span className="font-mono text-[7px] text-zinc-500 font-bold uppercase">SKU</span>
             )}
           </div>
           <span className="font-sans font-bold text-zinc-100">{isVi ? r.name : (r.nameEn || r.name)}</span>
@@ -399,8 +446,79 @@ export default function InventoryPage() {
     },
   ];
 
+  const handlePerformSlotting = (productSku, locationId, force = false) => {
+    const product = products.find(p => p.sku === productSku);
+    if (!product) {
+      setSlottingScanStatus('error');
+      return;
+    }
+
+    // Check category mismatch
+    const zoneMapping = {
+      'Zone A': 'HEAVY MACHINERY',
+      'Zone B': 'ELECTRONICS',
+      'Zone C': 'ENERGY UNITS',
+      'Zone D': 'FLUIDS',
+      'Khu A': 'HEAVY MACHINERY',
+      'Khu B': 'ELECTRONICS',
+      'Khu C': 'ENERGY UNITS',
+      'Khu D': 'FLUIDS'
+    };
+
+    let matchedZone = null;
+    Object.keys(zoneMapping).forEach(key => {
+      if (locationId.includes(key)) {
+        matchedZone = zoneMapping[key];
+      }
+    });
+
+    if (matchedZone && !force) {
+      const prodCat = product.category;
+      if (prodCat !== matchedZone) {
+        setMismatchTarget({ product, locationId });
+        setSlottingScanStatus('warning');
+        return;
+      }
+    }
+
+    setSlottingScanStatus('scanning');
+    setSlottingProgress(0);
+
+    const interval = setInterval(() => {
+      setSlottingProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          updateProduct({
+            ...product,
+            location: locationId
+          });
+
+          const title = isVi ? 'Quét liên kết kệ kho' : 'Barcode Bin Binding';
+          const desc = isVi 
+            ? `Thiết bị quét PDA gán sản phẩm ${product.name} (#${product.sku}) vào kệ ${locationId.split('/').pop()} (${locationId}) thành công.` 
+            : `PDA scanner successfully bound product ${product.nameEn || product.name} (#${product.sku}) to shelf ${locationId.split('/').pop()} (${locationId}).`;
+
+          const newNotif = {
+            id: `NT-SLOT-${Date.now()}`,
+            type: 'done',
+            title,
+            titleEn: 'Barcode Bin Binding',
+            desc,
+            descEn: desc,
+            time: new Date().toTimeString().split(' ')[0]
+          };
+
+          setNotifications(prev => [newNotif, ...prev]);
+          setSlottingScanStatus('success');
+          return 100;
+        }
+        return prev + 25;
+      });
+    }, 150);
+  };
+
   return (
-    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 select-none">
+    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100">
       
       {/* ─── TABS NAVIGATION BAR ─── */}
       <div className="flex items-center gap-6 border-b border-[#1b1a20] pb-3 mb-8 font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase select-none">
@@ -425,6 +543,24 @@ export default function InventoryPage() {
           {isVi ? 'TRUY XUẤT LÔ & SỐ SÊ-RI (LOTS)' : 'LOTS & SERIAL TRACER'}
           {activeTab === 'lots' && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#ff7a45]" />}
         </button>
+        <button 
+          onClick={() => {
+            setActiveTab('slotting');
+            // Select default product and location if empty
+            if (products.length > 0 && !slottingProductSku) {
+              setSlottingProductSku(products[0].sku);
+            }
+            const flatLocs = getFlatLocations(locationsTree).filter(l => l.id !== 'root');
+            if (flatLocs.length > 0 && !slottingLocationId) {
+              setSlottingLocationId(flatLocs[0].id);
+            }
+            setSlottingScanStatus('idle');
+          }}
+          className={`hover:text-[#ff7a45] transition-colors uppercase relative py-1 ${activeTab === 'slotting' ? 'text-[#ff7a45]' : ''}`}
+        >
+          {isVi ? 'LIÊN KẾT MÃ VẠCH (SLOTTING)' : 'BARCODE BIN BINDING'}
+          {activeTab === 'slotting' && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#ff7a45]" />}
+        </button>
       </div>
 
       {/* ────────────────────────────────────────────────────────
@@ -435,7 +571,7 @@ export default function InventoryPage() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'Tổng quan Danh mục Sản phẩm' : 'Inventory Overview'}</h2>
+              <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">{isVi ? 'TỔNG QUAN DANH MỤC SẢN PHẨM' : 'INVENTORY OVERVIEW'}</h2>
               <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
                 {isVi ? 'QUẢN LÝ DỮ LIỆU SẢN PHẨM - TÁI CUNG ỨNG VÀ ĐỊNH GIÁ' : 'PRODUCTS SPECIFICATIONS AND LOGISTICAL CONTROL'}
               </p>
@@ -451,34 +587,73 @@ export default function InventoryPage() {
           </div>
 
           {/* Search, Filter Bar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 mb-6 rounded-lg bg-[#111114] border border-[#22202a]">
-            <div className="flex flex-wrap items-center gap-6">
+          <div className="p-5 mb-6 rounded-lg bg-[#111114] border border-[#22202a]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 items-end">
               
               {/* Category Filter */}
-              <div className="flex flex-col items-start">
-                <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{isVi ? 'Bộ lọc danh mục' : 'Category Filter'}</label>
-                <select 
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="filter-select bg-zinc-950 border border-zinc-800 py-1.5 px-3 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none min-w-[150px] cursor-pointer"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{isVi && cat === 'ALL' ? 'TẤT CẢ DANH MỤC' : cat}</option>
-                  ))}
-                </select>
+              <div className="flex flex-col items-start relative w-full">
+                <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 select-none">
+                  <Layers className="w-3 h-3 text-[#ff7a45]/60" />
+                  {isVi ? 'BỘ LỌC DANH MỤC' : 'CATEGORY FILTER'}
+                </label>
+                <div className="relative w-full">
+                  <select 
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="filter-select w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-2 px-3 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none cursor-pointer transition-all"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{isVi && cat === 'ALL' ? 'TẤT CẢ DANH MỤC' : cat}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* SKU Search */}
-              <div className="flex flex-col items-start">
-                <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{isVi ? 'Tìm tên / mã sku' : 'Search name / barcode'}</label>
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isVi ? 'NHẬP SKU / TÊN / BARCODE...' : 'SKU ID OR NAME...'}
-                  className="bg-zinc-950 border border-zinc-800 py-1.5 px-3 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none min-w-[200px]"
-                />
+              <div className="flex flex-col items-start relative w-full">
+                <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 select-none">
+                  <Search className="w-3 h-3 text-[#ff7a45]/60" />
+                  {isVi ? 'TÌM TÊN / MÃ SKU' : 'SEARCH NAME / BARCODE'}
+                </label>
+                <div className="relative w-full">
+                  <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={isVi ? 'NHẬP SKU / TÊN / BARCODE...' : 'SKU ID OR NAME...'}
+                    className="w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-2 px-3 pl-8 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none transition-all placeholder:text-zinc-500"
+                  />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+                  {searchQuery && (
+                    <button 
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-[#ff7a45] transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Reset/Indicator Panel */}
+              <div className="flex items-center justify-end h-[34px] font-mono text-[9px] text-zinc-500 tracking-wider w-full">
+                {(categoryFilter !== 'ALL' || searchQuery) ? (
+                  <button
+                    onClick={() => { setCategoryFilter('ALL'); setSearchQuery(''); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff7a45]/10 border border-[#ff7a45]/20 hover:border-[#ff7a45]/40 text-[#ff7a45] rounded uppercase font-bold tracking-widest transition-all hover:bg-[#ff7a45]/15 w-full sm:w-auto justify-center"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    {isVi ? 'ĐẶT LẠI BỘ LỌC' : 'RESET FILTERS'}
+                  </button>
+                ) : (
+                  <div className="text-zinc-500 flex items-center gap-1.5 select-none font-bold justify-end w-full">
+                    <Check className="w-3 h-3 text-emerald-500" />
+                    {isVi ? 'ĐANG HIỂN THỊ TẤT CẢ HÀNG HÓA' : 'SHOWING FULL CATALOG'}
+                  </div>
+                )}
+              </div>
+
             </div>
           </div>
 
@@ -524,8 +699,12 @@ export default function InventoryPage() {
                   {isVi ? 'PHÂN ĐỘ ĐỘC QUYỀN OMEGA' : 'CRITICAL ASSET'}
                 </span>
               </div>
-              <p className="font-mono text-[9px] text-zinc-400 font-bold uppercase tracking-wider mt-2">
-                SKU: {activeItem.sku} // Barcode: {activeItem.barcode}
+              <p className="font-mono text-[9px] text-zinc-400 font-bold uppercase tracking-wider mt-2 flex flex-wrap items-center gap-1">
+                <span>SKU: {activeItem.sku}</span>
+                <CopyButton text={activeItem.sku} />
+                <span className="mx-1">//</span>
+                <span>Barcode: {activeItem.barcode}</span>
+                <CopyButton text={activeItem.barcode} />
               </p>
             </div>
             
@@ -610,7 +789,10 @@ export default function InventoryPage() {
                       ) : (
                         lots.filter(l => l.productSku === activeItem.sku).map((lot) => (
                           <tr key={lot.id} className="border-b border-[#1b1a20]/40">
-                            <td className="py-2.5 px-3 text-[#ff7a45] font-bold">{lot.id}</td>
+                            <td className="py-2.5 px-3 text-[#ff7a45] font-bold flex items-center gap-1">
+                              {lot.id}
+                              <CopyButton text={lot.id} />
+                            </td>
                             <td className="py-2.5 px-3 text-zinc-200 font-extrabold">{lot.qty} {isVi ? activeItem.unit : (activeItem.unitEn || activeItem.unit)}</td>
                             <td className="py-2.5 px-3 text-zinc-300">{lot.expiry}</td>
                             <td className="py-2.5 px-3 text-zinc-500">#{lot.receiptRef}</td>
@@ -686,12 +868,16 @@ export default function InventoryPage() {
                   </div>
                   <div className="flex justify-between items-center py-1.5 border-b border-zinc-900">
                     <span className="text-zinc-500">{isVi ? 'MÃ VẠCH (BARCODE):' : 'BARCODE EAN-13:'}</span>
-                    <span className="text-zinc-400">{activeItem.barcode}</span>
+                    <span className="text-zinc-400 flex items-center gap-1">
+                      {activeItem.barcode}
+                      <CopyButton text={activeItem.barcode} />
+                    </span>
                   </div>
                   <div className="flex justify-between items-center py-1.5">
                     <span className="text-zinc-500">{isVi ? 'VỊ TRÍ KHO HIỆN TẠI:' : 'WAREHOUSE NODE:'}</span>
-                    <span className="text-zinc-400 select-all truncate max-w-[200px]" title={activeItem.location}>
+                    <span className="text-zinc-400 flex items-center gap-1 select-all truncate max-w-[200px]" title={activeItem.location}>
                       {activeItem.location.split('/').slice(-2).join('/')}
+                      <CopyButton text={activeItem.location} />
                     </span>
                   </div>
                 </div>
@@ -800,7 +986,7 @@ export default function InventoryPage() {
         <div>
           {/* Header */}
           <div className="mb-6">
-            <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'Truy xuất Nguồn gốc Lô & Số Sê-ri' : 'Traceability Matrix (Lots / Serial Numbers)'}</h2>
+            <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">{isVi ? 'TRUY XUẤT NGUỒN GỐC LÔ & SỐ SÊ-RI' : 'TRACEABILITY MATRIX (LOTS / SERIAL NUMBERS)'}</h2>
             <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
               {isVi ? 'TRUY VẾT LỊCH SỬ CHUỖI CUNG ỨNG VÀ HẠN SỬ DỤNG SẢN PHẨM PHỨC TẠP' : 'END-TO-END SUPPLY CHAIN ORIGIN TRACKING'}
             </p>
@@ -809,7 +995,7 @@ export default function InventoryPage() {
           {/* Search box */}
           <div className="flex items-center gap-4 p-4 mb-6 rounded-lg bg-[#111114] border border-[#22202a]">
             <div className="flex flex-col items-start w-full max-w-sm">
-              <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{isVi ? 'Tìm kiếm mã lô / số serial / mã sản phẩm' : 'Search Lot ID or Product SKU'}</label>
+              <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{isVi ? 'TÌM KIẾM MÃ LÔ / SỐ SERIAL / MÃ SẢN PHẨM' : 'SEARCH LOT ID OR PRODUCT SKU'}</label>
               <input 
                 type="text" 
                 value={lotSearchQuery}
@@ -935,26 +1121,224 @@ export default function InventoryPage() {
       )}
 
       {/* ────────────────────────────────────────────────────────
+          TAB 4: BARCODE SLOTTING & BIN BINDING SIMULATOR
+          ──────────────────────────────────────────────────────── */}
+      {activeTab === 'slotting' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-fade-in text-zinc-100">
+          {/* Left 6 Columns: Interactive PDA Scanner simulation */}
+          <div className="lg:col-span-6 flex flex-col justify-between">
+            <Card className="bg-[#111114] border border-[#22202a] p-6 h-full flex flex-col justify-between">
+              <div>
+                <div className="border-b border-[#1b1a20] pb-3 mb-5 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">
+                      {isVi ? 'Thiết bị quét mã vạch PDA (PDA Scanner)' : 'PDA Handheld Scanner Terminal'}
+                    </h3>
+                    <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
+                      {isVi ? 'Liên kết mã vạch sản phẩm vào vị trí kệ kho tương ứng' : 'Link product SKU barcodes to coordinate locations'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 font-mono text-[11px]">
+                  {/* Select Product Dropdown */}
+                  <div>
+                    <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'Chọn sản phẩm cần liên kết (SKU):' : 'Select Product SKU:'}</label>
+                    <select
+                      value={slottingProductSku}
+                      onChange={(e) => {
+                        setSlottingProductSku(e.target.value);
+                        setSlottingScanStatus('idle');
+                      }}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-xs text-zinc-200 outline-none focus:border-[#ff7a45] cursor-pointer"
+                    >
+                      {products.map(p => (
+                        <option key={p.sku} value={p.sku}>
+                          #{p.sku} - {isVi ? p.name : (p.nameEn || p.name)} ({p.category})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Select Location Dropdown */}
+                  <div>
+                    <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'Chọn vị trí kệ kho đích (Bin/Shelf):' : 'Select Target Storage Bin:'}</label>
+                    <select
+                      value={slottingLocationId}
+                      onChange={(e) => {
+                        setSlottingLocationId(e.target.value);
+                        setSlottingScanStatus('idle');
+                      }}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-xs text-zinc-200 outline-none focus:border-[#ff7a45] cursor-pointer"
+                    >
+                      {getFlatLocations(locationsTree).filter(l => l.id !== 'root').map(loc => (
+                        <option key={loc.id} value={loc.id}>
+                          {loc.id} ({loc.name})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Webcam viewport animation */}
+                <div className="mt-5 relative h-48 bg-zinc-950 border border-zinc-900 rounded overflow-hidden flex flex-col items-center justify-center group">
+                  {slottingScanStatus === 'scanning' ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80">
+                      <div className="w-8 h-8 rounded-full border-2 border-[#ff7a45]/20 border-t-[#ff7a45] animate-spin mb-3" />
+                      <span className="text-[10px] font-mono font-bold text-[#ff7a45] uppercase tracking-widest animate-pulse">
+                        {isVi ? `Đang đối chiếu dữ liệu... ${slottingProgress}%` : `Verifying coordinates... ${slottingProgress}%`}
+                      </span>
+                    </div>
+                  ) : slottingScanStatus === 'success' ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-950/20 text-center p-4">
+                      <div className="w-10 h-10 rounded-full bg-emerald-950/50 border border-emerald-500/40 flex items-center justify-center mb-3">
+                        <Check className="w-5 h-5 text-emerald-400" />
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+                        {isVi ? 'ĐÃ LIÊN KẾT THÀNH CÔNG!' : 'BINDING COMPLETED SUCCESSFULLY!'}
+                      </span>
+                      <p className="text-[9px] text-zinc-400 font-sans mt-1">
+                        {isVi ? 'Hàng hóa đã được định vị tại kệ.' : 'Inventory balances now tied to shelf.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Laser scanner grid line */}
+                      <div className="absolute left-0 right-0 h-[1.5px] bg-[#ff7a45]/60 animate-bounce top-1/2" />
+                      
+                      {/* Interactive Camera Target corners */}
+                      <div className="w-32 h-20 border border-[#ff7a45]/30 rounded-sm relative flex items-center justify-center">
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff7a45]" />
+                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff7a45]" />
+                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ff7a45]" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff7a45]" />
+                        
+                        <Scan className="w-8 h-8 text-[#ff7a45]/40 animate-pulse" />
+                      </div>
+
+                      <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest mt-3">
+                        {isVi ? 'Căn chỉnh mã vạch vào khung ảnh' : 'Align EAN-13 barcode inside viewfinder'}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Print barcode & Bind actions */}
+              <div className="mt-5 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const prod = products.find(p => p.sku === slottingProductSku);
+                    if (prod) {
+                      setSlottingLabelProduct(prod);
+                      setIsSlottingLabelOpen(true);
+                    }
+                  }}
+                  className="flex-1 py-2.5 border border-zinc-800 bg-[#0c0c0e] hover:bg-zinc-900/60 text-zinc-300 font-mono text-[9px] uppercase tracking-widest font-extrabold rounded flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  {isVi ? 'Tạo nhãn mã vạch AI' : 'Generate AI Label'}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => handlePerformSlotting(slottingProductSku, slottingLocationId)}
+                  disabled={slottingScanStatus === 'scanning'}
+                  className="flex-1 py-2.5 bg-[#ff7a45] hover:bg-[#ff8b5a] text-zinc-950 font-mono text-[9px] uppercase tracking-widest font-black rounded flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(255,122,69,0.1)] transition-colors"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  {isVi ? 'Quét & liên kết kệ' : 'Scan & Bind Bin'}
+                </button>
+              </div>
+            </Card>
+          </div>
+
+          {/* Right 6 Columns: Shelf items query & Anomaly detection */}
+          <div className="lg:col-span-6 flex flex-col justify-between">
+            <Card className="bg-[#111114] border border-[#22202a] p-6 h-full flex flex-col justify-between">
+              <div>
+                <div className="border-b border-[#1b1a20] pb-3 mb-5">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">
+                    {isVi ? 'Bộ kiểm soát bất thường & Truy vấn kệ' : 'Shelf Query & Anomaly Monitor'}
+                  </h3>
+                  <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
+                    {isVi ? `Đang truy vấn kệ: ${slottingLocationId || '...'}` : `Active shelf coordinate: ${slottingLocationId || '...'}`}
+                  </p>
+                </div>
+
+                {/* Compatibility Rules HUD */}
+                <div className="p-3 bg-zinc-950 border border-zinc-900 rounded font-mono text-[10px] space-y-2 mb-4">
+                  <span className="text-zinc-500 uppercase tracking-wider text-[8px] font-bold block">{isVi ? 'Phân loại Zone tương thích quy định:' : 'Allowed Category compatibility rules:'}</span>
+                  <div className="flex justify-between items-center text-[9px]">
+                    <span className="text-zinc-400">WH-A/Zone A (HCM) →</span>
+                    <span className="text-zinc-200 font-bold uppercase">HEAVY MACHINERY</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[9px] border-t border-zinc-900/60 pt-1.5">
+                    <span className="text-zinc-400">WH-A/Zone B (HCM) →</span>
+                    <span className="text-zinc-200 font-bold uppercase">ELECTRONICS</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[9px] border-t border-zinc-900/60 pt-1.5">
+                    <span className="text-zinc-400">WH-C/Zone C (Đà Nẵng) →</span>
+                    <span className="text-zinc-200 font-bold uppercase">ENERGY UNITS</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[9px] border-t border-zinc-900/60 pt-1.5">
+                    <span className="text-zinc-400">WH-A/Zone D (HCM) →</span>
+                    <span className="text-zinc-200 font-bold uppercase">FLUIDS</span>
+                  </div>
+                </div>
+
+                {/* Items currently on shelf */}
+                <div className="space-y-2.5">
+                  <span className="font-mono text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                    {isVi ? 'Hàng hóa đang xếp ở kệ này:' : 'SKUs currently stored in this bin:'}
+                  </span>
+                  
+                  <div className="space-y-2 max-h-[160px] overflow-y-auto scrollbar-thin">
+                    {products.filter(p => p.location === slottingLocationId).length === 0 ? (
+                      <div className="text-center py-6 text-zinc-600 font-mono text-[10px] border border-dashed border-zinc-900 rounded bg-zinc-950/20">
+                        {isVi ? 'KỆ TRỐNG - CHƯA CÓ SẢN PHẨM NÀO' : 'SHELF EMPTY - NO PRODUCTS DETECTED'}
+                      </div>
+                    ) : (
+                      products.filter(p => p.location === slottingLocationId).map(p => (
+                        <div key={p.sku} className="p-2.5 border border-zinc-800 bg-zinc-950/40 rounded flex items-center justify-between font-mono text-[10px]">
+                          <div>
+                            <span className="text-zinc-500 font-bold">#{p.sku}</span>
+                            <span className="text-zinc-200 font-sans ml-2 text-xs font-bold">{isVi ? p.name : (p.nameEn || p.name)}</span>
+                          </div>
+                          <span className="text-[#ff7a45] font-extrabold">{p.stock} {isVi ? p.unit : (p.unitEn || p.unit)}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────
           PRODUCT ADD/EDIT FORM DRAWER MODAL
           ──────────────────────────────────────────────────────── */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs select-none">
-          <div className="w-full max-w-lg h-full bg-[#0c0c0e] border-l border-zinc-800/80 p-6 flex flex-col justify-between overflow-y-auto scrollbar-thin">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-lg h-full bg-[#0c0c0e] border-l border-zinc-800/80 flex flex-col shadow-2xl animate-fade-in">
             
-            <div>
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3.5 mb-6">
-                <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-zinc-100">
-                  {drawerMode === 'add' ? (isVi ? 'KHAI BÁO SKU SẢN PHẨM MỚI' : 'REGISTER NEW PRODUCT SKU') : (isVi ? 'CẬP NHẬT CẤU HÌNH SẢN PHẨM' : 'EDIT PRODUCT SPECIFICATIONS')}
-                </h3>
-                <button 
-                  type="button" 
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="text-zinc-500 hover:text-zinc-200 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
+              <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-zinc-100">
+                {drawerMode === 'add' ? (isVi ? 'KHAI BÁO SKU SẢN PHẨM MỚI' : 'REGISTER NEW PRODUCT SKU') : (isVi ? 'CẬP NHẬT CẤU HÌNH SẢN PHẨM' : 'EDIT PRODUCT SPECIFICATIONS')}
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setIsDrawerOpen(false)}
+                className="text-zinc-500 hover:text-zinc-200 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
+            <div className="flex-1 overflow-y-auto scrollbar-thin p-6 pb-20">
               {/* Form elements */}
               <form onSubmit={handleSaveProduct} className="space-y-4 font-mono text-[11px] text-zinc-300">
                 
@@ -1192,17 +1576,17 @@ export default function InventoryPage() {
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-zinc-850 flex gap-3">
+                <div className="pt-4 border-t border-zinc-850 flex gap-3 pb-8">
                   <button 
                     type="submit" 
-                    className="flex-1 py-2.5 bg-[#ff7a45] text-zinc-950 font-bold uppercase tracking-wider rounded transition-opacity hover:opacity-90 cyber-notched-btn"
+                    className="flex-1 py-2.5 bg-[#ff7a45] text-zinc-950 font-bold uppercase tracking-wider rounded transition-opacity hover:opacity-90 cyber-notched-btn cursor-pointer"
                   >
                     {isVi ? 'LƯU SKU HỆ THỐNG' : 'SAVE TO DATABASE'}
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setIsDrawerOpen(false)}
-                    className="flex-1 py-2.5 border border-zinc-800 bg-transparent text-zinc-400 font-bold uppercase tracking-wider rounded hover:text-white transition-colors"
+                    className="flex-1 py-2.5 border border-zinc-800 bg-transparent text-zinc-400 font-bold uppercase tracking-wider rounded hover:text-white transition-colors cursor-pointer"
                   >
                     {isVi ? 'HỦY BỎ' : 'CANCEL'}
                   </button>
@@ -1219,8 +1603,8 @@ export default function InventoryPage() {
           ADD LOCATION NODE MODAL DIALOG
           ──────────────────────────────────────────────────────── */}
       {isAddLocationOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none">
-          <div className="bg-[#111114] border border-zinc-800 p-6 rounded-lg w-full max-w-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs">
+          <div className="bg-[#111114] border border-zinc-800 p-6 rounded-lg w-full max-w-sm max-h-[90vh] overflow-y-auto scrollbar-thin">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#ff7a45] mb-4 pb-2 border-b border-zinc-900">
               {isVi ? 'Khai báo Phân khu Kho con' : 'Create Sub-location Node'}
             </h3>
@@ -1258,8 +1642,8 @@ export default function InventoryPage() {
           DELETE LOCATION CONFIRMATION MODAL
           ──────────────────────────────────────────────────────── */}
       {deleteLocationTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none">
-          <div className="bg-[#111114] border border-red-500/30 p-6 rounded-lg w-full max-w-sm shadow-[0_0_30px_rgba(239,68,68,0.05)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs">
+          <div className="bg-[#111114] border border-red-500/30 p-6 rounded-lg w-full max-w-sm shadow-[0_0_30px_rgba(239,68,68,0.05)] max-h-[90vh] overflow-y-auto scrollbar-thin">
             <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-red-500/15">
               <div className="w-8 h-8 rounded-full bg-red-950/40 border border-red-500/30 flex items-center justify-center">
                 <Trash className="w-4 h-4 text-red-400" />
@@ -1331,8 +1715,8 @@ export default function InventoryPage() {
           RENAME LOCATION MODAL DIALOG
           ──────────────────────────────────────────────────────── */}
       {editLocationTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none">
-          <div className="bg-[#111114] border border-blue-500/20 p-6 rounded-lg w-full max-w-sm shadow-[0_0_30px_rgba(59,130,246,0.05)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs">
+          <div className="bg-[#111114] border border-blue-500/20 p-6 rounded-lg w-full max-w-sm shadow-[0_0_30px_rgba(59,130,246,0.05)] max-h-[90vh] overflow-y-auto scrollbar-thin">
             <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-blue-500/15">
               <div className="w-8 h-8 rounded-full bg-blue-950/40 border border-blue-500/30 flex items-center justify-center">
                 <Edit className="w-4 h-4 text-blue-400" />
@@ -1521,7 +1905,156 @@ export default function InventoryPage() {
                 {isVi ? 'Chụp ảnh' : 'Capture frame'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
 
+      {/* ─── CATEGORY MISMATCH WARNING MODAL ─── */}
+      {mismatchTarget && (
+        <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/75 backdrop-blur-xs select-none">
+          <div className="bg-[#111114] border border-amber-500/30 p-6 rounded-lg w-full max-w-sm shadow-[0_0_20px_rgba(245,158,11,0.05)]">
+            <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-amber-500/15">
+              <div className="w-8 h-8 rounded-full bg-amber-950/40 border border-amber-500/30 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-amber-500" />
+              </div>
+              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-amber-500">
+                {isVi ? 'Phát hiện Bất thường Kệ kho (Anomaly)' : 'Storage Slotting Anomaly Warning'}
+              </h3>
+            </div>
+
+            <div className="space-y-3 mb-5 font-mono text-[10px] text-zinc-300">
+              <div className="p-3 bg-zinc-950 border border-zinc-900 rounded leading-relaxed space-y-1.5">
+                <p>
+                  <span className="text-zinc-500">{isVi ? 'Sản phẩm:' : 'Product:'}</span>{' '}
+                  <span className="text-zinc-100 font-bold">{mismatchTarget.product.sku} ({isVi ? mismatchTarget.product.name : mismatchTarget.product.nameEn})</span>
+                </p>
+                <p>
+                  <span className="text-zinc-500">{isVi ? 'Danh mục sản phẩm:' : 'Product Category:'}</span>{' '}
+                  <span className="text-zinc-100 font-bold uppercase">{mismatchTarget.product.category}</span>
+                </p>
+                <p>
+                  <span className="text-zinc-500">{isVi ? 'Kệ đích đã chọn:' : 'Target Shelf:'}</span>{' '}
+                  <span className="text-zinc-100 font-bold">{mismatchTarget.locationId}</span>
+                </p>
+              </div>
+
+              <div className="p-3 bg-amber-950/20 border border-amber-500/20 rounded text-amber-300 leading-relaxed font-sans text-[10px]">
+                {isVi 
+                  ? 'CẢNH BÁO AI: Sai kệ chứa! Bạn đang cố tình xếp một sản phẩm khác chủng loại vào phân khu được cấu hình riêng. Việc này có thể vi phạm quy định ATLD hoặc cản trước khả năng gom hàng tối ưu.'
+                  : 'AI COMPATIBILITY ALERT: Slotting mismatch! You are attempting to store a product in a warehouse zone reserved for a different category. This may disrupt automated picking paths or violate warehouse regulations.'}
+              </div>
+            </div>
+
+            <div className="flex gap-2.5 pt-3 border-t border-zinc-900">
+              <button
+                type="button"
+                onClick={() => {
+                  const targetSku = mismatchTarget.product.sku;
+                  const targetLoc = mismatchTarget.locationId;
+                  setMismatchTarget(null);
+                  handlePerformSlotting(targetSku, targetLoc, true);
+                }}
+                className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-500 text-zinc-950 font-mono font-bold tracking-widest text-[9px] uppercase rounded transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {isVi ? 'Bỏ qua & Vẫn lưu' : 'Bypass & Bind'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMismatchTarget(null);
+                  setSlottingScanStatus('idle');
+                }}
+                className="flex-1 py-2.5 border border-zinc-800 bg-transparent text-zinc-400 font-mono font-bold uppercase tracking-widest text-[9px] rounded hover:text-white transition-colors cursor-pointer"
+              >
+                {isVi ? 'Hủy bỏ' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── AI BARCODE LABEL MODAL ─── */}
+      {isSlottingLabelOpen && slottingLabelProduct && (
+        <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/80 backdrop-blur-xs select-none">
+          <div className="bg-[#0c0c0e] border border-zinc-800 p-6 rounded-lg w-full max-w-sm shadow-[0_8px_32px_rgba(0,0,0,0.8)] relative border-t-4 border-t-[#ff7a45]">
+            <button
+              onClick={() => {
+                setIsSlottingLabelOpen(false);
+                setSlottingLabelProduct(null);
+              }}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-350 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <h3 className="font-mono text-xs font-bold uppercase tracking-widest text-[#ff7a45] mb-4 pb-2 border-b border-zinc-850">
+              {isVi ? 'IN NHÃN MÃ VẠCH THÔNG MINH' : 'AI SMART BARCODE LABEL'}
+            </h3>
+
+            {/* Printable Label View */}
+            <div id="omega-printable-label" className="p-4 border border-zinc-800 bg-zinc-950/60 rounded text-center space-y-4 text-zinc-300 font-mono">
+              <div className="border-b border-zinc-850 pb-2">
+                <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest block">OMEGA SMART LOGISTICS LABEL</span>
+                <span className="text-xs font-sans font-bold text-zinc-150 uppercase block mt-1">
+                  {isVi ? slottingLabelProduct.name : (slottingLabelProduct.nameEn || slottingLabelProduct.name)}
+                </span>
+              </div>
+
+              {/* SVG EAN-13 Barcode */}
+              <div className="py-2 bg-white text-zinc-950 rounded flex items-center justify-center p-2">
+                {renderEan13Svg(slottingLabelProduct.barcode)}
+              </div>
+
+              {/* Extra details */}
+              <div className="grid grid-cols-2 gap-2 text-left text-[8px] tracking-wider uppercase border-t border-zinc-850 pt-3">
+                <div>
+                  <span className="text-zinc-500 block">SKU:</span>
+                  <span className="text-zinc-300 font-bold block">#{slottingLabelProduct.sku}</span>
+                </div>
+                <div>
+                  <span className="text-zinc-500 block">Category:</span>
+                  <span className="text-zinc-300 font-bold block truncate">{slottingLabelProduct.category}</span>
+                </div>
+                <div className="col-span-2 mt-1.5">
+                  <span className="text-zinc-500 block">Location Path:</span>
+                  <span className="text-[#ff7a45] font-bold block select-all truncate text-[9px]">{slottingLabelProduct.location}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const btn = document.getElementById('print-mock-btn');
+                  if (btn) {
+                    btn.innerText = isVi ? 'ĐANG GỬI LỆNH IN...' : 'SENDING TO PRINT...';
+                    setTimeout(() => {
+                      btn.innerText = isVi ? 'IN NHÃN THÀNH CÔNG!' : 'LABEL PRINTED!';
+                      setTimeout(() => {
+                        setIsSlottingLabelOpen(false);
+                        setSlottingLabelProduct(null);
+                      }, 850);
+                    }, 1000);
+                  }
+                }}
+                id="print-mock-btn"
+                className="flex-1 py-2 bg-[#ff7a45] hover:bg-[#ff8b5a] text-zinc-950 font-mono font-bold tracking-widest text-[9px] uppercase rounded transition-colors cursor-pointer"
+              >
+                {isVi ? 'Gửi lệnh in nhãn' : 'Send Print Command'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSlottingLabelOpen(false);
+                  setSlottingLabelProduct(null);
+                }}
+                className="flex-1 py-2 border border-zinc-800 bg-transparent text-zinc-400 font-mono font-bold uppercase tracking-widest text-[9px] rounded hover:text-white transition-colors cursor-pointer"
+              >
+                {isVi ? 'Đóng' : 'Close'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1593,3 +2126,26 @@ const getMockBlueprintImage = (category) => {
     maximumFractionDigits: 0
   }).format(val);
 } */
+
+const renderEan13Svg = (barcode) => {
+  const bars = [];
+  let x = 10;
+  const barcodeStr = barcode || "8930000000000";
+  for (let i = 0; i < barcodeStr.length; i++) {
+    const digit = parseInt(barcodeStr[i], 10) || 0;
+    const w1 = (digit % 3) + 1;
+    const w2 = ((digit + 2) % 3) + 1;
+    bars.push(<rect key={`b1-${i}`} x={x} y={10} width={w1} height={50} fill="black" />);
+    x += w1 + 1.5;
+    bars.push(<rect key={`b2-${i}`} x={x} y={10} width={w2} height={50} fill="black" />);
+    x += w2 + 1.5;
+  }
+  return (
+    <svg width="220" height="75" viewBox="0 0 220 75" className="text-zinc-900 mx-auto">
+      {bars}
+      <text x="110" y="70" textAnchor="middle" fontFamily="monospace" fontSize="10" fill="black" letterSpacing="3">
+        {barcodeStr}
+      </text>
+    </svg>
+  );
+};

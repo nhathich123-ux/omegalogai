@@ -11,8 +11,8 @@ export const demoProducts = [
     maxStock: 1000, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 1500,
-    price: 2500,
+    cost: 34500000,
+    price: 57500000,
     location: 'WH-A/Zone A/Aisle 1/Shelf 1/Level 1', 
     status: 'ok',
     description: 'Khung xe hợp kim siêu bền chịu lực va đập cực cao.',
@@ -30,8 +30,8 @@ export const demoProducts = [
     maxStock: 500, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 450,
-    price: 890,
+    cost: 10350000,
+    price: 20470000,
     location: 'WH-B/Zone B/Aisle 2/Shelf 3/Level 2', 
     status: 'warning',
     description: 'Chip điện tử thu phát sóng điện não tần số cực cao.',
@@ -49,8 +49,8 @@ export const demoProducts = [
     maxStock: 250, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 120,
-    price: 220,
+    cost: 2760000,
+    price: 5060000,
     location: 'WH-C/Zone C/Aisle 1/Shelf 2/Level 1', 
     status: 'alert',
     description: 'Lõi pin lithium mật độ năng lượng cao dùng cho xe nâng điện.',
@@ -68,8 +68,8 @@ export const demoProducts = [
     maxStock: 5000, 
     unit: 'Lít',
     unitEn: 'L',
-    cost: 15,
-    price: 30,
+    cost: 345000,
+    price: 690000,
     location: 'WH-A/Zone D/Aisle 1/Shelf 1/Level 1', 
     status: 'ok',
     description: 'Chất lỏng tản nhiệt cao cấp chống ăn mòn hệ thống động cơ.',
@@ -87,8 +87,8 @@ export const demoProducts = [
     maxStock: 2000, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 95,
-    price: 180,
+    cost: 2185000,
+    price: 4140000,
     location: 'WH-A/Zone B/Aisle 1/Shelf 2/Level 3', 
     status: 'ok',
     description: 'Cảm biến quang học siêu chính xác đo khoảng cách hồng ngoại.',
@@ -106,8 +106,8 @@ export const demoProducts = [
     maxStock: 500, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 5,
-    price: 15,
+    cost: 115000,
+    price: 345000,
     location: 'WH-A/Zone D/Aisle 1/Shelf 1/Level 1', 
     status: 'ok',
     description: 'Áo mưa tiện lợi siêu nhẹ chống thấm nước tuyệt đối.',
@@ -125,8 +125,8 @@ export const demoProducts = [
     maxStock: 300, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 15,
-    price: 35,
+    cost: 345000,
+    price: 805000,
     location: 'WH-A/Zone D/Aisle 1/Shelf 1/Level 1', 
     status: 'ok',
     description: 'Ô dù cầm tay cán dài gấp gọn có in logo OMEGA WMS.',
@@ -144,8 +144,8 @@ export const demoProducts = [
     maxStock: 400, 
     unit: 'cái',
     unitEn: 'pcs',
-    cost: 45,
-    price: 95,
+    cost: 1035000,
+    price: 2185000,
     location: 'WH-A/Zone D/Aisle 1/Shelf 1/Level 1', 
     status: 'ok',
     description: 'Áo khoác bảo hộ chống tia cực tím UV cực cao ngoài trời.',
@@ -170,8 +170,8 @@ export const demoReceipts = [
     warehouse: 'Warehouse A', 
     partner: 'SteelWorks Ltd', 
     items: [
-      { sku: 'OMG-9921', name: 'Khung gầm Carbon X-1', qty: 500, cost: 1500, qcPassed: true, lotId: 'LOT-9921-A1' },
-      { sku: 'OMG-8871', name: 'Chất làm mát Công nghiệp', qty: 4500, cost: 15, qcPassed: true, lotId: 'LOT-8871-01' }
+      { sku: 'OMG-9921', name: 'Khung gầm Carbon X-1', qty: 500, cost: 34500000, qcPassed: true, lotId: 'LOT-9921-A1' },
+      { sku: 'OMG-8871', name: 'Chất làm mát Công nghiệp', qty: 4500, cost: 345000, qcPassed: true, lotId: 'LOT-8871-01' }
     ], 
     status: 'done', 
     date: '2026-05-17',
@@ -184,8 +184,8 @@ export const demoReceipts = [
     warehouse: 'Warehouse A', 
     partner: 'TechParts Global', 
     items: [
-      { sku: 'OMG-9921', name: 'Khung gầm Carbon X-1', qty: 280, cost: 1500, qcPassed: null, lotId: 'LOT-9921-A2' },
-      { sku: 'X-10492-PS', name: 'Cảm biến Chính xác X-1', qty: 1429, cost: 95, qcPassed: null, lotId: 'SN-10492-P1' }
+      { sku: 'OMG-9921', name: 'Khung gầm Carbon X-1', qty: 280, cost: 34500000, qcPassed: null, lotId: 'LOT-9921-A2' },
+      { sku: 'X-10492-PS', name: 'Cảm biến Chính xác X-1', qty: 1429, cost: 2185000, qcPassed: null, lotId: 'SN-10492-P1' }
     ], 
     status: 'ready', 
     date: '2026-05-22',
@@ -198,7 +198,7 @@ export const demoReceipts = [
     warehouse: 'Warehouse B', 
     partner: 'ElectroSupply Co', 
     items: [
-      { sku: 'OMG-4452', name: 'Giao diện Neural Link', qty: 10, cost: 450, qcPassed: null, lotId: 'SN-4452-003' }
+      { sku: 'OMG-4452', name: 'Giao diện Neural Link', qty: 10, cost: 10350000, qcPassed: null, lotId: 'SN-4452-003' }
     ], 
     status: 'waiting', 
     date: '2026-05-20',
@@ -258,10 +258,10 @@ export const demoAdjustments = [
 ];
 
 export const demoPurchaseOrders = [
-  { id: 'PO-2026-0142', vendor: 'TechParts Global', items: 2, total: 605000, status: 'confirmed', expected: '2026-05-22' },
-  { id: 'PO-2026-0141', vendor: 'SteelWorks Ltd', items: 2, total: 817500, status: 'received', expected: '2026-05-18' },
-  { id: 'PO-2026-0140', vendor: 'HydraFlow Inc', items: 1, total: 9200, status: 'draft', expected: '2026-05-25' },
-  { id: 'PO-2026-0139', vendor: 'ElectroSupply Co', items: 1, total: 4500, status: 'confirmed', expected: '2026-05-20' },
+  { id: 'PO-2026-0142', vendor: 'TechParts Global', items: 2, total: 13915000000, status: 'confirmed', expected: '2026-05-22' },
+  { id: 'PO-2026-0141', vendor: 'SteelWorks Ltd', items: 2, total: 18802500000, status: 'received', expected: '2026-05-18' },
+  { id: 'PO-2026-0140', vendor: 'HydraFlow Inc', items: 1, total: 211600000, status: 'draft', expected: '2026-05-25' },
+  { id: 'PO-2026-0139', vendor: 'ElectroSupply Co', items: 1, total: 103500000, status: 'confirmed', expected: '2026-05-20' },
 ];
 
 export const demoNotifications = [

@@ -254,6 +254,8 @@ export default function SopChatbotWidget() {
       return str.split(/\s+/).map(word => map[word] || map[cleanTelex(word)] || word).join(' ');
     };
 
+    const isAuto = ["auto", "tu dong", "tự động", "lap tuc", "lập tức", "ngay", "luon", "tức thì", "tuc thi"].some(w => removeAccents(query.toLowerCase()).includes(w));
+
     const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     const getChatProfile = () => {
@@ -604,8 +606,9 @@ export default function SopChatbotWidget() {
       const actionType = pendingAction.type;
       const data = { ...pendingAction.data };
       const step = pendingAction.step;
+      const isAutoAction = pendingAction.isAuto || isAuto;
 
-      const isYes = ["có", "co", "muốn", "muon", "ok", "yes", "duyệt", "thực hiện", "chạy đi", "yup", "uh", "uhm", "đồng ý", "dong y", "agree"].some(w => query.toLowerCase().includes(w));
+      const isYes = ["có", "co", "muốn", "muon", "ok", "yes", "duyệt", "thực hiện", "chạy đi", "yup", "uh", "uhm", "đồng ý", "dong y", "agree", "auto", "tự động", "tu dong", "lập tức", "lap tuc", "ngay", "luon", "tức thì", "tuc thi"].some(w => query.toLowerCase().includes(w));
       const isNo = ["không", "khong", "đéo", "deo", "no", "nah", "cancel", "hủy", "huy", "dẹp đi", "dep di", "không muốn", "khong muon", "đếch", "bỏ", "bo"].some(w => query.toLowerCase().includes(w));
 
       if (step === 'confirming') {
@@ -732,6 +735,27 @@ export default function SopChatbotWidget() {
       }
 
       if (newMissing.length === 0) {
+        if (isAutoAction) {
+          const actionNames = {
+            "ADD_PRODUCT": "Thêm sản phẩm mới",
+            "CREATE_RECEIPT": "Tạo phiếu nhập kho",
+            "CREATE_DELIVERY": "Tạo phiếu xuất kho",
+            "CREATE_TRANSFER": "Điều chuyển kho nội bộ",
+            "CREATE_PO": "Tạo đơn mua hàng (PO)"
+          };
+          executeAction({ type: actionType, data });
+          setPendingAction(null);
+          showLocalToast(isVi ? 'Đã thực thi thành công trên hệ thống!' : 'Executed successfully on the system!');
+          
+          setChatHistory(prev => [...prev, {
+            role: 'ai',
+            text: applyPronounsJS(`🚀 [AUTO EXECUTE] Tớ đã tự động thực thi hành động **${actionNames[actionType]}** thành công trên hệ thống rồi nhé!`, prof),
+            source: 'Offline Action Executor - Auto',
+            ts: new Date()
+          }]);
+          return;
+        }
+
         let summary = "";
         if (actionType === "ADD_PRODUCT") {
           summary = `Thêm sản phẩm mới:\n• SKU: ${data.sku}\n• Tên: ${data.name}\n• Danh mục: ${data.category || 'ELECTRONICS'}\n• Tồn kho ban đầu: ${data.stock || 0} cái tại vị trí ${data.location || 'A-01-01'}`;
@@ -750,7 +774,8 @@ export default function SopChatbotWidget() {
           type: actionType,
           data,
           step: 'confirming',
-          missing_fields: []
+          missing_fields: [],
+          isAuto: isAutoAction
         });
         setChatHistory(prev => [...prev, { role: 'ai', text: promptText, source: 'Offline Action Executor', ts: new Date() }]);
         return;
@@ -770,7 +795,8 @@ export default function SopChatbotWidget() {
           type: actionType,
           data,
           step: 'collecting',
-          missing_fields: newMissing
+          missing_fields: newMissing,
+          isAuto: isAutoAction
         });
         setChatHistory(prev => [...prev, { role: 'ai', text: promptText, source: 'Offline Action Executor', ts: new Date() }]);
         return;
@@ -795,6 +821,7 @@ export default function SopChatbotWidget() {
 
     if (localActionType) {
       const data = extractFieldsJS(query);
+      const isAutoAction = isAuto;
       const missing = [];
       if (localActionType === "ADD_PRODUCT") {
         if (!data.sku) missing.push('sku');
@@ -819,6 +846,27 @@ export default function SopChatbotWidget() {
       }
 
       if (missing.length === 0) {
+        if (isAutoAction) {
+          const actionNames = {
+            "ADD_PRODUCT": "Thêm sản phẩm mới",
+            "CREATE_RECEIPT": "Tạo phiếu nhập kho",
+            "CREATE_DELIVERY": "Tạo phiếu xuất kho",
+            "CREATE_TRANSFER": "Điều chuyển kho nội bộ",
+            "CREATE_PO": "Tạo đơn mua hàng (PO)"
+          };
+          executeAction({ type: localActionType, data });
+          setPendingAction(null);
+          showLocalToast(isVi ? 'Đã thực thi thành công trên hệ thống!' : 'Executed successfully on the system!');
+          
+          setChatHistory(prev => [...prev, {
+            role: 'ai',
+            text: applyPronounsJS(`🚀 [AUTO EXECUTE] Tớ đã tự động thực thi hành động **${actionNames[localActionType]}** thành công trên hệ thống rồi nhé!`, prof),
+            source: 'Offline Action Executor - Auto',
+            ts: new Date()
+          }]);
+          return;
+        }
+
         let summary = "";
         if (localActionType === "ADD_PRODUCT") {
           summary = `Thêm sản phẩm mới:\n• SKU: ${data.sku}\n• Tên: ${data.name}\n• Danh mục: ${data.category || 'ELECTRONICS'}\n• Tồn kho ban đầu: ${data.stock || 0} cái tại vị trí ${data.location || 'A-01-01'}`;
@@ -837,7 +885,8 @@ export default function SopChatbotWidget() {
           type: localActionType,
           data,
           step: 'confirming',
-          missing_fields: []
+          missing_fields: [],
+          isAuto: isAutoAction
         });
         setChatHistory(prev => [...prev, { role: 'ai', text: promptText, source: 'Offline Action Executor', ts: new Date() }]);
         return;
@@ -857,7 +906,8 @@ export default function SopChatbotWidget() {
           type: localActionType,
           data,
           step: 'collecting',
-          missing_fields: missing
+          missing_fields: missing,
+          isAuto: isAutoAction
         });
         setChatHistory(prev => [...prev, { role: 'ai', text: promptText, source: 'Offline Action Executor', ts: new Date() }]);
         return;

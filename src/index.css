@@ -1563,6 +1563,38 @@ html[lang="vi"] .brand-title {
   background-color: var(--bg-input) !important;
 }
 
+[data-theme="light"] .border-\[\#22202a\]\/80 {
+  border-color: var(--border) !important;
+}
+
+[data-theme="light"] .bg-\[\#0e0e11\]\/40 {
+  background-color: var(--bg-card-hover) !important;
+}
+
+[data-theme="light"] .bg-\[\#0e0e11\]\/30 {
+  background-color: var(--bg-card-hover) !important;
+}
+
+[data-theme="light"] .border-\[\#1b1a20\]\/60 {
+  border-color: var(--border-subtle) !important;
+}
+
+[data-theme="light"] .border-\[\#1b1a20\]\/40 {
+  border-color: var(--border-subtle) !important;
+}
+
+[data-theme="light"] .text-\[\#ff9e7d\]\/80 {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .text-\[\#ff9e7d\]\/70 {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .text-\[\#ff9e7d\] {
+  color: var(--text-secondary) !important;
+}
+
 /* ═══════════════════════════════════════════
    OMEGA INTERACTIVE LANDING PAGE ANIMATIONS
    ═══════════════════════════════════════════ */

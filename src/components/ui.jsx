@@ -4,7 +4,7 @@ export function PageHeader({ title, subtitle, actions }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
       <div>
-        <h2 className="text-xl font-bold tracking-wide text-zinc-100 font-sans" style={{ letterSpacing: '0.03em' }}>{title}</h2>
+        <h2 className="text-xl font-bold tracking-wide text-zinc-100 font-sans uppercase" style={{ letterSpacing: '0.03em' }}>{title}</h2>
         {subtitle && (
           <p className="text-xs mt-1 text-zinc-400 font-mono tracking-wide uppercase opacity-70">{subtitle}</p>
         )}
@@ -78,35 +78,29 @@ export function StatusPill({ label, variant }) {
 }
 
 export function SegmentedStockBar({ stock, maxStock, unit = '', status }) {
-  const totalSegments = 10;
-  // Compute filled segments
-  const filledCount = Math.max(0, Math.min(totalSegments, Math.round((stock / maxStock) * totalSegments)));
+  const percentage = Math.max(0, Math.min(100, Math.round((stock / (maxStock || 1)) * 100)));
   
-  let activeClass = 'segmented-bar__segment--active';
+  let fillGradient = 'from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.35)]';
+  let statusTextClass = 'text-emerald-400';
+  
   if (status === 'alert' || stock === 0) {
-    activeClass = 'segmented-bar__segment--active-red';
-  } else if (status === 'warning') {
-    activeClass = 'segmented-bar__segment--active'; // warning is glowing orange
-  } else {
-    activeClass = 'segmented-bar__segment--active'; // ok is glowing orange
+    fillGradient = 'from-rose-600 to-red-500 shadow-[0_0_10px_rgba(239,68,68,0.45)]';
+    statusTextClass = 'text-red-400';
+  } else if (status === 'warning' || stock < (maxStock * 0.25)) {
+    fillGradient = 'from-amber-500 to-[#ff7a45] shadow-[0_0_10px_rgba(255,122,69,0.35)]';
+    statusTextClass = 'text-[#ff9e7d]';
   }
 
   return (
     <div className="flex items-center gap-3 w-full max-w-[220px]">
-      <div className="segmented-bar flex-1">
-        {Array.from({ length: totalSegments }).map((_, i) => {
-          const isFilled = i < filledCount && stock > 0;
-          return (
-            <span
-              key={i}
-              className={`segmented-bar__segment ${isFilled ? activeClass : ''}`}
-              style={{ height: '4px' }}
-            />
-          );
-        })}
+      <div className="h-1.5 w-full bg-zinc-950 border border-zinc-850 rounded-full overflow-hidden flex-1 relative" title={`${percentage}%`}>
+        <div 
+          className={`h-full bg-gradient-to-r rounded-full transition-all duration-500 ease-out ${fillGradient}`}
+          style={{ width: `${percentage}%` }}
+        />
       </div>
       <span className="font-mono text-[10px] text-zinc-400 shrink-0 min-w-[75px] text-right">
-        {stock.toLocaleString()}{unit} <span className="opacity-30">/</span> {maxStock.toLocaleString()}{unit}
+        <span className={`font-bold ${statusTextClass}`}>{stock.toLocaleString()}</span>{unit} <span className="opacity-20 font-sans">/</span> <span className="text-zinc-500">{maxStock.toLocaleString()}</span>{unit}
       </span>
     </div>
   );
@@ -118,11 +112,11 @@ export function DataTable({ columns, rows, rowKey, onRowClick, selectedKey }) {
       <table className="w-full text-sm min-w-[640px] border-collapse">
         <thead>
           <tr
-            className="border-b border-[#22202a] text-xs font-mono tracking-wider font-bold"
+            className="border-b border-[#22202a] bg-[#0e0e11]/40 text-xs font-mono tracking-widest font-extrabold uppercase"
             style={{ color: 'var(--text-muted)' }}
           >
             {columns.map((col) => (
-              <th key={col.key} className="text-left py-3 px-5 uppercase text-[10px] tracking-widest text-[#ff9e7d]/70">
+              <th key={col.key} className="text-left py-4 px-6 uppercase text-[9px] tracking-widest text-[#ff9e7d]/80 font-mono">
                 {col.label}
               </th>
             ))}
@@ -135,12 +129,14 @@ export function DataTable({ columns, rows, rowKey, onRowClick, selectedKey }) {
               <tr
                 key={row[rowKey]}
                 onClick={() => onRowClick && onRowClick(row)}
-                className={`border-b border-[#1b1a20] last:border-0 transition-colors cursor-pointer ${
-                  isSelected ? 'bg-zinc-900' : 'hover:bg-zinc-900/40'
+                className={`border-b border-[#1b1a20]/60 last:border-0 transition-all duration-250 cursor-pointer ${
+                  isSelected 
+                    ? 'bg-[#ff7a45]/5 text-zinc-100 border-l-2 border-l-[#ff7a45]' 
+                    : 'hover:bg-zinc-900/40 hover:text-zinc-150'
                 }`}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className="py-3 px-5 text-zinc-300 font-sans align-middle" style={col.style}>
+                  <td key={col.key} className="py-4 px-6 text-zinc-300 font-sans align-middle text-xs animate-fade-in" style={col.style}>
                     {col.render ? col.render(row) : row[col.key]}
                   </td>
                 ))}

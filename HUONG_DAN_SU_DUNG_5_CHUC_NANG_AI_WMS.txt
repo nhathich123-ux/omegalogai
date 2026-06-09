@@ -1,0 +1,167 @@
+================================================================================
+          TÀI LIỆU HƯỚNG DẪN SỬ DỤNG VÀ KIỂM THỬ 5 TÍNH NĂNG THÔNG MINH (AI/WMS)
+                              HỆ THỐNG ĐIỀU KHIỂN KHO OMEGA
+================================================================================
+
+Tài liệu này cung cấp hướng dẫn chi tiết từng bước bằng tiếng Việt để người sử dụng và ban giám khảo kiểm thử, trải nghiệm đầy đủ 5 tính năng thông minh (AI/WMS) nâng cao của hệ thống OMEGA LOGISTICS WMS. Bạn có thể sao chép trực tiếp nội dung này vào Microsoft Word để làm tài liệu báo cáo dự án.
+
+---
+
+--------------------------------------------------------------------------------
+Tính năng 1: AI DỰ BÁO TỒN KHO DỰA TRÊN ĐƠN HÀNG XUẤT (DEMAND FORECASTING)
+--------------------------------------------------------------------------------
+1. Chức năng cốt lõi:
+   Hệ thống không sử dụng định mức an toàn tĩnh, mà áp dụng giải thuật AI thời gian
+   để phân tích tốc độ tiêu thụ hàng hóa thực tế (Velocity), đối chiếu với lịch sử
+   đơn xuất và thời gian nhà cung cấp giao hàng (Lead time). Từ đó, tự động dự báo
+   số lượng tiêu thụ trong 7 ngày tới, tính toán số ngày còn lại trước khi cạn kho
+   (Stockout Countdown) và phát đi cảnh báo bổ sung hàng (Reorder) chủ động.
+
+2. Vị trí trên giao diện:
+   - Nhấp vào tab "Reports" (Báo cáo) ở thanh menu bên trái.
+   - Tìm thẻ đầu tiên: "Demand & Stockout Forecaster (Dự báo Nhu cầu & Hạn cạn kho)".
+
+3. Các bước kiểm thử:
+   - Bước 1: Trong dropdown "Chọn sản phẩm dự báo", hãy chọn một mã hàng (ví dụ: OMG-1002 - Lõi Pin Lithium-Ion hoặc OMG-9921 - Khung sườn Carbon).
+   - Bước 2: Nhấn nút "Run Forecast" (Chạy Dự Báo AI).
+   - Bước 3: Đọc kết quả hiển thị:
+     + Hệ thống vẽ biểu đồ cột dự báo lượng xuất 7 ngày tiếp theo.
+     + Cột trái hiển thị chỉ số: Tốc độ tiêu thụ trung bình ngày (Velocity), Số ngày tồn kho còn lại (Stockout Countdown) và Trạng thái Cảnh báo Cung ứng (Ví dụ: "⚠️ CẢNH BÁO ĐỨT GÃY: Hàng chỉ đủ dùng trong 1 ngày, trong khi thời gian nhập hàng cần tới 5 ngày!").
+     + Nếu hàng cạn dưới mức an toàn, một đơn hàng mua nháp (Draft PO) sẽ tự động được tạo ra ở tab "Purchase" để mua thêm hàng lên mức tối đa.
+
+---
+
+--------------------------------------------------------------------------------
+Tính năng 2: LIÊN KẾT MÃ VẠCH VÀ PHÁT HIỆN BẤT THƯỜNG (BARCODE SLOTTING SIMULATOR)
+--------------------------------------------------------------------------------
+1. Chức năng cốt lõi:
+   Giả lập thiết bị quét mã vạch cầm tay PDA của nhân viên kho để quét liên kết sản
+   phẩm (Product SKU) vào vị trí kệ kho thực tế (Storage Bin). 
+   Tích hợp bộ lọc quy tắc thông minh (Anomaly Detection): Hệ thống sẽ ngăn chặn và
+   cảnh báo đỏ nếu nhân viên xếp hàng sai vị trí quy định (Ví dụ: xếp Thiết bị hạng
+   nặng vào khu linh kiện Điện tử nhạy cảm, hoặc xếp Chất lỏng dễ cháy vào khu Năng
+   lượng). Đồng thời cho phép tự động tạo nhãn tem mã vạch AI (EAN-13 + QR).
+
+2. Vị trí trên giao diện:
+   - Nhấp vào tab "Inventory" (Kho hàng) ở thanh menu bên trái.
+   - Chọn tab thứ 4 ở thanh ngang phía trên: "LIÊN KẾT MÃ VẠCH (SLOTTING)".
+
+3. Các bước kiểm thử:
+   - Bước 1: Chọn sản phẩm trong dropdown "Chọn sản phẩm cần liên kết (SKU)" (Ví dụ chọn sản phẩm thuộc nhóm Thiết bị hạng nặng như OMG-9921).
+   - Bước 2: Chọn một kệ đích sai quy chuẩn tại dropdown "Chọn vị trí kệ kho đích" (Ví dụ chọn kệ nằm ở Khu B Điện tử: WH-A/Zone B/Aisle 1/Shelf 2/Level 3).
+   - Bước 3: Bấm nút màu cam "Quét & liên kết kệ" (Scan & Bind Bin).
+     + KẾT QUẢ: Màn hình quét sẽ hiển thị loading, sau đó bật ra một cửa sổ Cảnh báo đỏ rực: "Phát hiện Bất thường Kệ kho (Anomaly) - CẢNH BÁO AI: Sai kệ chứa! Sản phẩm thuộc nhóm Heavy Machinery nhưng kệ nằm tại Zone B dành cho Electronics...".
+     + Bạn có thể bấm "Bỏ qua & Vẫn lưu" để ép liên kết, hoặc bấm "Hủy bỏ" để chọn lại kệ chuẩn.
+   - Bước 4: Chọn kệ đúng chủng loại (Ví dụ kệ Zone A Thiết bị nặng: WH-A/Zone A/Aisle 1/Shelf 1/Level 1), bấm "Quét & liên kết kệ".
+     + KẾT QUẢ: Hệ thống báo quét thành công, hiển thị dấu tích xanh, cập nhật vị trí mới của sản phẩm lên cơ sở dữ liệu và tự động chèn dòng log thành công vào Terminal trung tâm dưới Dashboard.
+   - Bước 5 (Tạo nhãn AI): Bấm nút "Tạo nhãn mã vạch AI". Cửa sổ popup sẽ hiện ra tem nhãn kho thông minh với mã vạch EAN-13 vẽ chi tiết bằng SVG, mã QR định vị và thông tin SKU của sản phẩm. Nhấn "Gửi lệnh in nhãn" để mô phỏng hoạt động in tem dán kệ.
+
+---
+
+--------------------------------------------------------------------------------
+Tính năng 3: QUÉT HÓA ĐƠN ĐẦU VÀO AI OCR (INBOUND OCR MANIFEST CHECK)
+--------------------------------------------------------------------------------
+1. Chức năng cốt lõi:
+   Sử dụng công nghệ mô phỏng AI OCR để đọc hóa đơn PDF nhập hàng, tự động trích
+   xuất thông tin nhà cung cấp, danh sách sản phẩm, số lượng thực tế. Dựa trên mức
+   độ thiếu hụt hàng hóa trong kho hiện tại, hệ thống tự động tính điểm ưu tiên và
+   xếp xe tải chở hàng đó lên vị trí ưu tiên dỡ hàng trước (Priority Truck Queue)
+   để giải phóng chuỗi cung ứng tránh cháy hàng.
+
+2. Vị trí trên giao diện:
+   - Nhấp vào tab "Operations" (Vận hành) ở thanh menu bên trái.
+   - Cuộn xuống phần "Inbound Shipments (Receipts)" và tìm hộp công cụ "AI OCR Manifest Parser" ở cột bên phải.
+
+3. Các bước kiểm thử:
+   - Bước 1: Trong dropdown "Chọn hóa đơn Manifest nhập kho", chọn một hóa đơn mẫu (Ví dụ: invoice_steelworks_992.pdf).
+   - Bước 2: Bấm nút "Execute OCR manifest check" (Chạy phân tích OCR).
+     + KẾT QUẢ:
+       + Hệ thống hiển thị hộp thoại chạy quét OCR bóc tách từng dòng dữ liệu: Tên sản phẩm trích xuất, số lượng phát hiện, nhà cung cấp.
+       + Sau khi quét xong, xe tải chở hàng đó sẽ tự động được xếp vào hàng đợi ưu tiên "Priority Truck Queue" ở ngay bên cạnh kèm chỉ số điểm ưu tiên (Priority Score) tính theo độ thiếu hàng thực tế trong kho.
+
+---
+
+--------------------------------------------------------------------------------
+Tính năng 4: THUẬT TOÁN GỢI Ý MUA CHUNG & XẾP KỆ GẦN NHAU (APRIORI AFFINITY OPTIMIZER)
+--------------------------------------------------------------------------------
+1. Chức năng cốt lõi:
+   Hệ thống ứng dụng thuật toán Apriori khai phá dữ liệu (Data Mining) để phân tích
+   lịch sử đơn hàng xuất, phát hiện các nhóm sản phẩm thường được mua cùng nhau với
+   độ tin cậy cao (Confidence). Hệ thống tự động đề xuất tạo các gói combo khuyến mãi
+   và đồng thời ra lệnh sắp xếp kệ hàng (Proximity Slotting) để đưa hai mặt hàng này
+   về vị trí kệ vật lý sát cạnh nhau, giúp nhân viên gom hàng nhanh gấp 3 lần.
+
+2. Vị trí trên giao diện:
+   - Nhấp vào tab "Reports" (Báo cáo) ở thanh menu bên trái.
+   - Cuộn xuống dưới cùng tìm thẻ: "Market Basket Affinity Optimizer (Apriori)".
+
+3. Các bước kiểm thử:
+   - Bước 1: Xem bảng phân tích liên kết sản phẩm (ví dụ: Khung sườn OMG-9921 và Trục khuỷu OMG-4452 thường được khách mua chung với độ tin cậy 85%).
+   - Bước 2: Nhấn vào nút "Apply Proximity Slotting (Xếp kệ gần nhau)" màu cam ở cạnh đề xuất.
+     + KẾT QUẢ:
+       + Hệ thống sẽ tự động phát sinh một lệnh chuyển kho nội bộ (Internal Transfer) để dời vị trí kệ của một trong hai sản phẩm về sát kệ của sản phẩm kia.
+       + Màn hình Terminal trung tâm ở trang Dashboard sẽ xuất hiện dòng log màu xanh lá: "[Tự động chuyển hàng AI]: Đã tự động di dời vị trí kệ sản phẩm..." để chứng minh thuật toán hoạt động.
+
+---
+
+--------------------------------------------------------------------------------
+Tính năng 5: KIỂM TOÁN AN NINH & PHÁT HIỆN GIAN LẬN AI (SECURITY ANOMALY DETECTION)
+--------------------------------------------------------------------------------
+1. Chức năng cốt lõi:
+   Áp dụng mô hình mô phỏng thuật toán Rừng cô lập (Isolation Forest) và Autoencoder
+   để quét toàn bộ nhật ký vận hành kho (logs). Hệ thống tự động khoanh vùng và
+   phát hiện 3 loại bất thường (Outliers) nguy hiểm đe dọa an toàn kho:
+   - Bất thường thời gian (Time Outlier): Nhân viên chuyển kho lúc nửa đêm (2h sáng).
+   - Bất thường số lượng (Quantity Outlier): Lượng hàng báo hỏng tăng đột biến 500%.
+   - Bất thường quyền hạn (Authorization Outlier): Nhân viên thường tự ý chỉnh sửa giá vốn sản phẩm sai quy trình.
+
+2. Vị trí trên giao diện:
+   - Nhấp vào trang "Dashboard" (Bảng điều khiển trung tâm) ở thanh menu bên trái.
+   - Tìm thẻ lớn nằm ở gần dưới cùng (ngay trên Terminal đen): "Hệ thống Kiểm toán An ninh & Phát hiện Bất thường AI (Anomaly Detection)".
+
+3. Các bước kiểm thử:
+   - Bước 1: Khi vừa mở trang, chỉ số "Outliers Detected" (Số lỗi phát hiện) đang ở mức 0 và mức đe dọa là "AN TOÀN" (SECURE). Biểu đồ phân tán (Scatter Plot Radar) chỉ có các điểm xanh lá cây tập trung.
+   - Bước 2: Bấm nút màu đỏ "BẮT ĐẦU KIỂM TOÁN AN NINH AI" (Execute AI Security Scan).
+     + KẾT QUẢ:
+       + Hệ thống hiển thị thanh tiến trình chạy phần trăm từ 0% -> 100% kèm các dòng lệnh kiểm toán mô phỏng mô hình Isolation Forest quét logs.
+       + Khi đạt 100%, trạng thái chuyển thành "ĐE DỌA CAO" (THREAT HIGH).
+       + Biểu đồ phân tán xuất hiện 3 điểm chấm đỏ nhấp nháy nằm cô lập ở rìa ngoài. Bạn có thể di chuột (hover) vào từng chấm đỏ để xem nhanh chẩn đoán lỗi.
+       + Bảng "NHẬT KÝ KIỂM TOÁN BẤT THƯỜNG" hiển thị chi tiết 3 vụ việc sai phạm (Mã phiếu TR-9941, ADJ-3341, SYS-8821) với đầy đủ thông tin nhân viên vi phạm và lý do cảnh cáo.
+       + Đồng thời, 3 dòng cảnh báo màu đỏ chói cũng được đẩy trực tiếp vào luồng Log Terminal dưới cùng Dashboard để bộ phận vận hành nhận diện tức thì.
+
+---
+
+--------------------------------------------------------------------------------
+Tính năng 6: TRÍCH XUẤT TÀI LIỆU AI ĐA ĐỊNH DẠNG (AI DOCUMENT EXTRACTOR & IMPORTER)
+--------------------------------------------------------------------------------
+1. Chức năng cốt lõi:
+   Hệ thống tích hợp một mô-đun AI Document Parser thông minh, cho phép kéo thả hoặc tải lên các loại tài liệu phổ biến bao gồm Excel (.xlsx, .xls), Word (.docx, .doc), PDF (.pdf) hoặc Hình ảnh hóa đơn/kiểm kê (.jpg, .png).
+   AI sẽ tự động đọc, quét cấu trúc tài liệu thông qua mô phỏng thị giác máy OCR và phân tích ngôn ngữ tự nhiên NLP để bóc tách thông tin chi tiết:
+   - Danh sách sản phẩm mới (SKU, Tên, Danh mục, Tồn kho ban đầu, Vị trí kệ, Giá vốn, Giá bán).
+   - Phiếu yêu cầu nhập kho (Inbound Receipts) từ nhà cung cấp.
+   - Phiếu yêu cầu xuất kho (Outbound Deliveries) cho khách hàng/sàn TMĐT.
+   - Đơn mua hàng (Purchase Orders) gửi đối tác cung ứng.
+   - Lệnh điều chuyển nội bộ (Internal Transfers) giữa các kho.
+   Cho phép người dùng chỉnh sửa trực tiếp các dữ liệu bóc tách được trên bảng xem trước và nhấp nút "Đồng bộ vào kho" để tự động ghi đè, cập nhật thẳng vào cơ sở dữ liệu WMS tương ứng mà không cần nhập tay.
+
+2. Vị trí trên giao diện:
+   - Nhấp vào tab "TRÍCH XUẤT TÀI LIỆU AI" (AI DOC EXTRACTOR) ở thanh menu bên trái.
+
+3. Các bước kiểm thử:
+   - Bước 1: Để kiểm tra nhanh, bạn có thể chọn một trong các file sandbox mẫu được thiết kế sẵn ở thẻ "File mẫu để test thử" bên góc trái:
+     + Bấm chọn file `danh_sach_san_pham_moi_cong_nghe.xlsx`.
+     + Hoặc bấm chọn file `hoa_don_nhap_kho_FastCorp_lot9.pdf`.
+     + Hoặc bấm chọn file `yeu_cau_xuat_kho_Lazada_v3.docx`.
+     + Hoặc bấm chọn file `photo_kiem_ke_ke_A2.jpg`.
+   - Bước 2 (Hoặc tự nhập văn bản): Bạn có thể dán trực tiếp đoạn văn bản thô từ clipboard vào ô nhập liệu bên dưới (Ví dụ dán: "nhập kho nhà cung cấp FastCorp mã SKU-OMG-9921 số lượng 150 cái").
+   - Bước 3: Nhấp nút màu cam "KHỞI CHẠY PHÂN TÍCH AI" (RUN AI ANALYZER).
+     + KẾT QUẢ:
+       + Khung terminal màu xanh sẽ chạy log từng dòng giả lập quá trình AI đọc mã hóa Blob, phân tích LayoutLMv3 và bóc tách thực thể WMS.
+       + Bảng bên phải hiển thị cấu trúc dữ liệu đã được trích xuất hoàn chỉnh theo định dạng lưới (SKU, Tên sản phẩm, Số lượng, Đối tác...).
+       + Bạn có thể chỉnh sửa trực tiếp các thông số trên bảng này (Ví dụ: click vào ô số lượng chỉnh từ 150 thành 180).
+   - Bước 4: Nhấp nút xanh lá "ĐỒNG BỘ VÀO KHO" ở góc trên bên phải bảng dữ liệu.
+     + KẾT QUẢ: Hệ thống báo tích xanh thành công. Toàn bộ danh mục sản phẩm mới hoặc các phiếu nhập/xuất kho vừa phân tích sẽ được đưa vào các tab tương ứng của cơ sở dữ liệu hệ thống (Ví dụ: nếu là danh sách sản phẩm thì sẽ xuất hiện ngay trong tab "KHO HÀNG", nếu là phiếu nhập sẽ tự động hiển thị trong tab "VẬN HÀNH").
+
+================================================================================
+Chúc bạn có buổi thuyết trình dự án thành công rực rỡ với OMEGA WMS!
+================================================================================

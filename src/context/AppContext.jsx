@@ -199,6 +199,17 @@ export function AppProvider({ children }) {
   const [purchaseOrders, setPurchaseOrders] = useState(() => getLocalStorageItem('omega-purchase-orders', []));
 
   // 10. Real-time Alarm / Notification Logs Stream
+  const productsRef = useRef(products);
+  const purchaseOrdersRef = useRef(purchaseOrders);
+
+  useEffect(() => {
+    productsRef.current = products;
+  }, [products]);
+
+  useEffect(() => {
+    purchaseOrdersRef.current = purchaseOrders;
+  }, [purchaseOrders]);
+
   const [notifications, setNotifications] = useState(() => getLocalStorageItem('omega-notifications', [
     {
       id: '1',
@@ -262,19 +273,19 @@ export function AppProvider({ children }) {
 
   // --- Reordering Rules Automator ---
   const checkReorderingRules = (sku) => {
-    const prod = products.find(p => p.sku === sku);
+    const prod = productsRef.current.find(p => p.sku === sku);
     if (!prod) return;
 
-    if (prod.stock < prod.minStock) {
+    if (Number(prod.stock) < Number(prod.minStock)) {
       // Check if a draft PO for this SKU already exists
-      const alreadyDraft = purchaseOrders.some(
+      const alreadyDraft = purchaseOrdersRef.current.some(
         po => po.status === 'draft' && po.vendor === getVendorForCategory(prod.category)
       );
 
       if (!alreadyDraft) {
-        const orderQty = prod.maxStock - prod.stock;
+        const orderQty = Number(prod.maxStock) - Number(prod.stock);
         const poId = `PO-2026-0${Math.floor(100 + Math.random() * 900)}`;
-        const costTotal = orderQty * prod.cost;
+        const costTotal = orderQty * Number(prod.cost);
 
         // 1. Append Purchase Order
         const newPO = {
@@ -294,9 +305,9 @@ export function AppProvider({ children }) {
             id: `RL-${Math.floor(9000 + Math.random() * 1000)}`,
             sku: prod.sku,
             name: prod.name,
-            min: prod.minStock,
-            max: prod.maxStock,
-            current: prod.stock,
+            min: Number(prod.minStock),
+            max: Number(prod.maxStock),
+            current: Number(prod.stock),
             orderedQty: orderQty,
             poId: poId,
             date: new Date().toLocaleString()
@@ -357,7 +368,14 @@ export function AppProvider({ children }) {
 
   const updateProduct = (updatedProd) => {
     const currentProd = products.find(p => p.sku === updatedProd.sku);
-    let finalProd = { ...updatedProd };
+    let finalProd = { 
+      ...updatedProd,
+      stock: Number(updatedProd.stock) || 0,
+      cost: Number(updatedProd.cost) || 0,
+      price: Number(updatedProd.price) || 0,
+      minStock: Number(updatedProd.minStock) || 0,
+      maxStock: Number(updatedProd.maxStock) || 0
+    };
     let relocated = false;
     let fromLoc = '';
     let toLoc = '';
@@ -520,11 +538,12 @@ export function AppProvider({ children }) {
         const item = targetReceipt.items.find(i => i.sku === p.sku);
         if (item && item.qcPassed !== false) {
           // Increment stock and update location to the selected putaway shelf zone!
+          const newStock = Number(p.stock) + Number(item.qty);
           return {
             ...p,
-            stock: p.stock + item.qty,
+            stock: newStock,
             location: selectedPutawayLoc || p.location,
-            status: p.stock + item.qty > p.minStock ? 'ok' : p.stock + item.qty > 0 ? 'warning' : 'alert'
+            status: newStock > Number(p.minStock) ? 'ok' : newStock > 0 ? 'warning' : 'alert'
           };
         }
         return p;
@@ -672,11 +691,11 @@ export function AppProvider({ children }) {
       return prevProducts.map(p => {
         const item = targetDel.items.find(i => i.sku === p.sku);
         if (item) {
-          const finalStock = Math.max(0, p.stock - item.qty);
+          const finalStock = Math.max(0, Number(p.stock) - Number(item.qty));
           return {
             ...p,
             stock: finalStock,
-            status: finalStock > p.minStock ? 'ok' : finalStock > 0 ? 'warning' : 'alert'
+            status: finalStock > Number(p.minStock) ? 'ok' : finalStock > 0 ? 'warning' : 'alert'
           };
         }
         return p;
@@ -687,13 +706,13 @@ export function AppProvider({ children }) {
     setLots(prevLots => {
       return prevLots.map(lot => {
         const item = targetDel.items.find(i => i.sku === lot.productSku);
-        if (item && lot.qty > 0) {
+        if (item && Number(lot.qty) > 0) {
           // Simplistic deduction for lots
-          const deduct = Math.min(lot.qty, item.qty);
+          const deduct = Math.min(Number(lot.qty), Number(item.qty));
           return {
             ...lot,
-            qty: lot.qty - deduct,
-            status: lot.qty - deduct === 0 ? 'used' : 'active'
+            qty: Math.max(0, Number(lot.qty) - deduct),
+            status: Number(lot.qty) - deduct === 0 ? 'used' : 'active'
           };
         }
         return lot;
@@ -712,8 +731,8 @@ export function AppProvider({ children }) {
         type: 'done',
         title: `Xuất kho hoàn tất: #${deliveryId}`,
         titleEn: `Delivery Completed: #${deliveryId}`,
-        desc: `Đã giao gói hàng cho đơn vị vận chuyển. Giảm ${targetDel.items.reduce((acc, i) => acc + i.qty, 0)} sản phẩm.`,
-        descEn: `Package handed over to carrier. Deducted total of ${targetDel.items.reduce((acc, i) => acc + i.qty, 0)} units.`,
+        desc: `Đã giao gói hàng cho đơn vị vận chuyển. Giảm ${targetDel.items.reduce((acc, i) => acc + Number(i.qty || 0), 0)} sản phẩm.`,
+        descEn: `Package handed over to carrier. Deducted total of ${targetDel.items.reduce((acc, i) => acc + Number(i.qty || 0), 0)} units.`,
         time: new Date().toTimeString().split(' ')[0]
       },
       ...prev
@@ -1366,15 +1385,385 @@ export function AppProvider({ children }) {
   }, [partners]);
 
   const loadDemoData = () => {
-    setProducts(demoProducts);
-    setLots(demoLots);
-    setReceipts(demoReceipts);
-    setDeliveries(demoDeliveries);
-    setInternalTransfers(demoInternalTransfers);
-    setAdjustments(demoAdjustments);
-    setPurchaseOrders(demoPurchaseOrders);
-    setNotifications(demoNotifications);
-    setReorderHistory(demoReorderHistory);
+    const getRandomDateStr = (daysAgo) => {
+      const d = new Date();
+      d.setDate(d.getDate() - daysAgo);
+      return d.toISOString().split('T')[0];
+    };
+
+    // 1. Randomize Products stock, min, max, cost, price, status
+    const randomProducts = demoProducts.map(p => {
+      let stock = Math.floor(Math.random() * 200) + 15;
+      if (p.sku === 'OMG-1209') {
+        stock = Math.random() < 0.4 ? 0 : Math.floor(Math.random() * 50) + 5;
+      }
+      if (p.sku === 'OMG-8871') {
+        stock = Math.floor(Math.random() * 1500) + 1000;
+      }
+      
+      const minStock = Math.floor(Math.random() * 30) + 15;
+      const maxStock = Math.floor(Math.random() * 400) + 200;
+      
+      // Cost & Price slightly randomized to nearest 1,000 VND
+      const cost = Math.round(p.cost * (0.85 + Math.random() * 0.3) / 1000) * 1000;
+      const price = Math.round(cost * (1.5 + Math.random() * 0.6) / 1000) * 1000;
+      const status = stock === 0 ? 'alert' : stock < minStock ? 'warning' : 'ok';
+      
+      const possibleLocations = [
+        'WH-A/Zone A/Aisle 1/Shelf 1/Level 1',
+        'WH-A/Zone A/Aisle 1/Shelf 1/Level 2',
+        'WH-A/Zone B/Aisle 1/Shelf 2/Level 3',
+        'WH-A/Zone D/Aisle 1/Shelf 1/Level 1',
+        'WH-B/Zone B/Aisle 2/Shelf 3/Level 2',
+        'WH-C/Zone C/Aisle 1/Shelf 2/Level 1'
+      ];
+      const randomLoc = possibleLocations[Math.floor(Math.random() * possibleLocations.length)];
+
+      return {
+        ...p,
+        stock,
+        minStock,
+        maxStock,
+        cost,
+        price,
+        status,
+        location: randomLoc,
+        lots: []
+      };
+    });
+
+    // 2. Generate matching active Lots dynamically based on product stocks
+    const randomLots = [];
+    randomProducts.forEach(p => {
+      if (p.stock > 0) {
+        const numLots = Math.random() < 0.4 || p.stock === 1 ? 1 : 2;
+        if (numLots === 1) {
+          const lotId = `LOT-${p.sku}-${Math.floor(100 + Math.random() * 900)}`;
+          randomLots.push({
+            id: lotId,
+            productSku: p.sku,
+            status: 'active',
+            qty: p.stock,
+            expiry: getRandomDateStr(-Math.floor(180 + Math.random() * 360)),
+            dateCreated: getRandomDateStr(Math.floor(10 + Math.random() * 60)),
+            receiptRef: `IN-${Math.floor(1000 + Math.random() * 9000)}`
+          });
+          p.lots.push(lotId);
+        } else {
+          const qty1 = Math.floor(p.stock / 2) + (p.stock % 2);
+          const qty2 = p.stock - qty1;
+          
+          const lotId1 = `LOT-${p.sku}-${Math.floor(100 + Math.random() * 900)}`;
+          const lotId2 = `LOT-${p.sku}-${Math.floor(100 + Math.random() * 900)}`;
+          
+          randomLots.push({
+            id: lotId1,
+            productSku: p.sku,
+            status: 'active',
+            qty: qty1,
+            expiry: getRandomDateStr(-Math.floor(180 + Math.random() * 360)),
+            dateCreated: getRandomDateStr(Math.floor(30 + Math.random() * 60)),
+            receiptRef: `IN-${Math.floor(1000 + Math.random() * 9000)}`
+          });
+          randomLots.push({
+            id: lotId2,
+            productSku: p.sku,
+            status: 'active',
+            qty: qty2,
+            expiry: getRandomDateStr(-Math.floor(200 + Math.random() * 360)),
+            dateCreated: getRandomDateStr(Math.floor(5 + Math.random() * 25)),
+            receiptRef: `IN-${Math.floor(1000 + Math.random() * 9000)}`
+          });
+          p.lots.push(lotId1, lotId2);
+        }
+      }
+    });
+
+    // 3. Generate randomized Receipts
+    const supplierPartners = partners.filter(pr => pr.type === 'supplier');
+    const supplierNames = supplierPartners.length > 0 ? supplierPartners.map(pr => pr.name) : ['SteelWorks Ltd', 'TechParts Global', 'ElectroSupply Co', 'HydraFlow Inc'];
+    
+    const numReceipts = Math.floor(Math.random() * 3) + 3; // 3 to 5
+    const randomReceipts = [];
+    
+    for (let rIndex = 0; rIndex < numReceipts; rIndex++) {
+      const recId = `IN-${Math.floor(1000 + Math.random() * 9000)}`;
+      const poRef = `PO-2026-0${Math.floor(100 + Math.random() * 900)}`;
+      const partnerName = supplierNames[Math.floor(Math.random() * supplierNames.length)];
+      const date = getRandomDateStr(Math.floor(2 + Math.random() * 25));
+      
+      const itemsCount = Math.floor(Math.random() * 3) + 1; // 1 to 3 items
+      const selectedProds = [];
+      const usedSkus = new Set();
+      
+      while (selectedProds.length < itemsCount) {
+        const pRandom = randomProducts[Math.floor(Math.random() * randomProducts.length)];
+        if (!usedSkus.has(pRandom.sku)) {
+          selectedProds.push(pRandom);
+          usedSkus.add(pRandom.sku);
+        }
+      }
+      
+      const items = selectedProds.map(p => {
+        const qty = Math.floor(Math.random() * 150) + 10;
+        return {
+          sku: p.sku,
+          name: p.name,
+          qty,
+          cost: p.cost,
+          qcPassed: Math.random() < 0.95 ? true : false,
+          lotId: p.lots[Math.floor(Math.random() * p.lots.length)] || `LOT-${p.sku}-${Math.floor(100 + Math.random() * 900)}`
+        };
+      });
+      
+      const status = Math.random() < 0.6 ? 'done' : Math.random() < 0.5 ? 'ready' : 'waiting';
+      const allPassed = items.every(it => it.qcPassed === true);
+      const qcDetails = status === 'done' ? {
+        checkedBy: `QC_AGENT_0${Math.floor(Math.random() * 5) + 1}`,
+        result: allPassed ? 'PASS' : 'FAIL_HOLD',
+        notes: allPassed ? 'Tất cả thông số đo đạc vật lý danh nghĩa hoàn toàn ổn định.' : 'Phát hiện một số sản phẩm có vết xước ngoại quan, chuyển phòng kiểm định tiếp theo.'
+      } : null;
+      
+      const possibleLocs = [
+        'WH-A/Zone A/Aisle 1/Shelf 1/Level 1',
+        'WH-A/Zone B/Aisle 1/Shelf 2/Level 3',
+        'WH-C/Zone C/Aisle 1/Shelf 2/Level 1',
+        'WH-A/Zone D/Aisle 1/Shelf 1/Level 1'
+      ];
+      const putawayLoc = status === 'done' ? possibleLocs[Math.floor(Math.random() * possibleLocs.length)] : 'Chờ kiểm định QC.';
+      
+      randomReceipts.push({
+        id: recId,
+        ref: poRef,
+        warehouse: Math.random() < 0.6 ? 'Warehouse A' : Math.random() < 0.5 ? 'Warehouse B' : 'Warehouse C',
+        partner: partnerName,
+        items,
+        status,
+        date,
+        qcDetails,
+        putawayLoc
+      });
+    }
+
+    // 4. Generate randomized Deliveries
+    const customerPartners = partners.filter(pr => pr.type === 'customer');
+    const customerNames = customerPartners.length > 0 ? customerPartners.map(pr => pr.name) : ['MegaRetail Corp', 'BuildMart JSC', 'AutoParts VN', 'IndoTrans Log'];
+    
+    const numDeliveries = Math.floor(Math.random() * 3) + 3; // 3 to 5
+    const randomDeliveries = [];
+    
+    for (let dIndex = 0; dIndex < numDeliveries; dIndex++) {
+      const delId = `OUT-${Math.floor(1000 + Math.random() * 9000)}`;
+      const soRef = `SO-${Math.floor(7000 + Math.random() * 900)}`;
+      const partnerName = customerNames[Math.floor(Math.random() * customerNames.length)];
+      const date = getRandomDateStr(Math.floor(1 + Math.random() * 20));
+      
+      const itemsCount = Math.floor(Math.random() * 2) + 1; // 1 to 2 items
+      const selectedProds = [];
+      const usedSkus = new Set();
+      
+      while (selectedProds.length < itemsCount) {
+        const pRandom = randomProducts[Math.floor(Math.random() * randomProducts.length)];
+        if (!usedSkus.has(pRandom.sku)) {
+          selectedProds.push(pRandom);
+          usedSkus.add(pRandom.sku);
+        }
+      }
+      
+      const items = selectedProds.map(p => {
+        const qty = Math.floor(Math.random() * 20) + 2;
+        return {
+          sku: p.sku,
+          name: p.name,
+          qty
+        };
+      });
+      
+      const status = Math.random() < 0.5 ? 'done' : Math.random() < 0.5 ? 'ready' : 'waiting';
+      const steps = {
+        pick: status === 'done' ? true : Math.random() < 0.5,
+        pack: status === 'done' ? true : Math.random() < 0.3,
+        ship: status === 'done'
+      };
+      
+      const carriers = ['DHL Express', 'Giao Hàng Nhanh', 'FedEx', 'Viettel Post'];
+      const carrier = carriers[Math.floor(Math.random() * carriers.length)];
+      const boxSizes = ['Thùng gỗ pallet', 'Thùng các-tông vừa', 'Thùng nhựa WMS', 'Hộp thư tiêu chuẩn'];
+      const boxSize = boxSizes[Math.floor(Math.random() * boxSizes.length)];
+      
+      const shippingDetails = status === 'done' ? {
+        carrier,
+        tracking: `TRK-${carrier.slice(0,3).toUpperCase()}-${Math.floor(10000 + Math.random() * 90000)}`,
+        boxSize
+      } : null;
+      
+      randomDeliveries.push({
+        id: delId,
+        ref: soRef,
+        warehouse: Math.random() < 0.6 ? 'Warehouse A' : Math.random() < 0.5 ? 'Warehouse B' : 'Warehouse C',
+        partner: partnerName,
+        items,
+        status,
+        date,
+        steps,
+        strategy: Math.random() < 0.5 ? 'FIFO' : 'LIFO',
+        shippingDetails
+      });
+    }
+
+    // 5. Generate randomized transfers
+    const numTransfers = Math.floor(Math.random() * 3) + 2; // 2 to 4
+    const randomInternalTransfers = [];
+    const whOptions = ['Warehouse A', 'Warehouse B', 'Warehouse C'];
+    
+    for (let tIndex = 0; tIndex < numTransfers; tIndex++) {
+      const transId = `TR-${Math.floor(1000 + Math.random() * 9000)}`;
+      const pRandom = randomProducts[Math.floor(Math.random() * randomProducts.length)];
+      const qty = Math.floor(Math.random() * 40) + 10;
+      
+      const fromWh = whOptions[Math.floor(Math.random() * whOptions.length)];
+      let toWh = whOptions[Math.floor(Math.random() * whOptions.length)];
+      if (fromWh === toWh) {
+        toWh = whOptions[(whOptions.indexOf(fromWh) + 1) % whOptions.length];
+      }
+      
+      const status = Math.random() < 0.5 ? 'done' : Math.random() < 0.5 ? 'in_transit' : 'draft';
+      const date = getRandomDateStr(Math.floor(1 + Math.random() * 15));
+      
+      randomInternalTransfers.push({
+        id: transId,
+        sku: pRandom.sku,
+        qty,
+        from: fromWh,
+        to: toWh,
+        status,
+        date
+      });
+    }
+
+    // 6. Generate randomized adjustments
+    const numAdjustments = Math.floor(Math.random() * 2) + 2; // 2 to 3
+    const randomAdjustments = [];
+    const reasons = ['Kiểm kê định kỳ Q2', 'Hao hụt thiết bị hỏng', 'Điều chỉnh sau chuyển giao', 'Điều tra chênh lệch'];
+    
+    for (let aIndex = 0; aIndex < numAdjustments; aIndex++) {
+      const adjId = `ADJ-${Math.floor(100 + Math.random() * 900)}`;
+      const pRandom = randomProducts[Math.floor(Math.random() * randomProducts.length)];
+      const systemQty = pRandom.stock;
+      
+      const diffVal = Math.floor(Math.random() * 20) - 10;
+      const actualQty = Math.max(0, systemQty + diffVal);
+      const finalDiffVal = actualQty - systemQty;
+      const diff = finalDiffVal >= 0 ? `+${finalDiffVal}` : `${finalDiffVal}`;
+      const reasonDetail = finalDiffVal === 0 ? 'Không có chênh lệch thực tế' : finalDiffVal < 0 ? 'Phát hiện hao hụt mài mòn cơ khí / mất mát' : 'Phát hiện dư lượng nhãn dán sai sót của nhà cung cấp';
+      
+      randomAdjustments.push({
+        id: adjId,
+        warehouse: Math.random() < 0.6 ? 'Warehouse A' : 'Warehouse B',
+        reason: reasons[Math.floor(Math.random() * reasons.length)],
+        date: getRandomDateStr(Math.floor(1 + Math.random() * 12)),
+        status: 'validated',
+        items: [
+          {
+            sku: pRandom.sku,
+            name: pRandom.name,
+            systemQty,
+            actualQty,
+            diff,
+            reasonDetail
+          }
+        ]
+      });
+    }
+
+    // 7. Generate randomized Purchase Orders
+    const numPOs = Math.floor(Math.random() * 3) + 3; // 3 to 5
+    const randomPurchaseOrders = [];
+    const poStatuses = ['confirmed', 'received', 'draft'];
+    
+    for (let pIndex = 0; pIndex < numPOs; pIndex++) {
+      const poId = `PO-2026-0${Math.floor(100 + Math.random() * 900)}`;
+      const vendor = supplierNames[Math.floor(Math.random() * supplierNames.length)];
+      const items = Math.floor(Math.random() * 3) + 1;
+      const total = Math.round((Math.floor(Math.random() * 400000000) + 10000000) / 1000) * 1000;
+      const status = poStatuses[Math.floor(Math.random() * poStatuses.length)];
+      const expected = getRandomDateStr(-Math.floor(1 + Math.random() * 7));
+      
+      randomPurchaseOrders.push({
+        id: poId,
+        vendor,
+        items,
+        total,
+        status,
+        expected
+      });
+    }
+
+    // 8. Generate dynamic Notifications
+    const randomNotifications = [
+      { 
+        id: '1', 
+        type: 'info', 
+        title: 'Hệ thống khởi chạy', 
+        titleEn: 'System Initiated', 
+        desc: 'Hệ thống điều khiển kho hàng Omega sẵn sàng hoạt động.', 
+        descEn: 'Omega warehouse control system is operational and ready.', 
+        time: new Date().toTimeString().split(' ')[0] 
+      }
+    ];
+
+    randomProducts.forEach(p => {
+      if (p.status === 'alert') {
+        randomNotifications.push({
+          id: `NT-${p.sku}-${Math.floor(Math.random()*1000000)}`,
+          type: 'critical',
+          title: 'Cháy hàng!',
+          titleEn: 'Stockout!',
+          desc: `SKU ${p.sku} (${p.name}) đã cạn kiệt (0/${p.maxStock}). Đơn hàng tự động đã tạo.`,
+          descEn: `SKU ${p.sku} (${p.nameEn || p.name}) is out of stock (0/${p.maxStock}). Auto-purchase triggered.`,
+          time: new Date().toTimeString().split(' ')[0]
+        });
+      } else if (p.status === 'warning') {
+        randomNotifications.push({
+          id: `NT-${p.sku}-${Math.floor(Math.random()*1000000)}`,
+          type: 'warning',
+          title: 'Tồn kho thấp',
+          titleEn: 'Low Stock Alert',
+          desc: `SKU ${p.sku} (${p.name}) đang dưới hạn tối thiểu (${p.stock}/${p.minStock}). Đề xuất tái cung ứng.`,
+          descEn: `SKU ${p.sku} (${p.nameEn || p.name}) is below minimum safety level (${p.stock}/${p.minStock}). Reorder recommended.`,
+          time: new Date().toTimeString().split(' ')[0]
+        });
+      }
+    });
+
+    // 9. Generate dynamic reordering rules history logs
+    const randomReorderHistory = [];
+    randomProducts.forEach(p => {
+      if (p.stock < p.minStock) {
+        const orderQty = p.maxStock - p.stock;
+        randomReorderHistory.push({
+          id: `RL-${Math.floor(9000 + Math.random() * 1000)}`,
+          sku: p.sku,
+          name: p.name,
+          min: p.minStock,
+          max: p.maxStock,
+          current: p.stock,
+          orderedQty,
+          poId: `PO-2026-0${Math.floor(100 + Math.random() * 900)}`,
+          date: new Date(Date.now() - Math.floor(Math.random() * 3) * 24 * 60 * 60 * 1000).toLocaleString()
+        });
+      }
+    });
+
+    setProducts(randomProducts);
+    setLots(randomLots);
+    setReceipts(randomReceipts);
+    setDeliveries(randomDeliveries);
+    setInternalTransfers(randomInternalTransfers);
+    setAdjustments(randomAdjustments);
+    setPurchaseOrders(randomPurchaseOrders);
+    setNotifications(randomNotifications);
+    setReorderHistory(randomReorderHistory.length > 0 ? randomReorderHistory : demoReorderHistory);
   };
 
   const clearAllData = () => {

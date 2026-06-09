@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Check, Clock, TrendingUp, Cpu, XCircle, ShoppingBag } from 'lucide-react';
+import { Plus, Check, Clock, TrendingUp, Cpu, XCircle, ShoppingBag, Search, RefreshCw, X, Filter } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PageHeader, Card, TableToolbar, StatusPill, DataTable } from '../components/ui';
 
@@ -21,13 +21,17 @@ export default function PurchasePage() {
   const [selectedSku, setSelectedSku] = useState('OMG-9921');
   const [purchaseQty, setPurchaseQty] = useState(100);
 
+  // Search & Filter state
+  const [poSearch, setPoSearch] = useState('');
+  const [poStatusFilter, setPoStatusFilter] = useState('ALL');
+
   // Formatting currency helper
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
       maximumFractionDigits: 0
-    }).format(val * 23000);
+    }).format(val);
   };
 
   // Vendors list
@@ -110,13 +114,20 @@ export default function PurchasePage() {
     }
   ];
 
+  const filteredPOs = purchaseOrders.filter(po => {
+    const matchesSearch = po.id.toLowerCase().includes(poSearch.toLowerCase()) ||
+                          po.vendor.toLowerCase().includes(poSearch.toLowerCase());
+    const matchesStatus = poStatusFilter === 'ALL' || po.status === poStatusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 select-none">
+    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-xl font-bold font-sans tracking-wide text-zinc-100">{isVi ? 'Quản lý Cung ứng & Mua hàng (Procurement)' : 'Purchase Procurement Suite'}</h2>
+          <h2 className="text-xl font-bold font-sans tracking-wide text-zinc-100 uppercase">{isVi ? 'QUẢN LÝ CUNG ỨNG & MUA HÀNG (PROCUREMENT)' : 'PURCHASE PROCUREMENT SUITE'}</h2>
           <p className="font-mono text-[9px] font-bold text-[#ff7a45] uppercase tracking-widest mt-1">
             {isVi ? 'HOẠT ĐỘNG THƯƠNG LƯỢNG MUA HÀNG VÀ CHU TRÌNH TÁI CUNG ỨNG' : 'SUPPLIER PROCUREMENT FLOW AND REORDER ENGINE'}
           </p>
@@ -136,8 +147,78 @@ export default function PurchasePage() {
         
         {/* Left 8 Columns: PO catalog list */}
         <div className="lg:col-span-8">
+          {/* Search & Filter Bar for PO */}
+          <div className="p-4 mb-4 rounded-lg bg-[#111114] border border-[#22202a]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+              
+              {/* Search box */}
+              <div className="flex flex-col items-start relative w-full">
+                <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 select-none">
+                  <Search className="w-3 h-3 text-[#ff7a45]/60" />
+                  {isVi ? 'TÌM KIẾM ĐƠN HÀNG (PO)' : 'SEARCH PO CATALOG'}
+                </label>
+                <div className="relative w-full">
+                  <input 
+                    type="text" 
+                    value={poSearch}
+                    onChange={(e) => setPoSearch(e.target.value)}
+                    placeholder={isVi ? 'MÃ ĐƠN PO, NHÀ CUNG CẤP...' : 'PO NUMBER, VENDOR PARTNER...'}
+                    className="w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-1.5 px-3 pl-8 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none transition-all placeholder:text-zinc-500"
+                  />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+                  {poSearch && (
+                    <button 
+                      type="button"
+                      onClick={() => setPoSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-[#ff7a45] transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Status filter */}
+              <div className="flex flex-col items-start relative w-full">
+                <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 select-none">
+                  <Filter className="w-3 h-3 text-[#ff7a45]/60" />
+                  {isVi ? 'LỌC TRẠNG THÁI PO' : 'PO STAGE FILTER'}
+                </label>
+                <div className="relative w-full">
+                  <select 
+                    value={poStatusFilter}
+                    onChange={(e) => setPoStatusFilter(e.target.value)}
+                    className="filter-select w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-1.5 px-3 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none cursor-pointer transition-all"
+                  >
+                    <option value="ALL">{isVi ? 'TẤT CẢ TRẠNG THÁI' : 'ALL STAGES'}</option>
+                    <option value="draft">{isVi ? 'YÊU CẦU BÁO GIÁ (RFQ)' : 'RFQ/DRAFT'}</option>
+                    <option value="confirmed">{isVi ? 'ĐÃ PHÊ DUYỆT (CONFIRMED)' : 'CONFIRMED'}</option>
+                    <option value="received">{isVi ? 'ĐÃ NHẬP KHO (RECEIVED)' : 'RECEIVED'}</option>
+                  </select>
+                </div>
+              </div>
+
+            </div>
+            
+            {/* Reset / indicator row */}
+            {(poSearch || poStatusFilter !== 'ALL') && (
+              <div className="flex items-center justify-between border-t border-[#1b1a20]/60 mt-3 pt-3 font-mono text-[9px]">
+                <span className="text-zinc-500 uppercase">
+                  {isVi ? `Đã tìm thấy ${filteredPOs.length} kết quả phù hợp` : `Found ${filteredPOs.length} matching POs`}
+                </span>
+                <button
+                  onClick={() => { setPoSearch(''); setPoStatusFilter('ALL'); }}
+                  className="flex items-center gap-1 px-2.5 py-1 bg-[#ff7a45]/10 border border-[#ff7a45]/20 hover:border-[#ff7a45]/40 text-[#ff7a45] rounded uppercase font-bold tracking-widest transition-all"
+                >
+                  <RefreshCw className="w-2.5 h-2.5" />
+                  {isVi ? 'Đặt lại' : 'Reset'}
+                </button>
+              </div>
+            )}
+          </div>
+
           <Card noPadding className="overflow-hidden bg-[#111114] border border-[#22202a]">
-            <DataTable columns={columns} rows={purchaseOrders} rowKey="id" />
+            <DataTable columns={columns} rows={filteredPOs} rowKey="id" />
           </Card>
         </div>
 
@@ -198,7 +279,7 @@ export default function PurchasePage() {
 
       {/* ─── MANUAL PURCHASE ORDER MODAL FORM ─── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs">
           <div className="bg-[#111114] border border-zinc-800 p-6 rounded-lg w-full max-w-sm">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-4">
               <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#ff7a45]">

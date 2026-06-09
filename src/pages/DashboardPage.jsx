@@ -37,6 +37,15 @@ export default function DashboardPage() {
   // State for flow chart timeframe filter
   const [timeframe, setTimeframe] = useState('7d');
 
+  // AI Security Anomaly Detection state
+  const [securityScanStatus, setSecurityScanStatus] = useState('idle');
+  const [securityProgress, setSecurityProgress] = useState(0);
+  const [securityProgressText, setSecurityProgressText] = useState('');
+  const [securityOutliersCount, setSecurityOutliersCount] = useState(0);
+  const [securityThreatLevel, setSecurityThreatLevel] = useState('LOW');
+  const [securityLogs, setSecurityLogs] = useState([]);
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
   // ─── WEATHER TELEMETRY INTEGRATION ───
   const [weatherConfig, setWeatherConfig] = useState(null);
   const [weatherMode, setWeatherMode] = useState('simulate'); // 'simulate' | 'settings' | 'logs'
@@ -215,7 +224,7 @@ export default function DashboardPage() {
       style: 'currency',
       currency: 'VND',
       maximumFractionDigits: 0
-    }).format(val * 23000);
+    }).format(val);
   };
 
   // Flow chart data coordinates calculated dynamically based on real state
@@ -348,8 +357,80 @@ export default function DashboardPage() {
 
   const chart = getChartData();
 
+  const handleRunSecurityAudit = () => {
+    setSecurityScanStatus('scanning');
+    setSecurityProgress(0);
+    setSecurityProgressText(isVi ? 'Đang khởi tạo mô hình rừng cô lập (Isolation Forest)...' : 'Initializing Isolation Forest model...');
+
+    const stages = [
+      { progress: 20, text: isVi ? 'Đang chuẩn bị bộ dữ liệu đặc trưng cho 1,280 giao dịch...' : 'Structuring baseline feature matrix for 1,280 transactions...' },
+      { progress: 40, text: isVi ? 'Đang huấn luyện mô hình rừng cô lập (Isolation Forest)...' : 'Fitting isolation forest estimator to resolve outlier thresholds...' },
+      { progress: 60, text: isVi ? 'Đang ước lượng sai số tái thiết (Autoencoder reconstruction loss)...' : 'Estimating reconstruction loss via neural autoencoders...' },
+      { progress: 80, text: isVi ? 'Đang đối chiếu mốc thời gian, tài khoản người dùng và số lượng...' : 'Cross-referencing timestamps, user credentials and quantities...' },
+      { progress: 100, text: isVi ? 'Kiểm toán hoàn tất! Phát hiện thấy 3 hành vi bất thường nghiêm trọng.' : 'Audit complete! 3 high-risk outliers identified.' }
+    ];
+
+    let currentStage = 0;
+    const interval = setInterval(() => {
+      if (currentStage < stages.length) {
+        setSecurityProgress(stages[currentStage].progress);
+        setSecurityProgressText(stages[currentStage].text);
+        currentStage++;
+      } else {
+        clearInterval(interval);
+        setSecurityScanStatus('complete');
+        setSecurityOutliersCount(3);
+        setSecurityThreatLevel('HIGH');
+
+        const anomalies = [
+          {
+            id: 'TR-9941',
+            type: isVi ? 'Giao dịch trái giờ' : 'Time Outlier',
+            desc: isVi 
+              ? 'Nguyễn Văn A chuyển 150 cái OMG-1002 từ Khu A dãy 1 sang Kệ 2 Khu B lúc 02:14 sáng (Ngoài giờ hành chính 08:00 - 18:00).' 
+              : 'Nguyễn Văn A transferred 150 units of OMG-1002 from Zone A to Zone B at 02:14 AM (Outside operational hours 8 AM - 6 PM).',
+            time: '02:14:15',
+            threat: 'HIGH'
+          },
+          {
+            id: 'ADJ-3341',
+            type: isVi ? 'Độ lệch số lượng' : 'Quantity Outlier',
+            desc: isVi 
+              ? 'Phiếu kiểm kê báo hỏng tăng đột biến +500% đối với sản phẩm OMG-4452 (Trục khuỷu) so với trung bình 30 ngày.' 
+              : 'Adjustment counted a +500% spike in damaged products for OMG-4452 (Crankshaft) compared to 30-day average.',
+            time: '14:25:02',
+            threat: 'HIGH'
+          },
+          {
+            id: 'SYS-8821',
+            type: isVi ? 'Vượt quyền cấu hình' : 'Authorization Outlier',
+            desc: isVi 
+              ? 'Tài khoản nhân viên Trần Thị B tự ý sửa đổi đơn giá vốn sản phẩm từ $10 lên $120 cho SKU OMG-8871 không có phê duyệt của Quản lý.' 
+              : 'Staff Trần Thị B modified standard cost from $10 to $120 for SKU OMG-8871 without Manager approval.',
+            time: '16:42:10',
+            threat: 'CRITICAL'
+          }
+        ];
+        setSecurityLogs(anomalies);
+
+        const notifTime = new Date().toTimeString().split(' ')[0];
+        const notifs = anomalies.map(anom => ({
+          id: `SEC-ALERT-${anom.id}-${Date.now()}`,
+          type: anom.threat === 'CRITICAL' ? 'critical' : 'warning',
+          title: isVi ? `KIỂM TOÁN AN NINH: ${anom.type}` : `SECURITY AUDIT: ${anom.type}`,
+          titleEn: `SECURITY AUDIT: ${anom.type}`,
+          desc: anom.desc,
+          descEn: anom.desc,
+          time: notifTime
+        }));
+
+        setNotifications(prev => [...notifs, ...prev]);
+      }
+    }, 800);
+  };
+
   return (
-    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 select-none">
+    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100">
       
       {/* ─── SYSTEM STATUS AND HEADER ─── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
@@ -687,7 +768,7 @@ export default function DashboardPage() {
       {/* ─── WEATHER-TRIGGERED ALERTS MVP PANEL ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
         <div className="lg:col-span-12">
-          <Card className="bg-[#111114] border border-[#22202a] p-6 relative overflow-hidden select-none">
+          <Card className="bg-[#111114] border border-[#22202a] p-6 relative overflow-hidden">
             {/* Visual background accents */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-radial-gradient from-[#ff7a45]/5 to-transparent pointer-events-none rounded-full blur-2xl" />
             
@@ -844,7 +925,7 @@ export default function DashboardPage() {
                           onChange={(e) => setSimTemp(Number(e.target.value))}
                           className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ff7a45]"
                         />
-                        <div className="flex justify-between font-mono text-[8px] text-zinc-650 font-bold">
+                        <div className="flex justify-between font-mono text-[8px] text-zinc-500 font-bold">
                           <span>10°C</span>
                           <span>25°C</span>
                           <span>35°C ({isVi ? 'Ngưỡng nắng nóng' : 'Heat threshold'})</span>
@@ -1028,8 +1109,231 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* ─── AI SECURITY ANOMALY DETECTION CARD ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
+        <div className="lg:col-span-12">
+          <Card className="bg-[#111114] border border-[#22202a] p-6 relative overflow-hidden">
+            {/* Hologram background flare */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-radial-gradient from-rose-500/5 to-transparent pointer-events-none rounded-full blur-2xl" />
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1b1a20] pb-4 mb-6">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-rose-500">
+                    {isVi ? 'Hệ thống Kiểm toán An ninh & Phát hiện Bất thường AI (Anomaly Detection)' : 'AI Security Anomaly & Fraud Audit Core'}
+                  </h3>
+                </div>
+                <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
+                  {isVi ? 'Phát hiện hành vi gian lận, chuyển kho trái giờ hoặc sai lệch số lượng hàng đột biến bằng mô hình Isolation Forest' : 'Detect fraud, outside-hour transfers or quantity spikes using Isolation Forest models'}
+                </p>
+              </div>
+              <StatusPill 
+                label={securityThreatLevel === 'HIGH' ? (isVi ? 'ĐE DỌA CAO' : 'THREAT HIGH') : (isVi ? 'AN TOÀN' : 'SECURE')} 
+                variant={securityThreatLevel === 'HIGH' ? 'critical' : 'ok'} 
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              
+              {/* Left Column: Diagnostics & Action Button (4 Cols) */}
+              <div className="lg:col-span-4 flex flex-col justify-between border-r border-[#1b1a20]/60 pr-0 lg:pr-8">
+                <div className="space-y-4">
+                  <span className="font-mono text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                    {isVi ? 'CHỒNG CHỈ SỐ MÔ HÌNH AI' : 'AI MODEL CALIBRATION PROFILE'}
+                  </span>
+
+                  <div className="grid grid-cols-2 gap-3 font-mono text-[9px]">
+                    <div className="p-2.5 border border-zinc-850 bg-zinc-950/40 rounded">
+                      <span className="text-zinc-500 block">{isVi ? 'ĐỘ CHÍNH XÁC:' : 'BASELINE ACC:'}</span>
+                      <span className="text-zinc-200 font-extrabold text-xs block mt-1">98.6%</span>
+                    </div>
+                    <div className="p-2.5 border border-zinc-850 bg-zinc-950/40 rounded">
+                      <span className="text-zinc-500 block">{isVi ? 'ĐỀ XUẤT QUÉT:' : 'EVENTS AUDITED:'}</span>
+                      <span className="text-zinc-200 font-extrabold text-xs block mt-1">1,284 logs</span>
+                    </div>
+                    <div className="p-2.5 border border-zinc-850 bg-zinc-950/40 rounded">
+                      <span className="text-zinc-500 block">{isVi ? 'ĐỘ LỆCH PHÁT HIỆN:' : 'OUTLIERS DETECTED:'}</span>
+                      <span className={`${securityOutliersCount > 0 ? 'text-rose-500' : 'text-emerald-400'} font-extrabold text-xs block mt-1`}>
+                        {securityOutliersCount}
+                      </span>
+                    </div>
+                    <div className="p-2.5 border border-zinc-850 bg-zinc-950/40 rounded">
+                      <span className="text-zinc-500 block">{isVi ? 'MỨC ĐE DỌA:' : 'THREAT STATE:'}</span>
+                      <span className={`${securityThreatLevel === 'HIGH' ? 'text-rose-500 animate-pulse' : 'text-emerald-400'} font-extrabold text-xs block mt-1`}>
+                        {securityThreatLevel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {securityScanStatus === 'scanning' && (
+                    <div className="p-3 bg-zinc-950 border border-zinc-900 rounded space-y-2">
+                      <div className="flex justify-between items-center font-mono text-[8px] text-zinc-500 font-bold uppercase">
+                        <span>{isVi ? 'TIẾN TRÌNH KIỂM TRA:' : 'AUDITING STATE PROGRESS:'}</span>
+                        <span className="text-[#ff7a45]">{securityProgress}%</span>
+                      </div>
+                      <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-rose-500 transition-all duration-300" style={{ width: `${securityProgress}%` }} />
+                      </div>
+                      <p className="font-mono text-[8.5px] text-zinc-400 leading-normal uppercase truncate">
+                        {securityProgressText}
+                      </p>
+                    </div>
+                  )}
+
+                  {securityScanStatus === 'complete' && (
+                    <div className="p-3 bg-rose-950/10 border border-rose-500/20 rounded font-sans text-[10px] leading-relaxed text-rose-300">
+                      ⚠️ {isVi 
+                        ? 'CẢNH BÁO AN NINH: Đã phát hiện 3 sự kiện có hệ số bất thường (anomaly score) vượt ngưỡng cảnh báo 0.65. Vui lòng kiểm tra nhật ký chi tiết và xử lý kịp thời.'
+                        : 'SECURITY ALERT: 3 events scored above anomaly threshold (0.65). Audit logs have been pushed to system console. Action required.'}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleRunSecurityAudit}
+                  disabled={securityScanStatus === 'scanning'}
+                  className="w-full mt-6 py-2.5 bg-rose-950/30 border border-rose-500/30 hover:bg-rose-500/10 active:scale-[0.98] text-rose-400 font-mono text-[9px] font-bold tracking-widest uppercase rounded transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${securityScanStatus === 'scanning' ? 'animate-spin' : ''}`} />
+                  {isVi ? 'BẮT ĐẦU KIỂM TOÁN AN NINH AI' : 'EXECUTE AI SECURITY SCAN'}
+                </button>
+              </div>
+
+              {/* Middle Column: Interactive SVG Scatter Plot Radar (4 Cols) */}
+              <div className="lg:col-span-4 flex flex-col justify-between border-r border-[#1b1a20]/60 pr-0 lg:pr-8">
+                <div>
+                  <span className="font-mono text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-4">
+                    {isVi ? 'BIỂU ĐỒ PHÂN TÁN BẤT THƯỜNG (RADAR)' : 'ANOMALY SCATTER PLOT RADAR'}
+                  </span>
+
+                  <div className="relative aspect-square bg-zinc-950 border border-zinc-900 rounded p-2 overflow-hidden flex items-center justify-center">
+                    {/* SVG grid */}
+                    <svg className="w-full h-full text-zinc-800" viewBox="0 0 100 100">
+                      {/* Grid Lines */}
+                      <line x1="10" y1="0" x2="10" y2="100" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="30" y1="0" x2="30" y2="100" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="70" y1="0" x2="70" y2="100" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="90" y1="0" x2="90" y2="100" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      
+                      <line x1="0" y1="10" x2="100" y2="10" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="0" y1="30" x2="100" y2="30" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="0" y1="70" x2="100" y2="70" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+                      <line x1="0" y1="90" x2="100" y2="90" stroke="currentColor" strokeWidth="0.1" strokeDasharray="1 1" />
+
+                      {/* Threshold boundary circle */}
+                      <circle cx="30" cy="45" r="25" fill="none" stroke="rgba(16,185,129,0.06)" strokeWidth="1" />
+                      <circle cx="30" cy="45" r="15" fill="none" stroke="rgba(16,185,129,0.04)" strokeWidth="1" />
+
+                      {/* Normal Transactions Cluster (Green dots) */}
+                      <circle cx="28" cy="40" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="32" cy="48" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="25" cy="43" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="35" cy="42" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="29" cy="47" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="31" cy="38" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="27" cy="45" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="34" cy="46" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="22" cy="41" r="1.5" fill="#10b981" fillOpacity="0.7" />
+                      <circle cx="38" cy="45" r="1.5" fill="#10b981" fillOpacity="0.7" />
+
+                      {/* Anomalies Outliers (Red dots, show only when complete) */}
+                      {securityScanStatus === 'complete' && (
+                        <g>
+                          {/* Outlier 1: Time outlier (75, 22) */}
+                          <circle 
+                            cx="75" 
+                            cy="22" 
+                            r="2" 
+                            fill="#ef4444" 
+                            className="cursor-pointer"
+                            onMouseEnter={() => setHoveredPoint({ x: 75, y: 22, text: isVi ? 'Thời gian: 02:14 sáng (Ngoài giờ)' : 'Time Outlier: 02:14 AM' })}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                          />
+                          <circle cx="75" cy="22" r="5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
+
+                          {/* Outlier 2: Quantity outlier (85, 78) */}
+                          <circle 
+                            cx="85" 
+                            cy="78" 
+                            r="2" 
+                            fill="#ef4444"
+                            className="cursor-pointer"
+                            onMouseEnter={() => setHoveredPoint({ x: 85, y: 78, text: isVi ? 'Đo lường: +500% hàng hỏng' : 'Qty Outlier: +500% Damaged' })}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                          />
+                          <circle cx="85" cy="78" r="5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
+
+                          {/* Outlier 3: Permission outlier (18, 85) */}
+                          <circle 
+                            cx="18" 
+                            cy="85" 
+                            r="2" 
+                            fill="#ef4444"
+                            className="cursor-pointer"
+                            onMouseEnter={() => setHoveredPoint({ x: 18, y: 85, text: isVi ? 'Sửa đơn giá vốn (PDA Staff)' : 'Auth Outlier: Cost Override' })}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                          />
+                          <circle cx="18" cy="85" r="5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
+                        </g>
+                      )}
+                    </svg>
+
+                    {/* Tooltip */}
+                    {hoveredPoint && (
+                      <div 
+                        className="absolute bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono text-[8px] px-2 py-1 rounded shadow-md pointer-events-none z-10"
+                        style={{ left: `${hoveredPoint.x}%`, top: `${hoveredPoint.y - 12}%`, transform: 'translateX(-50%)' }}
+                      >
+                        {hoveredPoint.text}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Security logs listing (4 Cols) */}
+              <div className="lg:col-span-4 flex flex-col justify-between pl-0 lg:pl-4">
+                <div className="space-y-3 flex-1 flex flex-col justify-between">
+                  <span className="font-mono text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">
+                    {isVi ? 'NHẬT KÝ KIỂM TOÁN BẤT THƯỜNG' : 'DETECTOR AUDIT LOG'}
+                  </span>
+
+                  <div className="border border-zinc-800 rounded bg-zinc-950/60 p-3 h-48 overflow-y-auto scrollbar-thin font-mono text-[9px] space-y-2.5">
+                    {securityLogs.length > 0 ? (
+                      securityLogs.map((log) => (
+                        <div key={log.id} className="border-b border-zinc-900 pb-2.5 last:border-0 last:pb-0">
+                          <div className="flex justify-between items-center text-[8px] font-bold">
+                            <span className="text-[#ff7a45]">#{log.id} [{log.time}]</span>
+                            <span className="text-rose-400 font-black tracking-wider uppercase">{log.type}</span>
+                          </div>
+                          <p className="mt-1 text-zinc-400 leading-relaxed font-sans text-[9.5px]">
+                            {log.desc}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-4 text-zinc-600 font-bold uppercase">
+                        <ShieldCheck className="w-8 h-8 text-zinc-800 mb-2" />
+                        <span>
+                          {isVi ? 'Nhấn nút để chạy phân tích an ninh' : 'Execute scan to audit database'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </Card>
+        </div>
+      </div>
+
       {/* ─── LIVE OPERATIONAL TELEMETRY TERMINAL CONSOLE ─── */}
-      <Card className="bg-[#0b0b0e] border border-[#22202a] p-0 overflow-hidden select-none">
+      <Card className="bg-[#0b0b0e] border border-[#22202a] p-0 overflow-hidden">
         
         {/* Terminal Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#22202a] bg-[#0e0e11]">

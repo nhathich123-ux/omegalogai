@@ -32,6 +32,176 @@
   ],
   "logs": [
     {
+      "id": "WLOG-7897",
+      "time": "2026-06-09 16:34:03",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-6614",
+      "time": "2026-06-09 08:23:20",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-1469",
+      "time": "2026-06-09 08:14:08",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-6855",
+      "time": "2026-06-09 08:02:26",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-9644",
+      "time": "2026-06-09 08:01:54",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-5591",
+      "time": "2026-06-08 22:57:44",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-7656",
+      "time": "2026-06-08 22:57:24",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-7185",
+      "time": "2026-06-08 22:43:36",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-3450",
+      "time": "2026-06-08 22:43:22",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-5285",
+      "time": "2026-06-08 22:42:02",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-5803",
+      "time": "2026-06-08 22:19:54",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-5429",
+      "time": "2026-06-08 22:19:42",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-8545",
+      "time": "2026-06-08 21:56:39",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-4033",
+      "time": "2026-06-08 21:56:26",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-4410",
+      "time": "2026-06-08 21:48:44",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-4488",
+      "time": "2026-06-08 21:48:25",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-4459",
+      "time": "2026-06-08 15:23:15",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
       "id": "WLOG-5334",
       "time": "2026-06-08 14:01:58",
       "source": "Giả lập tự động (Thiếu API Key)",

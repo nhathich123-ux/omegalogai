@@ -16,6 +16,15 @@ import {
   Camera,
   Upload,
   Key,
+  LayoutDashboard,
+  Warehouse,
+  Users,
+  ShoppingCart,
+  ArrowLeftRight,
+  Brain,
+  TrendingUp,
+  Settings,
+  Terminal,
 } from 'lucide-react';
 import { useApp } from './context/AppContext';
 import LandingPage from './pages/LandingPage';
@@ -30,6 +39,7 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const DeveloperPage = lazy(() => import('./pages/DeveloperPage'));
 const PartnersPage = lazy(() => import('./pages/PartnersPage'));
+const AiFilePage = lazy(() => import('./pages/AiFilePage'));
 
 const OMEGA_LOGO_SRC = '/omega-logo.png';
 
@@ -54,6 +64,7 @@ const PAGES = {
   settings: SettingsPage,
   developer: DeveloperPage,
   partners: PartnersPage,
+  aifile: AiFilePage,
 };
 
 function Sidebar() {
@@ -66,27 +77,57 @@ function Sidebar() {
 
   const isVi = lang === 'vi';
 
-  // Sidebar navigation items
-  const sidebarItems = [
-    { id: 'dashboard', label: isVi ? 'TRUNG TÂM ĐIỀU KHIỂN' : 'DASHBOARD' },
-    { id: 'inventory', label: isVi ? 'KHO HÀNG' : 'INVENTORY' },
-    { id: 'purchase', label: isVi ? 'MUA HÀNG' : 'PROCUREMENT' },
-    { id: 'partners', label: isVi ? 'ĐỐI TÁC' : 'PARTNERS' },
-    { id: 'operations', label: isVi ? 'VẬN HÀNH' : 'OPERATIONS' },
-    { id: 'reports', label: isVi ? 'DỰ BÁO AI' : 'AI PREDICTOR' },
-    { id: 'settings', label: isVi ? 'CÀI ĐẶT' : 'SETTINGS' },
+  // Sidebar navigation groups ordered logically in business workflow:
+  // 1. Giám sát (Overview)
+  // 2. Dữ liệu nền tảng (Master Data)
+  // 3. Nghiệp vụ kho (Core Logistics)
+  // 4. Trí tuệ nhân tạo (Advanced AI)
+  // 5. Cấu hình (System)
+  const sidebarGroups = [
+    {
+      title: isVi ? 'Giám sát' : 'Monitoring',
+      items: [
+        { id: 'dashboard', label: isVi ? 'TRUNG TÂM ĐIỀU KHIỂN' : 'DASHBOARD', icon: LayoutDashboard },
+      ]
+    },
+    {
+      title: isVi ? 'Dữ liệu nền tảng' : 'Master Data',
+      items: [
+        { id: 'inventory', label: isVi ? 'KHO HÀNG' : 'INVENTORY', icon: Warehouse },
+        { id: 'partners', label: isVi ? 'ĐỐI TÁC' : 'PARTNERS', icon: Users },
+      ]
+    },
+    {
+      title: isVi ? 'Nghiệp vụ kho' : 'Logistics Flow',
+      items: [
+        { id: 'purchase', label: isVi ? 'MUA HÀNG' : 'PROCUREMENT', icon: ShoppingCart },
+        { id: 'operations', label: isVi ? 'VẬN HÀNH' : 'OPERATIONS', icon: ArrowLeftRight },
+      ]
+    },
+    {
+      title: isVi ? 'Trí tuệ nhân tạo' : 'AI Cognitive',
+      items: [
+        { id: 'aifile', label: isVi ? 'TRÍCH XUẤT TÀI LIỆU AI' : 'AI DOC EXTRACTOR', icon: Brain },
+        { id: 'reports', label: isVi ? 'DỰ BÁO & BÁO CÁO AI' : 'AI PREDICTOR & REPORTS', icon: TrendingUp },
+      ]
+    },
+    {
+      title: isVi ? 'Cấu hình' : 'System',
+      items: [
+        { id: 'settings', label: isVi ? 'CÀI ĐẶT' : 'SETTINGS', icon: Settings },
+        ...(currentUser && currentUser.email === 'nhathich123@gmail.com'
+          ? [{ id: 'developer', label: isVi ? 'CÀI ĐẶT PHÁT TRIỂN' : 'DEVELOPER SETTINGS', icon: Terminal }]
+          : [])
+      ]
+    }
   ];
-
-  if (currentUser && currentUser.email === 'nhathich123@gmail.com') {
-    sidebarItems.push({ id: 'developer', label: isVi ? 'CÀI ĐẶT NHÀ PHÁT TRIỂN' : 'DEVELOPER SETTINGS' });
-  }
 
   return (
     <aside
       className="flex flex-col w-60 min-h-screen shrink-0 border-r border-[var(--border)] select-none"
       style={{ background: 'var(--bg-sidebar)' }}
     >
-      <div className="px-5 pt-8 pb-8">
+      <div className="px-5 pt-8 pb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 p-0.5 border border-[#ff7a45]/30 rounded bg-[#ff7a45]/5 flex items-center justify-center shrink-0">
             <OmegaLogo className="w-full h-full object-contain" />
@@ -100,23 +141,33 @@ function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {sidebarItems.map(({ id, label }) => {
-          const isActive = activePage === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => go(id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-[10px] font-mono font-bold tracking-wider rounded transition-all text-left uppercase ${isActive
-                ? 'text-[#ff7a45] bg-[#ff7a45]/5 border-l-2 border-l-[#ff7a45]'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] border-l-2 border-l-transparent'
-                }`}
-            >
-              {label}
-            </button>
-          );
-        })}
+      <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto scrollbar-thin">
+        {sidebarGroups.map((group, gIdx) => (
+          <div key={gIdx} className="space-y-1.5">
+            <span className="text-[8px] font-mono font-bold text-zinc-500 uppercase tracking-widest px-4 block select-none opacity-80">
+              {group.title}
+            </span>
+            <div className="space-y-0.5">
+              {group.items.map(({ id, label, icon: Icon }) => {
+                const isActive = activePage === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => go(id)}
+                    className={`group w-full flex items-center gap-3 px-4 py-2 text-[10px] font-mono font-bold tracking-wider rounded transition-all text-left uppercase ${isActive
+                      ? 'text-[#ff7a45] bg-[#ff7a45]/5 border-l-2 border-l-[#ff7a45]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] border-l-2 border-l-transparent'
+                      }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#ff7a45]' : 'text-zinc-500 group-hover:text-zinc-300 transition-colors'}`} />
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="px-4 pb-6 space-y-4 mt-auto">

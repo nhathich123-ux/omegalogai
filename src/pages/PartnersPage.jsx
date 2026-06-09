@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader, Card, StatusPill, DataTable } from '../components/ui';
-import { Plus, Edit, Trash2, Search, UserCheck, Briefcase, Mail, MapPin, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, UserCheck, Briefcase, Mail, MapPin, Check, RefreshCw, X, Filter } from 'lucide-react';
 
 export default function PartnersPage() {
   const { partners, setPartners, lang, setNotifications } = useApp();
@@ -9,6 +9,7 @@ export default function PartnersPage() {
 
   const [activeTab, setActiveTab] = useState('suppliers'); // 'suppliers' | 'customers'
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name-asc');
   const [message, setMessage] = useState(null);
 
   // Form states
@@ -100,20 +101,31 @@ export default function PartnersPage() {
     }
   };
 
-  // Filter based on selected tab and search query
+  // Filter and sort based on selected tab, search query, and sort parameter
   const filteredList = partners.filter(p => {
     const isCorrectType = activeTab === 'suppliers' ? p.type === 'supplier' : p.type === 'customer';
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (p.contact && p.contact.toLowerCase().includes(searchTerm.toLowerCase()));
     return isCorrectType && matchesSearch;
+  }).sort((a, b) => {
+    if (sortBy === 'name-asc') {
+      return a.name.localeCompare(b.name);
+    } else if (sortBy === 'name-desc') {
+      return b.name.localeCompare(a.name);
+    } else if (sortBy === 'date-newest') {
+      return new Date(b.date || '') - new Date(a.date || '');
+    } else if (sortBy === 'date-oldest') {
+      return new Date(a.date || '') - new Date(b.date || '');
+    }
+    return 0;
   });
 
   // Table Columns
   const columns = [
     { 
       key: 'id', 
-      label: 'ID Partner', 
+      label: isVi ? 'ID ĐỐI TÁC (PARTNER ID)' : 'PARTNER ID', 
       render: (r) => <span className="font-mono text-xs font-bold text-zinc-500">#{r.id}</span> 
     },
     { 
@@ -136,7 +148,7 @@ export default function PartnersPage() {
       label: isVi ? 'ĐỊA CHỈ' : 'ADDRESS LOCATION',
       render: (r) => (
         <div className="flex items-center gap-1.5 font-sans text-xs text-zinc-400">
-          <MapPin className="w-3.5 h-3.5 text-zinc-650" />
+          <MapPin className="w-3.5 h-3.5 text-zinc-500" />
           <span>{r.address || 'N/A'}</span>
         </div>
       )
@@ -173,7 +185,7 @@ export default function PartnersPage() {
   ];
 
   return (
-    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 select-none font-sans">
+    <div className="p-6 lg:p-8 animate-fade-in text-zinc-100 font-sans">
       
       {/* Tab Navigation */}
       <div className="flex items-center gap-6 border-b border-[#1b1a20] pb-3 mb-8 font-mono text-[9px] font-bold tracking-widest text-zinc-500 uppercase">
@@ -196,10 +208,10 @@ export default function PartnersPage() {
       {/* Header and Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold font-sans text-zinc-100">
+          <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">
             {activeTab === 'suppliers' 
-              ? (isVi ? 'Quản lý Nhà cung cấp' : 'Suppliers Directory')
-              : (isVi ? 'Quản lý Đối tác Khách hàng' : 'Customers Directory')}
+              ? (isVi ? 'QUẢN LÝ NHÀ CUNG CẤP' : 'SUPPLIERS DIRECTORY')
+              : (isVi ? 'QUẢN LÝ ĐỐI TÁC KHÁCH HÀNG' : 'CUSTOMERS DIRECTORY')}
           </h2>
           <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
             {isVi 
@@ -270,19 +282,76 @@ export default function PartnersPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="flex items-center gap-4 p-4 mb-6 rounded-lg bg-[#111114] border border-[#22202a]">
-        <div className="flex flex-col items-start w-full max-w-xs">
-          <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">{isVi ? 'Tìm theo tên / ID' : 'Search name / partner ID'}</label>
-          <div className="relative w-full">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-            <input 
-              type="text" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={isVi ? 'NHẬP TÊN HOẶC ID...' : 'ENTER PARTNER NAME...'}
-              className="w-full bg-zinc-950 border border-zinc-800 py-1.5 px-3 pl-8 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none"
-            />
+      <div className="p-5 mb-6 rounded-lg bg-[#111114] border border-[#22202a]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 items-end">
+          
+          {/* Search box */}
+          <div className="flex flex-col items-start relative w-full">
+            <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 select-none">
+              <Search className="w-3 h-3 text-[#ff7a45]/60" />
+              {isVi ? 'TÌM THEO TÊN / ID / LIÊN HỆ' : 'SEARCH NAME / ID / CONTACT'}
+            </label>
+            <div className="relative w-full">
+              <input 
+                type="text" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={isVi ? 'NHẬP TÊN, ID HOẶC EMAIL...' : 'ENTER NAME, ID OR EMAIL...'}
+                className="w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-2 px-3 pl-8 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none transition-all placeholder:text-zinc-600"
+              />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+              {searchTerm && (
+                <button 
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-[#ff7a45] transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Sort selector */}
+          <div className="flex flex-col items-start relative w-full">
+            <label className="font-mono text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-1.5 select-none">
+              <Filter className="w-3 h-3 text-[#ff7a45]/60" />
+              {isVi ? 'SẮP XẾP ĐỐI TÁC' : 'SORT PARTNERS'}
+            </label>
+            <div className="relative w-full">
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="filter-select w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-2 px-3 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none cursor-pointer transition-all"
+              >
+                <option value="name-asc">{isVi ? 'TÊN ĐỐI TÁC (A-Z)' : 'PARTNER NAME (A-Z)'}</option>
+                <option value="name-desc">{isVi ? 'TÊN ĐỐI TÁC (Z-A)' : 'PARTNER NAME (Z-A)'}</option>
+                <option value="date-newest">{isVi ? 'NGÀY MỚI NHẤT' : 'NEWEST REGISTERED'}</option>
+                <option value="date-oldest">{isVi ? 'NGÀY CŨ NHẤT' : 'OLDEST REGISTERED'}</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Clear button / indicator */}
+          <div className="flex items-center justify-end h-[34px] font-mono text-[9px] text-zinc-500 tracking-wider w-full">
+            {(searchTerm || sortBy !== 'name-asc') ? (
+              <button
+                onClick={() => { setSearchTerm(''); setSortBy('name-asc'); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff7a45]/10 border border-[#ff7a45]/20 hover:border-[#ff7a45]/40 text-[#ff7a45] rounded uppercase font-bold tracking-widest transition-all hover:bg-[#ff7a45]/15 w-full sm:w-auto justify-center"
+              >
+                <RefreshCw className="w-3 h-3" />
+                {isVi ? 'Đặt lại bộ lọc' : 'Reset Filters'}
+              </button>
+            ) : (
+              <div className="text-zinc-500 flex items-center gap-1.5 select-none font-bold justify-end w-full">
+                <Check className="w-3 h-3 text-emerald-500" />
+                {isVi 
+                  ? `ĐANG HIỂN THỊ ${filteredList.length} ĐỐI TÁC` 
+                  : `SHOWING ${filteredList.length} PARTNERS`}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
@@ -290,7 +359,7 @@ export default function PartnersPage() {
       <Card noPadding className="overflow-hidden bg-[#111114] border border-[#22202a]">
         <DataTable columns={columns} rows={filteredList} rowKey="id" />
         
-        <div className="flex items-center justify-between border-t border-[#22202a] p-4 text-[9px] font-mono font-bold tracking-wider text-zinc-500 uppercase select-none">
+        <div className="flex items-center justify-between border-t border-[#22202a] p-4 text-[9px] font-mono font-bold tracking-wider text-zinc-500 uppercase">
           <span>
             {isVi 
               ? `HIỂN THỊ 1-${filteredList.length} TRÊN TỔNG SỐ ${partners.filter(p => activeTab === 'suppliers' ? p.type === 'supplier' : p.type === 'customer').length} ĐỐI TÁC` 
@@ -301,7 +370,7 @@ export default function PartnersPage() {
 
       {/* Add / Edit Drawer */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs">
           <form 
             onSubmit={handleSavePartner} 
             className="w-full max-w-md h-full bg-[#0c0c0e] border-l border-zinc-800/80 p-6 flex flex-col justify-between overflow-y-auto scrollbar-thin"
@@ -311,8 +380,8 @@ export default function PartnersPage() {
                 <div>
                   <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-zinc-100">
                     {drawerMode === 'add' 
-                      ? (isVi ? 'Thêm Đối Tác Mới' : 'Register Partner')
-                      : (isVi ? `Sửa Đối Tác: #${formId}` : `Edit Partner: #${formId}`)}
+                      ? (isVi ? 'THÊM ĐỐI TÁC MỚI' : 'REGISTER PARTNER')
+                      : (isVi ? `SỬA ĐỐI TÁC: #${formId}` : `EDIT PARTNER: #${formId}`)}
                   </h3>
                   <p className="text-[9px] text-zinc-500 font-mono tracking-widest mt-1">
                     {isVi 
@@ -327,7 +396,7 @@ export default function PartnersPage() {
 
               <div className="space-y-4 font-mono text-[11px] text-zinc-300">
                 <div>
-                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">ID Partner:</label>
+                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'ID ĐỐI TÁC (PARTNER ID):' : 'PARTNER ID:'}</label>
                   <input 
                     type="text" 
                     value={formId}
@@ -337,7 +406,7 @@ export default function PartnersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'Tên đối tác thương mại:' : 'Partner Corporate Name:'}</label>
+                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'TÊN ĐỐI TÁC THƯƠNG MẠI:' : 'PARTNER CORPORATE NAME:'}</label>
                   <input 
                     type="text" 
                     value={formName}
@@ -349,7 +418,7 @@ export default function PartnersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'Thông tin liên hệ (Email/SĐT):' : 'Correspondence Info (Email/Phone):'}</label>
+                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'THÔNG TIN LIÊN HỆ (EMAIL/SĐT):' : 'CORRESPONDENCE INFO (EMAIL/PHONE):'}</label>
                   <input 
                     type="text" 
                     value={formContact}
@@ -361,7 +430,7 @@ export default function PartnersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'Địa chỉ trụ sở chính:' : 'Headquarters Address:'}</label>
+                  <label className="block text-zinc-500 uppercase tracking-wider mb-1.5">{isVi ? 'ĐỊA CHỈ TRỤ SỞ CHÍNH:' : 'HEADQUARTERS ADDRESS:'}</label>
                   <textarea 
                     value={formAddress}
                     onChange={(e) => setFormAddress(e.target.value)}

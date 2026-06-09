@@ -199,7 +199,7 @@ export default function DeveloperPage() {
   );
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl animate-fade-in text-zinc-100 select-none font-sans">
+    <div className="p-6 lg:p-8 max-w-6xl animate-fade-in text-zinc-100 font-sans">
       <PageHeader 
         title={isVi ? 'Quản trị Nhà phát triển' : 'Developer Administration'} 
         subtitle={isVi ? 'Cổng kiểm tra thông tin tài khoản nhân viên, chữ ký sinh trắc học và quản trị cơ sở dữ liệu cốt lõi' : 'Inspect registered staff profiles, biometric states, and core database nodes'} 
@@ -262,7 +262,7 @@ export default function DeveloperPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1b1a20] pb-4 mb-4">
             <div>
               <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                {isVi ? 'Danh mục Tài khoản Nhân viên' : 'Staff Credentials Registry'}
+                {isVi ? 'DANH MỤC TÀI KHOẢN NHÂN VIÊN' : 'STAFF CREDENTIALS REGISTRY'}
               </h3>
               <p className="text-[9px] text-zinc-500 tracking-wide mt-0.5">
                 {isVi ? 'Kiểm tra mật khẩu dạng rõ, ngày khởi tạo và chỉnh sửa cơ sở dữ liệu' : 'Inspect plain text passwords, registrations and biometrics link state'}
@@ -386,7 +386,7 @@ export default function DeveloperPage() {
               <Server className="w-4 h-4 text-orange-400" />
               <div>
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                  {isVi ? 'Bộ kiểm soát AI & Hệ thống' : 'AI Models & Node Config'}
+                  {isVi ? 'BỘ KIỂM SOÁT AI & HỆ THỐNG' : 'AI MODELS & NODE CONFIG'}
                 </h3>
                 <p className="text-[9px] text-zinc-500 tracking-wide mt-0.5">
                   {isVi ? 'Thông số liên kết API & Tự động reset' : 'Network channels & model parameters'}
@@ -415,7 +415,7 @@ export default function DeveloperPage() {
               <ShieldAlert className="w-4 h-4 text-red-500" />
               <div>
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-red-400">
-                  {isVi ? 'Trung tâm Cảnh báo Đỏ' : 'Red Zone Controls'}
+                  {isVi ? 'TRUNG TÂM CẢNH BÁO ĐỎ' : 'RED ZONE CONTROLS'}
                 </h3>
                 <p className="text-[9px] text-zinc-500 tracking-wide mt-0.5">
                   {isVi ? 'Hành động can thiệp khẩn cấp' : 'High-risk telemetry overrides'}
@@ -456,7 +456,7 @@ export default function DeveloperPage() {
                     </div>
                     <div>
                       <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300">
-                        {isVi ? 'Cập nhật tài khoản nhân viên' : 'Edit Staff Profile'}
+                        {isVi ? 'CẬP NHẬT TÀI KHOẢN NHÂN VIÊN' : 'EDIT STAFF PROFILE'}
                       </h3>
                       <p className="text-[9px] text-zinc-500 tracking-wide mt-0.5 font-mono">
                         {editingAccount.email}
