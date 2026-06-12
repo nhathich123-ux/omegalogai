@@ -927,7 +927,10 @@ function TopHeader() {
           <input
             type="search"
             placeholder={isVi ? 'TÌM KIẾM...' : 'SEARCH...'}
-            className="w-full pl-9 pr-4 py-1.5 font-mono text-[10px] tracking-wider uppercase rounded border border-[var(--border)] outline-none focus:border-[#ff7a45]/50 transition-colors"
+            value={globalSearchQuery}
+            onChange={(e) => setGlobalSearchQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+            className="w-full pl-9 pr-4 py-1.5 font-mono text-[10px] tracking-wider rounded border border-[var(--border)] outline-none focus:border-[#ff7a45]/50 transition-colors"
             style={{ background: 'var(--bg-input)', color: 'var(--text-primary)' }}
           />
         </div>

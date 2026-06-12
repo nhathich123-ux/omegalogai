@@ -68,7 +68,9 @@ export default function InventoryPage() {
     renameLocationNode,
     lang,
     notifications,
-    setNotifications
+    setNotifications,
+    globalSearchQuery,
+    setGlobalSearchQuery
   } = useApp();
 
   const isVi = lang === 'vi';
@@ -96,7 +98,8 @@ export default function InventoryPage() {
   const [activeTab, setActiveTab] = useState('products');
 
   // Search & Filters state
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchQuery = globalSearchQuery;
+  const setSearchQuery = setGlobalSearchQuery;
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   
   // SKU Detail State

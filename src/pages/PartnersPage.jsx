@@ -4,11 +4,12 @@ import { PageHeader, Card, StatusPill, DataTable } from '../components/ui';
 import { Plus, Edit, Trash2, Search, UserCheck, Briefcase, Mail, MapPin, Check, RefreshCw, X, Filter } from 'lucide-react';
 
 export default function PartnersPage() {
-  const { partners, setPartners, lang, setNotifications } = useApp();
+  const { partners, setPartners, lang, setNotifications, globalSearchQuery, setGlobalSearchQuery } = useApp();
   const isVi = lang === 'vi';
 
   const [activeTab, setActiveTab] = useState('suppliers'); // 'suppliers' | 'customers'
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchTerm = globalSearchQuery;
+  const setSearchTerm = setGlobalSearchQuery;
   const [sortBy, setSortBy] = useState('name-asc');
   const [message, setMessage] = useState(null);
 

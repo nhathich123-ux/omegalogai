@@ -153,6 +153,11 @@ export function AppProvider({ children }) {
   });
   const [activePage, setActivePage] = useState('landing'); // Default is landing (welcome page)
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
+
+  useEffect(() => {
+    setGlobalSearchQuery('');
+  }, [activePage]);
 
   // Global Auth Modal and Face ID Biometric States
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -1803,6 +1808,8 @@ export function AppProvider({ children }) {
         setActivePage,
         sidebarOpen,
         setSidebarOpen,
+        globalSearchQuery,
+        setGlobalSearchQuery,
         isProfileOpen,
         setIsProfileOpen,
         profileMode,

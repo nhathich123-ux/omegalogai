@@ -66,7 +66,9 @@ export default function OperationsPage() {
     processShip,
     createInternalTransfer,
     partners,
-    lang 
+    lang,
+    globalSearchQuery,
+    setGlobalSearchQuery
   } = useApp();
 
   const isVi = lang === 'vi';
@@ -75,9 +77,11 @@ export default function OperationsPage() {
   const [activeTab, setActiveTab] = useState('receipts');
 
   // Search & Filter state for receipts/deliveries
-  const [receiptSearch, setReceiptSearch] = useState('');
+  const receiptSearch = globalSearchQuery;
+  const setReceiptSearch = setGlobalSearchQuery;
   const [receiptStatusFilter, setReceiptStatusFilter] = useState('ALL');
-  const [deliverySearch, setDeliverySearch] = useState('');
+  const deliverySearch = globalSearchQuery;
+  const setDeliverySearch = setGlobalSearchQuery;
   const [deliveryStatusFilter, setDeliveryStatusFilter] = useState('ALL');
 
   // Detail Modal overlay state

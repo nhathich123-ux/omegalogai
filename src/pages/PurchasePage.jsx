@@ -10,7 +10,9 @@ export default function PurchasePage() {
     confirmPurchaseOrder, 
     createPurchaseOrder,
     reorderHistory,
-    lang 
+    lang,
+    globalSearchQuery,
+    setGlobalSearchQuery
   } = useApp();
 
   const isVi = lang === 'vi';
@@ -22,7 +24,8 @@ export default function PurchasePage() {
   const [purchaseQty, setPurchaseQty] = useState(100);
 
   // Search & Filter state
-  const [poSearch, setPoSearch] = useState('');
+  const poSearch = globalSearchQuery;
+  const setPoSearch = setGlobalSearchQuery;
   const [poStatusFilter, setPoStatusFilter] = useState('ALL');
 
   // Formatting currency helper
