@@ -36,6 +36,14 @@ export default function DashboardPage() {
 
   // State for flow chart timeframe filter
   const [timeframe, setTimeframe] = useState('7d');
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split('T')[0];
+  });
+  const [endDate, setEndDate] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
 
   // AI Security Anomaly Detection state
   const [securityScanStatus, setSecurityScanStatus] = useState('idle');
@@ -252,6 +260,38 @@ export default function DashboardPage() {
       for (let i = 0; i < 5; i++) {
         const d = dates[Math.floor(i * (dates.length - 1) / 4)];
         labelFormat.push(`${d.getDate()}/${d.getMonth() + 1}`);
+      }
+    } else if (timeframe === 'custom') {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        for (let i = 0; i <= diffDays; i++) {
+          const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+          dates.push(d);
+        }
+        
+        if (dates.length === 1) {
+          dates.push(new Date(dates[0].getTime()));
+        }
+        
+        for (let i = 0; i < 5; i++) {
+          if (dates.length > 0) {
+            const d = dates[Math.floor(i * (dates.length - 1) / 4)];
+            labelFormat.push(`${d.getDate()}/${d.getMonth() + 1}`);
+          }
+        }
+      } else {
+        const current = new Date();
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(current.getTime() - i * 24 * 60 * 60 * 1000);
+          dates.push(d);
+          const daysVi = ['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+          const daysEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          labelFormat.push(isVi ? daysVi[d.getDay()] : daysEn[d.getDay()]);
+        }
       }
     } else {
       // Default: Last 7 days
@@ -599,8 +639,37 @@ export default function DashboardPage() {
                   >
                     30D
                   </button>
+                  <button 
+                    onClick={() => setTimeframe('custom')}
+                    className={`px-2.5 py-1 rounded transition-colors ${timeframe === 'custom' ? 'bg-[#ff7a45] text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
+                  >
+                    {isVi ? 'TÙY CHỈNH' : 'CUSTOM'}
+                  </button>
                 </div>
               </div>
+
+              {timeframe === 'custom' && (
+                <div className="flex flex-wrap items-center gap-4 bg-zinc-950/60 p-3 border border-zinc-900 rounded mb-6 animate-fade-in font-mono text-[9px] uppercase tracking-wider text-zinc-400">
+                  <div className="flex items-center gap-2">
+                    <span>{isVi ? 'TỪ NGÀY:' : 'FROM DATE:'}</span>
+                    <input 
+                      type="date" 
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="bg-zinc-900 border border-zinc-800 rounded px-2.5 py-1 text-zinc-200 text-[10px] outline-none focus:border-[#ff7a45]/50 transition-colors"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>{isVi ? 'ĐẾN NGÀY:' : 'TO DATE:'}</span>
+                    <input 
+                      type="date" 
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="bg-zinc-900 border border-zinc-800 rounded px-2.5 py-1 text-zinc-200 text-[10px] outline-none focus:border-[#ff7a45]/50 transition-colors"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Sine Wave Graphic */}
               <div className="relative w-full h-48 overflow-hidden border-b border-[#1b1a20]/45">
