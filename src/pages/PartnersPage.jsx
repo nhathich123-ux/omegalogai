@@ -298,7 +298,7 @@ export default function PartnersPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={isVi ? 'NHẬP TÊN, ID HOẶC EMAIL...' : 'ENTER NAME, ID OR EMAIL...'}
-                className="w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-2 px-3 pl-8 text-zinc-300 font-mono text-[10px] rounded tracking-wider uppercase outline-none transition-all placeholder:text-zinc-600"
+                className="w-full bg-zinc-950 border border-zinc-800/80 focus:border-[#ff7a45]/50 focus:ring-1 focus:ring-[#ff7a45]/20 py-2 px-3 pl-8 text-zinc-300 font-mono text-[10px] rounded tracking-wider outline-none transition-all placeholder:text-zinc-600"
               />
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
               {searchTerm && (
