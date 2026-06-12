@@ -965,16 +965,22 @@ function TopHeader() {
         <div className="relative">
           <button
             type="button"
-            onClick={() => setIsNotifOpen(!isNotifOpen)}
+            onClick={() => {
+              const nextState = !isNotifOpen;
+              setIsNotifOpen(nextState);
+              if (nextState && notifications && notifications.length > 0) {
+                setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+              }
+            }}
             className="w-8 h-8 rounded border border-[var(--border)] flex items-center justify-center hover:opacity-75 transition-opacity text-zinc-400 cursor-pointer relative"
             style={{ background: 'var(--bg-input)' }}
             aria-label="Notifications"
             title={isVi ? 'Thông báo hệ thống' : 'System Notifications'}
           >
             <Bell className="w-3.5 h-3.5" />
-            {notifications && notifications.length > 0 && (
+            {notifications && notifications.filter(n => !n.read).length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 px-1 min-w-[15px] h-[15px] rounded-full bg-[#ff7a45] text-zinc-950 font-mono font-black text-[8px] flex items-center justify-center border border-[#0c0c0e]">
-                {notifications.length}
+                {notifications.filter(n => !n.read).length}
               </span>
             )}
           </button>
