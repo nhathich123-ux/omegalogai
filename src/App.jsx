@@ -213,7 +213,9 @@ function TopHeader() {
     pendingUser,
     setPendingUser,
     showFaceIdPrompt,
-    setShowFaceIdPrompt
+    setShowFaceIdPrompt,
+    globalSearchQuery,
+    setGlobalSearchQuery
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
