@@ -1409,21 +1409,21 @@ html[lang="vi"] .brand-title {
    LIGHT WAREHOUSE PALETTE — ACTIVE SYSTEM THEME
    ═══════════════════════════════════════════ */
 [data-theme="light"] {
-  --bg-root: #F4F4F6;
-  --bg-sidebar: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F1F1F4;
-  --bg-card-alt: #EBEBEF;
+  --bg-root: #C8CBD2;
+  --bg-sidebar: #D7D9E0;
+  --bg-card: #E1E4EC;
+  --bg-card-hover: #E9ECF4;
+  --bg-card-alt: #BAC0CB;
   --bg-input: #FFFFFF;
   --bg-nav-active: rgba(232, 130, 90, 0.12);
-  --border: #DCDCE2;
-  --border-subtle: #ECECEF;
-  --border-accent: rgba(232, 130, 90, 0.4);
-  --text-primary: #1C1C20;
-  --text-secondary: #5A5A62;
-  --text-muted: #9A9AB0;
-  --header-bg: #FFFFFF;
-  --table-row-hover: #F5F5FA;
+  --border: #A5AAB5;
+  --border-subtle: #B8BDC8;
+  --border-accent: rgba(232, 130, 90, 0.45);
+  --text-primary: #1C1E24;
+  --text-secondary: #484B54;
+  --text-muted: #686C78;
+  --header-bg: #D7D9E0;
+  --table-row-hover: #D3D6DF;
   --glow-orange: rgba(232, 130, 90, 0.1);
   --glow-orange-strong: rgba(232, 130, 90, 0.25);
 }
@@ -1445,15 +1445,15 @@ html[lang="vi"] .brand-title {
 }
 
 [data-theme="light"] .bg-zinc-950\/80 {
-  background-color: rgba(244, 244, 246, 0.8) !important;
+  background-color: rgba(200, 203, 210, 0.8) !important;
 }
 
 [data-theme="light"] .bg-zinc-950\/60 {
-  background-color: rgba(244, 244, 246, 0.6) !important;
+  background-color: rgba(200, 203, 210, 0.6) !important;
 }
 
 [data-theme="light"] .bg-zinc-950\/40 {
-  background-color: rgba(244, 244, 246, 0.4) !important;
+  background-color: rgba(200, 203, 210, 0.4) !important;
 }
 
 [data-theme="light"] .bg-\[\#09090b\] {
@@ -1548,15 +1548,15 @@ html[lang="vi"] .brand-title {
 }
 
 [data-theme="light"] .bg-zinc-900\/50 {
-  background-color: rgba(241, 241, 244, 0.5) !important;
+  background-color: rgba(233, 236, 244, 0.5) !important;
 }
 
 [data-theme="light"] .bg-zinc-900\/40 {
-  background-color: rgba(241, 241, 244, 0.4) !important;
+  background-color: rgba(233, 236, 244, 0.4) !important;
 }
 
 [data-theme="light"] .bg-zinc-900\/80 {
-  background-color: rgba(241, 241, 244, 0.8) !important;
+  background-color: rgba(233, 236, 244, 0.8) !important;
 }
 
 [data-theme="light"] .bg-\[\#121215\] {
