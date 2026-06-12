@@ -934,7 +934,7 @@ export default function ReportsPage() {
               {reportsSubtab === 'onhand' && (
                 <div>
                   <div className="border-b border-[#1b1a20] pb-3 mb-5">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">{isVi ? 'Báo cáo tồn kho theo Vị trí kệ' : 'Quantity by Specific Shelf Coordinates'}</h3>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">{isVi ? 'BÁO CÁO TỒN KHO THEO VỊ TRÍ KỆ' : 'QUANTITY BY SPECIFIC SHELF COORDINATES'}</h3>
                     <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">{isVi ? 'Số lượng tồn và tọa độ thực tế tương ứng' : 'Audit coordinates of physical items'}</p>
                   </div>
                   <div className="overflow-x-auto scrollbar-thin">
@@ -967,7 +967,7 @@ export default function ReportsPage() {
                 <div>
                   <div className="border-b border-[#1b1a20] pb-3 mb-5 flex items-center justify-between">
                     <div>
-                      <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">{isVi ? 'Báo cáo định giá tồn kho (FIFO)' : 'Inventory Cost Valuation (FIFO Rule)'}</h3>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">{isVi ? 'BÁO CÁO ĐỊNH GIÁ TỒN KHO (FIFO)' : 'INVENTORY COST VALUATION (FIFO RULE)'}</h3>
                       <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">{isVi ? 'Tính giá trị kho bằng đơn giá thực tế lô mua hàng' : 'Asset value based on real consignment costs'}</p>
                     </div>
                     <span className="text-xs font-mono font-extrabold text-[#ff7a45]">
@@ -1008,7 +1008,7 @@ export default function ReportsPage() {
               {reportsSubtab === 'moves' && (
                 <div>
                   <div className="border-b border-[#1b1a20] pb-3 mb-5">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">{isVi ? 'Nhật ký di chuyển hàng hóa toàn cục' : 'Global Stock Movements Audit Trail'}</h3>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">{isVi ? 'NHẬT KÝ DI CHUYỂN HÀNG HÓA TOÀN CỤC' : 'GLOBAL STOCK MOVEMENTS AUDIT TRAIL'}</h3>
                     <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">{isVi ? 'Lịch sử kiểm tra mọi hoạt động nhập, xuất và chuyển kho' : 'Auditable trace of all inventory transactions'}</p>
                   </div>
                   <div className="overflow-x-auto scrollbar-thin">

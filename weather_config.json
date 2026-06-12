@@ -32,6 +32,26 @@
   ],
   "logs": [
     {
+      "id": "WLOG-2514",
+      "time": "2026-06-12 22:20:18",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
+      "id": "WLOG-6041",
+      "time": "2026-06-12 22:19:31",
+      "source": "Giả lập tự động (Thiếu API Key)",
+      "condition": "Clear",
+      "temp": 28.0,
+      "alerts_triggered": [],
+      "telegram_sent": false,
+      "telegram_error": null
+    },
+    {
       "id": "WLOG-7897",
       "time": "2026-06-09 16:34:03",
       "source": "Giả lập tự động (Thiếu API Key)",

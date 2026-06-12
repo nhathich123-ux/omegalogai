@@ -571,7 +571,7 @@ export default function InventoryPage() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">{isVi ? 'TỔNG QUAN DANH MỤC SẢN PHẨM' : 'INVENTORY OVERVIEW'}</h2>
+              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'TỔNG QUAN DANH MỤC SẢN PHẨM' : 'INVENTORY OVERVIEW'}</h2>
               <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
                 {isVi ? 'QUẢN LÝ DỮ LIỆU SẢN PHẨM - TÁI CUNG ỨNG VÀ ĐỊNH GIÁ' : 'PRODUCTS SPECIFICATIONS AND LOGISTICAL CONTROL'}
               </p>
@@ -986,7 +986,7 @@ export default function InventoryPage() {
         <div>
           {/* Header */}
           <div className="mb-6">
-            <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">{isVi ? 'TRUY XUẤT NGUỒN GỐC LÔ & SỐ SÊ-RI' : 'TRACEABILITY MATRIX (LOTS / SERIAL NUMBERS)'}</h2>
+            <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'TRUY XUẤT NGUỒN GỐC LÔ & SỐ SÊ-RI' : 'TRACEABILITY MATRIX (LOTS / SERIAL NUMBERS)'}</h2>
             <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
               {isVi ? 'TRUY VẾT LỊCH SỬ CHUỖI CUNG ỨNG VÀ HẠN SỬ DỤNG SẢN PHẨM PHỨC TẠP' : 'END-TO-END SUPPLY CHAIN ORIGIN TRACKING'}
             </p>

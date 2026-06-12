@@ -127,7 +127,7 @@ export default function PurchasePage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-xl font-bold font-sans tracking-wide text-zinc-100 uppercase">{isVi ? 'QUẢN LÝ CUNG ỨNG & MUA HÀNG (PROCUREMENT)' : 'PURCHASE PROCUREMENT SUITE'}</h2>
+          <h2 className="text-xl font-bold font-sans tracking-wide text-zinc-100">{isVi ? 'QUẢN LÝ CUNG ỨNG & MUA HÀNG (PROCUREMENT)' : 'PURCHASE PROCUREMENT SUITE'}</h2>
           <p className="font-mono text-[9px] font-bold text-[#ff7a45] uppercase tracking-widest mt-1">
             {isVi ? 'HOẠT ĐỘNG THƯƠNG LƯỢNG MUA HÀNG VÀ CHU TRÌNH TÁI CUNG ỨNG' : 'SUPPLIER PROCUREMENT FLOW AND REORDER ENGINE'}
           </p>

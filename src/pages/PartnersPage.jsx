@@ -208,7 +208,7 @@ export default function PartnersPage() {
       {/* Header and Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">
+          <h2 className="text-xl font-bold font-sans text-zinc-100">
             {activeTab === 'suppliers' 
               ? (isVi ? 'QUẢN LÝ NHÀ CUNG CẤP' : 'SUPPLIERS DIRECTORY')
               : (isVi ? 'QUẢN LÝ ĐỐI TÁC KHÁCH HÀNG' : 'CUSTOMERS DIRECTORY')}

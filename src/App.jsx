@@ -85,34 +85,34 @@ function Sidebar() {
   // 5. Cấu hình (System)
   const sidebarGroups = [
     {
-      title: isVi ? 'Giám sát' : 'Monitoring',
+      title: isVi ? 'GIÁM SÁT' : 'MONITORING',
       items: [
         { id: 'dashboard', label: isVi ? 'TRUNG TÂM ĐIỀU KHIỂN' : 'DASHBOARD', icon: LayoutDashboard },
       ]
     },
     {
-      title: isVi ? 'Dữ liệu nền tảng' : 'Master Data',
+      title: isVi ? 'DỮ LIỆU NỀN TẢNG' : 'MASTER DATA',
       items: [
         { id: 'inventory', label: isVi ? 'KHO HÀNG' : 'INVENTORY', icon: Warehouse },
         { id: 'partners', label: isVi ? 'ĐỐI TÁC' : 'PARTNERS', icon: Users },
       ]
     },
     {
-      title: isVi ? 'Nghiệp vụ kho' : 'Logistics Flow',
+      title: isVi ? 'NGHIỆP VỤ KHO' : 'LOGISTICS FLOW',
       items: [
         { id: 'purchase', label: isVi ? 'MUA HÀNG' : 'PROCUREMENT', icon: ShoppingCart },
         { id: 'operations', label: isVi ? 'VẬN HÀNH' : 'OPERATIONS', icon: ArrowLeftRight },
       ]
     },
     {
-      title: isVi ? 'Trí tuệ nhân tạo' : 'AI Cognitive',
+      title: isVi ? 'TRÍ TUỆ NHÂN TẠO' : 'AI COGNITIVE',
       items: [
         { id: 'aifile', label: isVi ? 'TRÍCH XUẤT TÀI LIỆU AI' : 'AI DOC EXTRACTOR', icon: Brain },
         { id: 'reports', label: isVi ? 'DỰ BÁO & BÁO CÁO AI' : 'AI PREDICTOR & REPORTS', icon: TrendingUp },
       ]
     },
     {
-      title: isVi ? 'Cấu hình' : 'System',
+      title: isVi ? 'CẤU HÌNH' : 'SYSTEM',
       items: [
         { id: 'settings', label: isVi ? 'CÀI ĐẶT' : 'SETTINGS', icon: Settings },
         ...(currentUser && currentUser.email === 'nhathich123@gmail.com'

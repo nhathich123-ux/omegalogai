@@ -311,7 +311,7 @@ export default function OperationsPage() {
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">{isVi ? 'PHIẾU NHẬP KHO & KIỂM TRA CHẤT LƯỢNG (QC)' : 'INCOMING RECEIPTS & QUALITY CHECKS'}</h2>
+              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'PHIẾU NHẬP KHO & KIỂM TRA CHẤT LƯỢNG (QC)' : 'INCOMING RECEIPTS & QUALITY CHECKS'}</h2>
               <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
                 {isVi ? 'KIỂM THỬ QC TRƯỚC KHI ĐƯA VÀO VỊ TRÍ KỆ BẢO QUẢN' : 'RECEIPTS METRIC SYSTEM AND QUALITY TESTS'}
               </p>
@@ -634,7 +634,7 @@ export default function OperationsPage() {
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold font-sans text-zinc-100 uppercase">{isVi ? 'QUY TRÌNH XUẤT KHO BÁN HÀNG (PICK-PACK-SHIP)' : 'SALES OUTGOING SHIPMENTS (DELIVERIES)'}</h2>
+              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'QUY TRÌNH XUẤT KHO BÁN HÀNG (PICK-PACK-SHIP)' : 'SALES OUTGOING SHIPMENTS (DELIVERIES)'}</h2>
               <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
                 {isVi ? 'ĐÓNG GÓI - GIAO VẬN VÀ QUẢN LÝ LỘ TRÌNH CHIẾN LƯỢC FIFO/LIFO' : '3-STEP LOGISTICS PIPELINE WITH FIFO/LIFO ALGORITHM'}
               </p>

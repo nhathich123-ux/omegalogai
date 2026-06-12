@@ -201,7 +201,7 @@ export default function DeveloperPage() {
   return (
     <div className="p-6 lg:p-8 max-w-6xl animate-fade-in text-zinc-100 font-sans">
       <PageHeader 
-        title={isVi ? 'Quản trị Nhà phát triển' : 'Developer Administration'} 
+        title={isVi ? 'QUẢN TRỊ NHÀ PHÁT TRIỂN' : 'DEVELOPER ADMINISTRATION'} 
         subtitle={isVi ? 'Cổng kiểm tra thông tin tài khoản nhân viên, chữ ký sinh trắc học và quản trị cơ sở dữ liệu cốt lõi' : 'Inspect registered staff profiles, biometric states, and core database nodes'} 
       />
 
@@ -467,7 +467,7 @@ export default function DeveloperPage() {
                   <form onSubmit={handleUpdateAccountSubmit} className="space-y-4">
                     <div>
                       <label className="block text-[8px] font-mono font-extrabold text-zinc-500 uppercase tracking-widest mb-1.5">
-                        {isVi ? 'Tên Nhân Viên' : 'Employee Name'}
+                        {isVi ? 'TÊN NHÂN VIÊN' : 'EMPLOYEE NAME'}
                       </label>
                       <input
                         type="text"
@@ -480,7 +480,7 @@ export default function DeveloperPage() {
 
                     <div>
                       <label className="block text-[8px] font-mono font-extrabold text-zinc-500 uppercase tracking-widest mb-1.5">
-                        {isVi ? 'Địa chỉ Email (Tài khoản)' : 'Email (Username)'}
+                        {isVi ? 'ĐỊA CHỈ EMAIL (TÀI KHOẢN)' : 'EMAIL (USERNAME)'}
                       </label>
                       <input
                         type="email"
@@ -495,7 +495,7 @@ export default function DeveloperPage() {
 
                     <div>
                       <label className="block text-[8px] font-mono font-extrabold text-zinc-500 uppercase tracking-widest mb-1.5">
-                        {isVi ? 'Mật Khẩu' : 'Password'}
+                        {isVi ? 'MẬT KHẨU' : 'PASSWORD'}
                       </label>
                       <input
                         type="text"
@@ -508,7 +508,7 @@ export default function DeveloperPage() {
 
                     <div>
                       <label className="block text-[8px] font-mono font-extrabold text-zinc-500 uppercase tracking-widest mb-1.5">
-                        {isVi ? 'Vai trò quyền hạn' : 'Access Permissions'}
+                        {isVi ? 'VAI TRÒ QUYỀN HẠN' : 'ACCESS PERMISSIONS'}
                       </label>
                       <select
                         value={editRole}
@@ -527,13 +527,13 @@ export default function DeveloperPage() {
                         onClick={() => setEditingAccount(null)}
                         className="flex-1 py-2 bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-400 font-mono text-[9px] uppercase tracking-wider rounded transition-colors cursor-pointer"
                       >
-                        {isVi ? 'Hủy bỏ' : 'Cancel'}
+                        {isVi ? 'HỦY BỎ' : 'CANCEL'}
                       </button>
                       <button
                         type="submit"
                         className="flex-1 py-2 bg-[#ff7a45] hover:bg-[#ff9e7d] text-zinc-950 font-mono text-[9px] font-bold uppercase tracking-wider rounded transition-colors cursor-pointer"
                       >
-                        {isVi ? 'Lưu thay đổi' : 'Save Changes'}
+                        {isVi ? 'LƯU THAY ĐỔI' : 'SAVE CHANGES'}
                       </button>
                     </div>
                   </form>

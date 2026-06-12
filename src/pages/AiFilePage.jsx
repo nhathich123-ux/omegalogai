@@ -262,7 +262,7 @@ export default function AiFilePage() {
             <div className="flex items-center gap-3 border-b border-[#1b1a20] pb-3 mb-4">
               <FileCheck className="w-4 h-4 text-[#ff7a45]" />
               <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                {isVi ? 'TẢI LÊN TÀI LIỆU' : 'DOCUMENT INGESTION ZONE'}
+                {isVi ? 'Tải lên Tài liệu' : 'Document Ingestion Zone'}
               </h3>
             </div>
 
@@ -443,7 +443,7 @@ export default function AiFilePage() {
                   <div className="w-2 h-2 rounded-full bg-[#ff7a45] shadow-[0_0_8px_#ff7a45]" />
                   <div>
                     <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300">
-                      {isVi ? 'DỮ LIỆU AI TRÍCH XUẤT ĐƯỢC' : 'AI EXTRACTED STRUCTURED GRID'}
+                      {isVi ? 'Dữ liệu AI trích xuất được' : 'AI Extracted Structured Grid'}
                     </h3>
                     <p className="text-[9px] text-[#ff7a45] font-mono uppercase tracking-wider mt-0.5">
                       {analysisResult.summary} • Confidence: {analysisResult.confidence}%
