@@ -66,13 +66,15 @@ export function StatusPill({ label, variant }) {
   }
 
   let cleanLabel = label;
-  if (variant === 'ok') cleanLabel = "IN STOCK";
-  if (variant === 'warning') cleanLabel = "LOW STOCK";
-  if (variant === 'alert') cleanLabel = "OUT OF STOCK";
+  if (!cleanLabel) {
+    if (variant === 'ok') cleanLabel = "IN STOCK";
+    if (variant === 'warning') cleanLabel = "LOW STOCK";
+    if (variant === 'alert') cleanLabel = "OUT OF STOCK";
+  }
 
   return (
     <span className={`${baseStyle} ${statusStyle}`}>
-      {cleanLabel}
+      {cleanLabel || ""}
     </span>
   );
 }

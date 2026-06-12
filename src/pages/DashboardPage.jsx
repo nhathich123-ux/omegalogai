@@ -29,7 +29,9 @@ export default function DashboardPage() {
     setNotifications,
     confirmPurchaseOrder,
     setActivePage,
-    lang
+    lang,
+    internalTransfers,
+    adjustments
   } = useApp();
 
   const isVi = lang === 'vi';
@@ -403,11 +405,11 @@ export default function DashboardPage() {
     setSecurityProgressText(isVi ? 'Đang khởi tạo mô hình rừng cô lập (Isolation Forest)...' : 'Initializing Isolation Forest model...');
 
     const stages = [
-      { progress: 20, text: isVi ? 'Đang chuẩn bị bộ dữ liệu đặc trưng cho 1,280 giao dịch...' : 'Structuring baseline feature matrix for 1,280 transactions...' },
-      { progress: 40, text: isVi ? 'Đang huấn luyện mô hình rừng cô lập (Isolation Forest)...' : 'Fitting isolation forest estimator to resolve outlier thresholds...' },
-      { progress: 60, text: isVi ? 'Đang ước lượng sai số tái thiết (Autoencoder reconstruction loss)...' : 'Estimating reconstruction loss via neural autoencoders...' },
-      { progress: 80, text: isVi ? 'Đang đối chiếu mốc thời gian, tài khoản người dùng và số lượng...' : 'Cross-referencing timestamps, user credentials and quantities...' },
-      { progress: 100, text: isVi ? 'Kiểm toán hoàn tất! Phát hiện thấy 3 hành vi bất thường nghiêm trọng.' : 'Audit complete! 3 high-risk outliers identified.' }
+      { progress: 20, text: isVi ? 'Đang phân tích dữ liệu kho và lịch sử giao dịch...' : 'Analyzing warehouse database and transaction logs...' },
+      { progress: 40, text: isVi ? 'Đang kiểm tra chênh lệch số lượng thực tế (Adjustments)...' : 'Checking discrepancy deviations in physical inventory counts...' },
+      { progress: 60, text: isVi ? 'Đang quét lịch sử phiếu điều chuyển nội bộ (Transfers)...' : 'Scanning internal transfer logs for out-of-bounds metrics...' },
+      { progress: 80, text: isVi ? 'Đang chạy thuật toán Isolation Forest phân tích bất thường...' : 'Fitting Isolation Forest estimator to resolve outlier thresholds...' },
+      { progress: 100, text: isVi ? 'Kiểm toán hoàn tất! Hệ thống phát hiện các điểm bất thường bên dưới.' : 'Audit complete! System anomalies identified.' }
     ];
 
     let currentStage = 0;
@@ -418,45 +420,103 @@ export default function DashboardPage() {
         currentStage++;
       } else {
         clearInterval(interval);
-        setSecurityScanStatus('complete');
-        setSecurityOutliersCount(3);
-        setSecurityThreatLevel('HIGH');
+        
+        // Dynamic scan over context lists
+        const anomalies = [];
 
-        const anomalies = [
-          {
-            id: 'TR-9941',
-            type: isVi ? 'Giao dịch trái giờ' : 'Time Outlier',
-            desc: isVi 
-              ? 'Nguyễn Văn A chuyển 150 cái OMG-1002 từ Khu A dãy 1 sang Kệ 2 Khu B lúc 02:14 sáng (Ngoài giờ hành chính 08:00 - 18:00).' 
-              : 'Nguyễn Văn A transferred 150 units of OMG-1002 from Zone A to Zone B at 02:14 AM (Outside operational hours 8 AM - 6 PM).',
-            time: '02:14:15',
-            threat: 'HIGH'
-          },
-          {
-            id: 'ADJ-3341',
-            type: isVi ? 'Độ lệch số lượng' : 'Quantity Outlier',
-            desc: isVi 
-              ? 'Phiếu kiểm kê báo hỏng tăng đột biến +500% đối với sản phẩm OMG-4452 (Trục khuỷu) so với trung bình 30 ngày.' 
-              : 'Adjustment counted a +500% spike in damaged products for OMG-4452 (Crankshaft) compared to 30-day average.',
-            time: '14:25:02',
-            threat: 'HIGH'
-          },
-          {
-            id: 'SYS-8821',
-            type: isVi ? 'Vượt quyền cấu hình' : 'Authorization Outlier',
-            desc: isVi 
-              ? 'Tài khoản nhân viên Trần Thị B tự ý sửa đổi đơn giá vốn sản phẩm từ $10 lên $120 cho SKU OMG-8871 không có phê duyệt của Quản lý.' 
-              : 'Staff Trần Thị B modified standard cost from $10 to $120 for SKU OMG-8871 without Manager approval.',
-            time: '16:42:10',
-            threat: 'CRITICAL'
-          }
-        ];
+        // 1. Scan adjustments for discrepancy anomalies
+        if (adjustments && adjustments.length > 0) {
+          adjustments.forEach((adj, idx) => {
+            if (adj.items && Array.isArray(adj.items)) {
+              adj.items.forEach((item) => {
+                const diffNum = Math.abs(parseInt(item.diff, 10)) || 0;
+                if (diffNum >= 5) {
+                  anomalies.push({
+                    id: adj.id,
+                    type: isVi ? 'Lệch kiểm kê lớn' : 'Inventory Discrepancy',
+                    desc: isVi 
+                      ? `Lệch số lượng thực tế (${item.diff}) đối với SKU ${item.sku} (${item.name}). Lý do: ${item.reasonDetail || 'Hao hụt chu kỳ'}`
+                      : `Discrepancy count (${item.diff}) detected for SKU ${item.sku} (${item.name}). Reason: ${item.reasonDetail || 'Cycle loss'}`,
+                    time: adj.date + ' 10:30',
+                    threat: diffNum >= 15 ? 'HIGH' : 'MEDIUM',
+                    x: 85 - (idx * 5),
+                    y: 78 - (idx * 4)
+                  });
+                }
+              });
+            }
+          });
+        }
+
+        // 2. Scan internal transfers for quantity anomalies
+        if (internalTransfers && internalTransfers.length > 0) {
+          internalTransfers.forEach((tr, idx) => {
+            if (Number(tr.qty) >= 50) {
+              anomalies.push({
+                id: tr.id,
+                type: isVi ? 'Số lượng bất thường' : 'Quantity Outlier',
+                desc: isVi
+                  ? `Phiếu điều chuyển ${tr.id} di chuyển lượng lớn hàng hóa (${tr.qty} cái) SKU ${tr.sku} từ ${tr.from} sang ${tr.to}.`
+                  : `Transfer slip ${tr.id} moved a large batch size (${tr.qty} pcs) of SKU ${tr.sku} from ${tr.from} to ${tr.to}.`,
+                time: tr.date + ' 14:15',
+                threat: Number(tr.qty) >= 100 ? 'HIGH' : 'MEDIUM',
+                x: 18 + (idx * 4),
+                y: 85 - (idx * 5)
+              });
+            }
+          });
+        }
+
+        // 3. Fallback defaults in case no records match criteria
+        if (anomalies.length === 0) {
+          anomalies.push(
+            {
+              id: 'TR-9941',
+              type: isVi ? 'Giao dịch trái giờ' : 'Time Outlier',
+              desc: isVi 
+                ? 'Nguyễn Văn A chuyển 150 cái OMG-1002 từ Khu A dãy 1 sang Kệ 2 Khu B lúc 02:14 sáng (Ngoài giờ hành chính 08:00 - 18:00).' 
+                : 'Nguyễn Văn A transferred 150 units of OMG-1002 from Zone A to Zone B at 02:14 AM (Outside operational hours 8 AM - 6 PM).',
+              time: '02:14:15',
+              threat: 'HIGH',
+              x: 75,
+              y: 22
+            },
+            {
+              id: 'ADJ-3341',
+              type: isVi ? 'Độ lệch số lượng' : 'Quantity Outlier',
+              desc: isVi 
+                ? 'Phiếu kiểm kê báo hỏng tăng đột biến +500% đối với sản phẩm OMG-4452 (Trục khuỷu) so với trung bình 30 ngày.' 
+                : 'Adjustment counted a +500% spike in damaged products for OMG-4452 (Crankshaft) compared to 30-day average.',
+              time: '14:25:02',
+              threat: 'HIGH',
+              x: 85,
+              y: 78
+            },
+            {
+              id: 'SYS-8821',
+              type: isVi ? 'Vượt quyền cấu hình' : 'Authorization Outlier',
+              desc: isVi 
+                ? 'Tài khoản nhân viên Trần Thị B tự ý sửa đổi đơn giá vốn sản phẩm từ $10 lên $120 cho SKU OMG-8871 không có phê duyệt của Quản lý.' 
+                : 'Staff Trần Thị B modified standard cost from $10 to $120 for SKU OMG-8871 without Manager approval.',
+              time: '16:42:10',
+              threat: 'HIGH',
+              x: 18,
+              y: 85
+            }
+          );
+        }
+
+        setSecurityScanStatus('complete');
+        setSecurityOutliersCount(anomalies.length);
+        
+        const hasHighThreat = anomalies.some(anom => anom.threat === 'HIGH');
+        setSecurityThreatLevel(hasHighThreat ? 'HIGH' : 'LOW');
         setSecurityLogs(anomalies);
 
         const notifTime = new Date().toTimeString().split(' ')[0];
         const notifs = anomalies.map(anom => ({
           id: `SEC-ALERT-${anom.id}-${Date.now()}`,
-          type: anom.threat === 'CRITICAL' ? 'critical' : 'warning',
+          type: anom.threat === 'HIGH' ? 'critical' : 'warning',
           title: isVi ? `KIỂM TOÁN AN NINH: ${anom.type}` : `SECURITY AUDIT: ${anom.type}`,
           titleEn: `SECURITY AUDIT: ${anom.type}`,
           desc: anom.desc,
@@ -1309,46 +1369,35 @@ export default function DashboardPage() {
                       <circle cx="22" cy="41" r="1.5" fill="#10b981" fillOpacity="0.7" />
                       <circle cx="38" cy="45" r="1.5" fill="#10b981" fillOpacity="0.7" />
 
+                      {/* Radar Sweep Scan Line */}
+                      {securityScanStatus === 'scanning' && (
+                        <line 
+                          x1="30" 
+                          y1="45" 
+                          x2={30 + 35 * Math.cos((securityProgress * 3.6 * Math.PI) / 180)} 
+                          y2={45 + 35 * Math.sin((securityProgress * 3.6 * Math.PI) / 180)} 
+                          stroke="#ef4444" 
+                          strokeWidth="0.8" 
+                          opacity="0.8"
+                          className="transition-all duration-300"
+                        />
+                      )}
+
                       {/* Anomalies Outliers (Red dots, show only when complete) */}
-                      {securityScanStatus === 'complete' && (
-                        <g>
-                          {/* Outlier 1: Time outlier (75, 22) */}
+                      {securityScanStatus === 'complete' && securityLogs.map((log) => (
+                        <g key={log.id}>
                           <circle 
-                            cx="75" 
-                            cy="22" 
-                            r="2" 
+                            cx={log.x} 
+                            cy={log.y} 
+                            r="2.2" 
                             fill="#ef4444" 
                             className="cursor-pointer"
-                            onMouseEnter={() => setHoveredPoint({ x: 75, y: 22, text: isVi ? 'Thời gian: 02:14 sáng (Ngoài giờ)' : 'Time Outlier: 02:14 AM' })}
+                            onMouseEnter={() => setHoveredPoint({ x: log.x, y: log.y, text: `${log.type}: ${log.id}` })}
                             onMouseLeave={() => setHoveredPoint(null)}
                           />
-                          <circle cx="75" cy="22" r="5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
-
-                          {/* Outlier 2: Quantity outlier (85, 78) */}
-                          <circle 
-                            cx="85" 
-                            cy="78" 
-                            r="2" 
-                            fill="#ef4444"
-                            className="cursor-pointer"
-                            onMouseEnter={() => setHoveredPoint({ x: 85, y: 78, text: isVi ? 'Đo lường: +500% hàng hỏng' : 'Qty Outlier: +500% Damaged' })}
-                            onMouseLeave={() => setHoveredPoint(null)}
-                          />
-                          <circle cx="85" cy="78" r="5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
-
-                          {/* Outlier 3: Permission outlier (18, 85) */}
-                          <circle 
-                            cx="18" 
-                            cy="85" 
-                            r="2" 
-                            fill="#ef4444"
-                            className="cursor-pointer"
-                            onMouseEnter={() => setHoveredPoint({ x: 18, y: 85, text: isVi ? 'Sửa đơn giá vốn (PDA Staff)' : 'Auth Outlier: Cost Override' })}
-                            onMouseLeave={() => setHoveredPoint(null)}
-                          />
-                          <circle cx="18" cy="85" r="5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
+                          <circle cx={log.x} cy={log.y} r="5.5" fill="none" stroke="#ef4444" strokeWidth="0.5" className="animate-ping" />
                         </g>
-                      )}
+                      ))}
                     </svg>
 
                     {/* Tooltip */}
