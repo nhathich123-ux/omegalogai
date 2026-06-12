@@ -210,8 +210,8 @@ export default function PartnersPage() {
         <div>
           <h2 className="text-xl font-bold font-sans text-zinc-100">
             {activeTab === 'suppliers' 
-              ? (isVi ? 'QUẢN LÝ NHÀ CUNG CẤP' : 'SUPPLIERS DIRECTORY')
-              : (isVi ? 'QUẢN LÝ ĐỐI TÁC KHÁCH HÀNG' : 'CUSTOMERS DIRECTORY')}
+              ? (isVi ? 'Quản lý nhà cung cấp' : 'Suppliers directory')
+              : (isVi ? 'Quản lý đối tác khách hàng' : 'Customers directory')}
           </h2>
           <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
             {isVi 

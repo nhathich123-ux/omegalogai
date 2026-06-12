@@ -852,56 +852,56 @@ function TopHeader() {
     if (activePage === 'dashboard') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Màn hình Điều khiển Trung tâm' : 'Command Center'}
+          {isVi ? 'Màn hình điều khiển trung tâm' : 'Command center'}
         </span>
       );
     }
     if (activePage === 'inventory') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Quản lý Kho & SKU' : 'Inventory Management'}
+          {isVi ? 'Quản lý kho & SKU' : 'Inventory management'}
         </span>
       );
     }
     if (activePage === 'purchase') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Quản lý Cung ứng (Procurement)' : 'Purchase Procurement'}
+          {isVi ? 'Quản lý cung ứng (Procurement)' : 'Purchase procurement'}
         </span>
       );
     }
     if (activePage === 'operations') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Vận hành Xuất Nhập Kho' : 'Stock Movements'}
+          {isVi ? 'Vận hành xuất nhập kho' : 'Stock movements'}
         </span>
       );
     }
     if (activePage === 'reports') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Báo cáo & Phân tích AI' : 'AI Predictor & Reports'}
+          {isVi ? 'Báo cáo & phân tích AI' : 'AI predictor & reports'}
         </span>
       );
     }
     if (activePage === 'partners') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Quản lý Đối tác & Khách hàng' : 'Partners & Clients'}
+          {isVi ? 'Quản lý đối tác & khách hàng' : 'Partners & clients'}
         </span>
       );
     }
     if (activePage === 'settings') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Cài đặt hệ thống' : 'System Settings'}
+          {isVi ? 'Cài đặt hệ thống' : 'System settings'}
         </span>
       );
     }
     if (activePage === 'developer') {
       return (
         <span className="font-sans font-bold text-sm text-zinc-200">
-          {isVi ? 'Cấu hình & Quản trị Nhà phát triển' : 'Developer Console'}
+          {isVi ? 'Cài đặt phát triển' : 'Developer settings'}
         </span>
       );
     }

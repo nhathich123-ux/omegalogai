@@ -311,7 +311,7 @@ export default function OperationsPage() {
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'PHIẾU NHẬP KHO & KIỂM TRA CHẤT LƯỢNG (QC)' : 'INCOMING RECEIPTS & QUALITY CHECKS'}</h2>
+              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'Phiếu nhập kho & kiểm tra chất lượng (QC)' : 'Incoming receipts & quality checks'}</h2>
               <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
                 {isVi ? 'KIỂM THỬ QC TRƯỚC KHI ĐƯA VÀO VỊ TRÍ KỆ BẢO QUẢN' : 'RECEIPTS METRIC SYSTEM AND QUALITY TESTS'}
               </p>
@@ -634,7 +634,7 @@ export default function OperationsPage() {
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'QUY TRÌNH XUẤT KHO BÁN HÀNG (PICK-PACK-SHIP)' : 'SALES OUTGOING SHIPMENTS (DELIVERIES)'}</h2>
+              <h2 className="text-xl font-bold font-sans text-zinc-100">{isVi ? 'Quy trình xuất kho bán hàng (Pick-Pack-Ship)' : 'Sales outgoing shipments (Deliveries)'}</h2>
               <p className="font-mono text-[9px] text-[#ff7a45] font-bold uppercase tracking-widest mt-1">
                 {isVi ? 'ĐÓNG GÓI - GIAO VẬN VÀ QUẢN LÝ LỘ TRÌNH CHIẾN LƯỢC FIFO/LIFO' : '3-STEP LOGISTICS PIPELINE WITH FIFO/LIFO ALGORITHM'}
               </p>
@@ -972,7 +972,7 @@ export default function OperationsPage() {
               <div>
                 <div className="border-b border-[#1b1a20] pb-3.5 mb-6">
                   <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-[#ff7a45]">
-                    {isVi ? 'LẬP PHIẾU CHUYỂN KHO NỘI BỘ' : 'INTERNAL WAREHOUSE TRANSFER'}
+                    {isVi ? 'Lập phiếu chuyển kho nội bộ' : 'Internal warehouse transfer'}
                   </h3>
                   <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
                     {isVi ? 'Điều chuyển hàng hóa qua lại giữa các kho bãi' : 'Move stock instantly between sub-zones or warehouses'}
