@@ -1409,23 +1409,23 @@ html[lang="vi"] .brand-title {
    LIGHT WAREHOUSE PALETTE — ACTIVE SYSTEM THEME
    ═══════════════════════════════════════════ */
 [data-theme="light"] {
-  --bg-root: #C8CBD2;
-  --bg-sidebar: #D7D9E0;
-  --bg-card: #E1E4EC;
-  --bg-card-hover: #E9ECF4;
-  --bg-card-alt: #BAC0CB;
-  --bg-input: #FFFFFF;
-  --bg-nav-active: rgba(232, 130, 90, 0.12);
-  --border: #A5AAB5;
-  --border-subtle: #B8BDC8;
+  --bg-root: #21252D;
+  --bg-sidebar: #1A1D24;
+  --bg-card: #2B303C;
+  --bg-card-hover: #323846;
+  --bg-card-alt: #171920;
+  --bg-input: #1C1F26;
+  --bg-nav-active: rgba(232, 130, 90, 0.15);
+  --border: #3B4252;
+  --border-subtle: #2C313E;
   --border-accent: rgba(232, 130, 90, 0.45);
-  --text-primary: #1C1E24;
-  --text-secondary: #484B54;
-  --text-muted: #686C78;
-  --header-bg: #D7D9E0;
-  --table-row-hover: #D3D6DF;
-  --glow-orange: rgba(232, 130, 90, 0.1);
-  --glow-orange-strong: rgba(232, 130, 90, 0.25);
+  --text-primary: #ECEFF4;
+  --text-secondary: #BAC3CF;
+  --text-muted: #7E8D9F;
+  --header-bg: #1A1D24;
+  --table-row-hover: #313642;
+  --glow-orange: rgba(232, 130, 90, 0.15);
+  --glow-orange-strong: rgba(232, 130, 90, 0.35);
 }
 
 [data-theme="light"] .bg-\[\#111114\] {
@@ -1445,15 +1445,15 @@ html[lang="vi"] .brand-title {
 }
 
 [data-theme="light"] .bg-zinc-950\/80 {
-  background-color: rgba(200, 203, 210, 0.8) !important;
+  background-color: rgba(33, 37, 45, 0.8) !important;
 }
 
 [data-theme="light"] .bg-zinc-950\/60 {
-  background-color: rgba(200, 203, 210, 0.6) !important;
+  background-color: rgba(33, 37, 45, 0.6) !important;
 }
 
 [data-theme="light"] .bg-zinc-950\/40 {
-  background-color: rgba(200, 203, 210, 0.4) !important;
+  background-color: rgba(33, 37, 45, 0.4) !important;
 }
 
 [data-theme="light"] .bg-\[\#09090b\] {
@@ -1548,15 +1548,15 @@ html[lang="vi"] .brand-title {
 }
 
 [data-theme="light"] .bg-zinc-900\/50 {
-  background-color: rgba(233, 236, 244, 0.5) !important;
+  background-color: rgba(50, 56, 70, 0.5) !important;
 }
 
 [data-theme="light"] .bg-zinc-900\/40 {
-  background-color: rgba(233, 236, 244, 0.4) !important;
+  background-color: rgba(50, 56, 70, 0.4) !important;
 }
 
 [data-theme="light"] .bg-zinc-900\/80 {
-  background-color: rgba(233, 236, 244, 0.8) !important;
+  background-color: rgba(50, 56, 70, 0.8) !important;
 }
 
 [data-theme="light"] .bg-\[\#121215\] {
@@ -2850,89 +2850,89 @@ html[lang="vi"] .text-glow-amber {
 
 /* ─── LIGHT THEME OVERRIDES ─── */
 [data-theme="light"] .sop-fab {
-  background: radial-gradient(circle at 35% 35%, #ffffff, #f5f0ec);
+  background: radial-gradient(circle at 35% 35%, #2B303C, #1A1D24);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(232, 130, 90, 0.2),
-    0 0 40px rgba(232, 130, 90, 0.05);
+    0 4px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(232, 130, 90, 0.25),
+    0 0 40px rgba(232, 130, 90, 0.08);
 }
 
 [data-theme="light"] .sop-fab-badge {
-  border-color: #f5f0ec;
+  border-color: #1A1D24;
 }
 
 [data-theme="light"] .sop-panel {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(232, 130, 90, 0.15);
+  background: rgba(26, 29, 36, 0.95);
+  border-color: rgba(232, 130, 90, 0.25);
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(0, 0, 0, 0.04) inset;
+    0 24px 80px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 [data-theme="light"] .sop-header {
-  background: linear-gradient(180deg, rgba(232, 130, 90, 0.04) 0%, transparent 100%);
-  border-bottom-color: rgba(0, 0, 0, 0.06);
+  background: linear-gradient(180deg, rgba(232, 130, 90, 0.06) 0%, transparent 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="light"] .sop-header-title {
-  color: #1a1a1f;
+  color: #ECEFF4;
 }
 
 [data-theme="light"] .sop-close-btn {
-  border-color: rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.02);
-  color: #9A8E84;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #BAC3CF;
 }
 
 [data-theme="light"] .sop-bubble--ai {
-  background: rgba(245, 240, 236, 0.6);
-  border-color: rgba(0, 0, 0, 0.06);
-  color: #3a3530;
+  background: rgba(43, 48, 60, 0.7);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: #ECEFF4;
 }
 
 [data-theme="light"] .sop-bubble--user {
-  background: linear-gradient(135deg, rgba(232, 130, 90, 0.12), rgba(232, 130, 90, 0.06));
-  border-color: rgba(232, 130, 90, 0.15);
-  color: #1a1a1f;
+  background: linear-gradient(135deg, rgba(232, 130, 90, 0.2), rgba(232, 130, 90, 0.1));
+  border-color: rgba(232, 130, 90, 0.3);
+  color: #ECEFF4;
 }
 
 [data-theme="light"] .sop-input-wrapper {
-  background: rgba(245, 240, 236, 0.5);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(28, 31, 38, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="light"] .sop-input {
-  color: #1a1a1f;
+  color: #ECEFF4;
 }
 
 [data-theme="light"] .sop-input::placeholder {
-  color: #9A8E84;
+  color: #7E8D9F;
 }
 
 [data-theme="light"] .sop-input-area {
-  background: rgba(245, 240, 236, 0.3);
-  border-top-color: rgba(0, 0, 0, 0.04);
+  background: rgba(26, 29, 36, 0.5);
+  border-top-color: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="light"] .sop-quick-btn {
-  border-color: rgba(0, 0, 0, 0.06);
-  background: rgba(0, 0, 0, 0.02);
-  color: #5E554D;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #BAC3CF;
 }
 
 [data-theme="light"] .sop-quick-btn:hover {
-  background: rgba(232, 130, 90, 0.06);
-  border-color: rgba(232, 130, 90, 0.2);
-  color: #D4714E;
+  background: rgba(232, 130, 90, 0.12);
+  border-color: rgba(232, 130, 90, 0.35);
+  color: #F0A882;
 }
 
 [data-theme="light"] .sop-msg-time {
-  color: #b0a59a;
+  color: #7E8D9F;
 }
 
 [data-theme="light"] .sop-hud-logo {
-  border-color: rgba(232, 130, 90, 0.2);
-  background: #fff;
+  border-color: rgba(232, 130, 90, 0.35);
+  background: #1A1D24;
 }
 
 /* ─── CHATBOT TOAST NOTIFICATION ─── */
